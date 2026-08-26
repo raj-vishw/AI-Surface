@@ -1,0 +1,54 @@
+# Build artifacts
+/bin/
+/dist/
+*.exe
+*.test
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Go
+*.out
+coverage.txt
+coverage.html
+vendor/
+
+# Test artifacts (coverage/profile output, caches; *.test/*.out covered above)
+*.cover
+coverage/
+*.prof
+*.pprof
+/test-results/
+
+# Local database data/dumps — never commit real or generated data.
+# (migrations/*.sql are tracked source and aren't matched by any rule here.)
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.sql.gz
+/pgdata/
+/postgres-data/
+/data/
+
+# Personal local overrides (never shared — see configs/defaults, configs/development)
+configs/local/
+docker-compose.override.yml
+docs/
+CHANGELOG.md
+
+# Logs
+*.log
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local scratch
+/tmp/

@@ -1,0 +1,11 @@
+.git/
+.github/
+bin/
+dist/
+*.md
+.env
+.env.*
+!.env.example
+deployments/
+docs/
+test/

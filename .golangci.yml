@@ -1,0 +1,28 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - ineffassign
+    - revive
+    - gosec
+  exclusions:
+    rules:
+      # Test files legitimately ignore some errors (e.g. deferred Close in
+      # cleanup) and use package-level test helpers that trip revive's
+      # exported-comment checks.
+      - path: _test\.go
+        linters:
+          - revive
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

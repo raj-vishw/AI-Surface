@@ -1,0 +1,47 @@
+# Baseline configuration shared by every environment. Values here are
+# overlaid onto the built-in Go defaults (internal/config.defaultConfig)
+# and are themselves overlaid by configs/<environment>/config.yaml, then by
+# AI_RECON_* environment variables, then by CLI flags where applicable.
+#
+# Do not put secrets in this file — see .env.example / environment
+# variables for anything sensitive (database password, redis password).
+
+application:
+  name: ai-recon-platform
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_header_timeout: 5s
+  read_timeout: 5s
+  write_timeout: 10s
+  idle_timeout: 60s
+  shutdown_timeout: 15s
+
+database:
+  port: 5432
+  ssl_mode: disable
+  connect_timeout: 5s
+  max_open_connections: 20
+  max_idle_connections: 10
+  connection_max_lifetime: 30m
+  connection_max_idle_time: 5m
+
+redis:
+  database: 0
+  connect_timeout: 5s
+
+http_client:
+  timeout: 10s
+  max_idle_connections: 100
+  max_connections_per_host: 20
+  max_response_size: 10485760
+  max_redirects: 5
+
+logging:
+  level: info
+  format: json
+
+security:
+  require_authorization: true
+  dry_run: false

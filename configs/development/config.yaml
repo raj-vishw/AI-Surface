@@ -1,0 +1,24 @@
+# Development-environment overrides, layered on top of configs/defaults/config.yaml.
+#
+# Host/address values below assume PostgreSQL and Redis are reachable at
+# localhost (e.g. via `make dev-up`, which publishes their ports).
+# Inside docker-compose itself, the "server" service overrides
+# AI_RECON_DATABASE_HOST / AI_RECON_REDIS_ADDRESS to the service names
+# ("postgres" / "redis:6379") via environment variables, which take
+# precedence over this file.
+#
+# The database/redis passwords are intentionally NOT set here — they
+# come from AI_RECON_DATABASE_PASSWORD / AI_RECON_REDIS_PASSWORD via your
+# shell or .env file. See .env.example.
+
+database:
+  host: localhost
+  user: airecon
+  name: airecon_dev
+
+redis:
+  address: localhost:6379
+
+logging:
+  level: debug
+  format: json
