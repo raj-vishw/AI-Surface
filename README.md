@@ -114,5 +114,3 @@ make build-all          # build every executable into bin/
 ## Further reading
 
 - [SECURITY.md](SECURITY.md) — authorization boundary, safe defaults
-- [docs/architecture/foundation.md](docs/architecture/foundation.md) — Phase 1 architecture
-- [CHANGELOG.md](CHANGELOG.md)
