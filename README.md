@@ -4,13 +4,14 @@ A platform for discovering, fingerprinting, and performing authorized
 security assessments of AI/LLM systems. See `../doc_by_me/` for the full
 project specification, architecture, and phased roadmap.
 
-**Status: Phase 1 — core platform foundation.** Configuration, structured
-logging with request correlation IDs, an internal error model, a
-safe-by-default HTTP client abstraction (`internal/httpclient`), PostgreSQL
-and Redis connectivity, migrations, liveness/readiness checks, and the
-`server` / `cli` / `worker` / `migrate` executables. Discovery,
-fingerprinting, vulnerability probing, distributed workers, the dashboard,
-authentication, and RBAC are not implemented yet.
+**Status: Phase 2 — asset model & persistence engine.** Phase 1's platform
+foundation (configuration, structured logging, internal error model, HTTP
+client, PostgreSQL/Redis connectivity, migrations, liveness/readiness,
+executables) plus a canonical, deduplicated asset inventory backed by
+PostgreSQL — targets, assets, evidence, endpoints — with a repository/
+service architecture future discovery, fingerprinting, and probing phases
+build on. Discovery, fingerprinting, vulnerability probing, distributed
+workers, the dashboard, authentication, and RBAC are not implemented yet.
 
 ## 1. Prerequisites
 
@@ -102,15 +103,64 @@ make lint               # golangci-lint
 make build-all          # build every executable into bin/
 ```
 
+## Asset Persistence
+
+The platform maintains a normalized, deduplicated asset inventory backed
+by PostgreSQL (`internal/domain`, `internal/repository`,
+`internal/service`; full writeup in
+[docs/architecture/asset-model.md](docs/architecture/asset-model.md)):
+
+- **Target** — the authorized scope being assessed (a domain, host, IP,
+  CIDR, URL, repository, or cloud account). A target's mere existence is
+  never authorization to act against it — `authorization_status` starts
+  `UNVERIFIED` and only becomes `AUTHORIZED` through an explicit call.
+- **Asset** — anything discovered within a target's scope (a host, IP,
+  port, HTTP/API/AI endpoint, repository, cloud resource, ...), with a
+  deterministic **identity** computed from its type-appropriate fields
+  (hostname, IP, host+port+protocol, or normalized URL — never a display
+  name or response content). The same identity is always the same row.
+- **Deduplication** — two discovery sources observing the same real-world
+  asset collapse into one row via `INSERT ... ON CONFLICT DO UPDATE`,
+  race-free under concurrent writers.
+- **Evidence** — the append-only observation history backing each asset
+  (a DNS answer, an HTTP response, a TLS certificate, ...); never mutated,
+  deduplicated by a fingerprint of its (redacted) data.
+- **Historical tracking** — `first_seen` is fixed at an asset's original
+  discovery and never overwritten; `last_seen` advances with every
+  observation; lifecycle `status` changes only through an explicit call,
+  never as a side effect of being re-observed (or not observed).
+
+Every metadata field — asset, evidence, and endpoint alike — passes
+through a redaction boundary before it is ever logged or stored: keys
+matching common secret patterns (`password`, `token`, `authorization`,
+`cookie`, `api_key`, ...) are replaced with `"[REDACTED]"`.
+
+Run the database integration tests (requires `make dev-up` first):
+
+```sh
+make test-integration
+```
+
+They exercise real PostgreSQL directly — no mocking — covering migrations,
+CRUD, upsert/deduplication, evidence persistence, endpoint URL
+normalization, concurrent upserts (50 goroutines against the same
+identity), pagination, filters, and transaction atomicity.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`)       |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
+
+`ai-recon target` and `ai-recon asset` are development diagnostics for
+exercising the Phase 2 persistence layer by hand (see their `--help`) —
+not the platform's future scan CLI.
 
 ## Further reading
 
 - [SECURITY.md](SECURITY.md) — authorization boundary, safe defaults
+- [docs/architecture/asset-model.md](docs/architecture/asset-model.md) —
+  Phase 2 asset model, identity/deduplication, persistence architecture

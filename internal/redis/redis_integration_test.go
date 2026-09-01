@@ -28,7 +28,7 @@ func TestConnectAndHealthCheckAgainstRealRedis(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Connect() failed: %v", err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	if err := client.HealthCheck(context.Background()); err != nil {
 		t.Fatalf("HealthCheck() failed: %v", err)

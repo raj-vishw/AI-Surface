@@ -4,6 +4,7 @@ package migrate
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -16,9 +17,20 @@ import (
 //
 //	go test -tags=integration ./internal/migrate/...
 func TestUpIsIdempotent(t *testing.T) {
+	// TEST_DATABASE_DSN overrides everything else; otherwise the DSN is
+	// built from the same TEST_DATABASE_{HOST,PORT,USER,PASSWORD,NAME}
+	// variables every other integration test in this project uses (see
+	// test/integration/helpers_test.go), so one exported set of env vars
+	// configures the whole suite.
 	dsn := os.Getenv("TEST_DATABASE_DSN")
 	if dsn == "" {
-		dsn = "postgres://airecon:airecon@localhost:5432/airecon?sslmode=disable"
+		dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+			getenvOr("TEST_DATABASE_USER", "airecon"),
+			getenvOr("TEST_DATABASE_PASSWORD", "airecon"),
+			getenvOr("TEST_DATABASE_HOST", "localhost"),
+			getenvOr("TEST_DATABASE_PORT", "5432"),
+			getenvOr("TEST_DATABASE_NAME", "airecon"),
+		)
 	}
 
 	pool, err := pgxpool.New(context.Background(), dsn)
@@ -53,4 +65,11 @@ func TestUpIsIdempotent(t *testing.T) {
 			t.Errorf("expected migration %d (%s) to be applied", s.Version, s.Description)
 		}
 	}
+}
+
+func getenvOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }

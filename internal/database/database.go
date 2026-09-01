@@ -10,11 +10,27 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"ai-recon-platform/internal/config"
 	apperrors "ai-recon-platform/internal/errors"
 )
+
+// Executor is the subset of *pgxpool.Pool and pgx.Tx that repositories
+// need. Repositories depend on this interface rather than on *Pool
+// directly, so the same repository code runs unchanged whether it's
+// operating outside a transaction (Executor = *Pool) or inside one
+// (Executor = the pgx.Tx passed into a WithTx callback).
+type Executor interface {
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+var _ Executor = (*Pool)(nil)
+var _ Executor = (pgx.Tx)(nil)
 
 // Pool wraps a pgxpool.Pool so the rest of the codebase depends on this
 // package rather than directly on pgx, keeping the driver swappable.
@@ -77,4 +93,27 @@ func (p *Pool) HealthCheck(ctx context.Context) error {
 		return fmt.Errorf("database pool not initialized")
 	}
 	return p.Ping(ctx)
+}
+
+// WithTx runs fn inside a single PostgreSQL transaction: it begins the
+// transaction, invokes fn with it, commits if fn returns nil, and rolls
+// back otherwise (including if fn panics — the deferred rollback still
+// runs, then the panic propagates). Repository operations that must be
+// atomic as a group (e.g. upserting an asset and recording its evidence)
+// use this instead of opening a second connection pool.
+func (p *Pool) WithTx(ctx context.Context, fn func(ctx context.Context, tx pgx.Tx) error) error {
+	tx, err := p.Begin(ctx)
+	if err != nil {
+		return apperrors.NewDatabase("beginning transaction", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if err := fn(ctx, tx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return apperrors.NewDatabase("committing transaction", err)
+	}
+	return nil
 }
