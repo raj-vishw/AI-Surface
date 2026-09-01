@@ -4,15 +4,16 @@ A platform for discovering, fingerprinting, and performing authorized
 security assessments of AI/LLM systems. See `../doc_by_me/` for the full
 project specification, architecture, and phased roadmap.
 
-**Status: Phase 3 — HTTP discovery engine.** Phase 1's platform foundation
-plus Phase 2's asset/evidence/endpoint persistence layer, now with the
-platform's first real reconnaissance capability: `ai-recon scan` discovers
-HTTP/HTTPS services and endpoints against an authorized target, classifies
-them (including AI/LLM API *candidate* detection — never a specific
-provider/model claim), and persists everything through the Phase 2
-persistence layer. Fingerprinting, vulnerability probing, DNS/port/
-subdomain discovery, distributed workers, the dashboard, authentication,
-and RBAC are not implemented yet.
+**Status: Phase 4 — network discovery engine.** Phase 1's platform
+foundation, Phase 2's asset/evidence/endpoint persistence layer, and
+Phase 3's HTTP discovery (`ai-recon scan`), now with a second real
+reconnaissance capability: `ai-recon network-scan` performs authorized TCP
+connect discovery against HOST/IP/CIDR targets, conservatively classifies
+open ports (including HTTP/AI-service *candidate* flagging — never a
+confirmed identification), and persists them through the same Phase 2
+persistence layer. Fingerprinting, vulnerability probing, DNS/subdomain
+discovery, raw/privileged scanning, distributed workers, the dashboard,
+authentication, and RBAC are not implemented yet.
 
 ## 1. Prerequisites
 
@@ -190,19 +191,68 @@ ai-recon scan --target http://127.0.0.1:9000 --profile quick
   usually means the target isn't reachable — confirm the fixture/target is
   actually running and the port matches.
 
+## Network Discovery
+
+`ai-recon network-scan` performs authorized TCP connect discovery against a
+`HOST`/`IP`/`CIDR` target, conservatively classifies open ports, and
+persists them as `PORT` assets through the same persistence layer HTTP
+discovery uses — see
+[docs/architecture/network-discovery.md](docs/architecture/network-discovery.md)
+for the full architecture, including why a reachable port is never treated
+as proof of anything beyond "TCP reachable". **Scanning requires
+authorization**, exactly like `ai-recon scan`: the target must already
+exist and have `authorization_status = AUTHORIZED`
+(`ai-recon target authorize --id <uuid>`) before `network-scan` will run
+against it.
+
+```sh
+# Local test environment: HTTP services on :8000/:8080, a generic TCP
+# service on :9000 — no external targets needed.
+go run ./test/fixtures/localenv
+
+ai-recon target create --name "local test" --type IP --value 127.0.0.1
+ai-recon target authorize --id <uuid-printed-above>
+
+# Single port
+ai-recon network-scan --target 127.0.0.1 --ports 9000
+
+# Port list
+ai-recon network-scan --target 127.0.0.1 --ports 8000,8080,9000
+
+# Port range
+ai-recon network-scan --target 127.0.0.1 --ports 8000-8010
+
+# Profiles (quick / standard / comprehensive — see configs/defaults/config.yaml)
+ai-recon network-scan --target 127.0.0.1 --profile quick
+ai-recon network-scan --target 127.0.0.1 --profile standard
+ai-recon network-scan --target 127.0.0.1 --profile comprehensive
+
+# Dry run — reports host:port pairs without connecting or persisting anything
+ai-recon network-scan --target 127.0.0.1 --ports 8000-8010 --dry-run
+
+# Machine-readable output (stdout is always valid, log-free JSON)
+ai-recon network-scan --target 127.0.0.1 --ports 8000,8080 --format json
+```
+
+A `CIDR` target (e.g. `192.168.1.0/30`) expands to its usable host
+addresses (network/broadcast excluded for ordinary subnets), bounded by
+`discovery.network.max_hosts` (default 256) — exceeding the limit is
+rejected outright, never silently truncated.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
 `ai-recon asset` (and `target create`/`target list`) remain development
 diagnostics for exercising the Phase 2 persistence layer by hand (see
-their `--help`); `ai-recon target authorize` and `ai-recon scan` are real,
-required parts of running Phase 3 discovery.
+their `--help`); `ai-recon target authorize`, `ai-recon scan`, and
+`ai-recon network-scan` are real, required parts of running Phase 3/4
+discovery.
 
 ## Further reading
 
@@ -212,3 +262,6 @@ required parts of running Phase 3 discovery.
 - [docs/architecture/http-discovery.md](docs/architecture/http-discovery.md) —
   Phase 3 HTTP discovery engine: scope, concurrency, AI candidate
   detection, redirect handling
+- [docs/architecture/network-discovery.md](docs/architecture/network-discovery.md) —
+  Phase 4 network discovery engine: TCP connect scanning, CIDR expansion,
+  service/AI candidate detection

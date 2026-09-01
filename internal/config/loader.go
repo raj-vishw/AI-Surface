@@ -61,6 +61,14 @@ const (
 	envDiscoveryHTTPMaxRedirects      = "AI_RECON_DISCOVERY_HTTP_MAX_REDIRECTS"
 	envDiscoveryHTTPDetectAIEndpoints = "AI_RECON_DISCOVERY_HTTP_DETECT_AI_ENDPOINTS"
 
+	// Same scalars-only-via-env convention as discovery.http above —
+	// http_candidate_ports/ai_candidate_ports/profiles are YAML-only.
+	envDiscoveryNetworkEnabled           = "AI_RECON_DISCOVERY_NETWORK_ENABLED"
+	envDiscoveryNetworkConnectTimeout    = "AI_RECON_DISCOVERY_NETWORK_CONNECT_TIMEOUT"
+	envDiscoveryNetworkMaxConcurrency    = "AI_RECON_DISCOVERY_NETWORK_MAX_CONCURRENCY"
+	envDiscoveryNetworkMaxHosts          = "AI_RECON_DISCOVERY_NETWORK_MAX_HOSTS"
+	envDiscoveryNetworkRequestsPerSecond = "AI_RECON_DISCOVERY_NETWORK_REQUESTS_PER_SECOND"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -143,6 +151,31 @@ func defaultConfig() *Config {
 							"/api", "/api/", "/v1", "/v1/", "/v1/models",
 							"/v1/chat/completions", "/v1/completions", "/v1/embeddings",
 							"/models", "/health", "/healthz", "/ready", "/status",
+						},
+					},
+				},
+			},
+			Network: NetworkDiscoveryConfig{
+				Enabled:            true,
+				ConnectTimeout:     2 * time.Second,
+				MaxConcurrency:     100,
+				MaxHosts:           256,
+				RequestsPerSecond:  0, // unlimited by default; MaxConcurrency + ConnectTimeout are the primary safety bounds
+				HTTPCandidatePorts: []int{80, 443, 8000, 8080, 8443},
+				AICandidatePorts:   []int{11434, 5000, 8000, 8080, 8888},
+				Profiles: map[string]NetworkProfileConfig{
+					"quick": {
+						Ports: []int{80, 443, 8000, 8080, 8443, 8888, 11434},
+					},
+					"standard": {
+						Ports: []int{22, 80, 443, 3000, 5000, 8000, 8080, 8443, 8888, 9000, 11434},
+					},
+					"comprehensive": {
+						Ports: []int{
+							21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995,
+							1433, 1521, 3000, 3306, 3389, 5000, 5432, 5900, 6379,
+							8000, 8008, 8080, 8081, 8088, 8443, 8888, 9000, 9090,
+							9200, 9300, 11211, 11434, 27017, 50000,
 						},
 					},
 				},
@@ -281,6 +314,16 @@ func applyEnvOverrides(cfg *Config) error {
 			*dst = d
 		}
 	}
+	setFloat64 := func(key string, dst *float64) {
+		if v, ok := os.LookupEnv(key); ok {
+			f, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("%s: invalid number %q", key, v))
+				return
+			}
+			*dst = f
+		}
+	}
 
 	setString(envServerHost, &cfg.Server.Host)
 	setInt(envServerPort, &cfg.Server.Port)
@@ -320,6 +363,12 @@ func applyEnvOverrides(cfg *Config) error {
 	setBool(envDiscoveryHTTPFollowRedirects, &cfg.Discovery.HTTP.FollowRedirects)
 	setInt(envDiscoveryHTTPMaxRedirects, &cfg.Discovery.HTTP.MaxRedirects)
 	setBool(envDiscoveryHTTPDetectAIEndpoints, &cfg.Discovery.HTTP.DetectAIEndpoints)
+
+	setBool(envDiscoveryNetworkEnabled, &cfg.Discovery.Network.Enabled)
+	setDuration(envDiscoveryNetworkConnectTimeout, &cfg.Discovery.Network.ConnectTimeout)
+	setInt(envDiscoveryNetworkMaxConcurrency, &cfg.Discovery.Network.MaxConcurrency)
+	setInt(envDiscoveryNetworkMaxHosts, &cfg.Discovery.Network.MaxHosts)
+	setFloat64(envDiscoveryNetworkRequestsPerSecond, &cfg.Discovery.Network.RequestsPerSecond)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

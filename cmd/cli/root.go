@@ -33,6 +33,7 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewTargetCommand())
 	root.AddCommand(commands.NewAssetCommand())
 	root.AddCommand(commands.NewScanCommand())
+	root.AddCommand(commands.NewNetworkScanCommand())
 
 	return root
 }

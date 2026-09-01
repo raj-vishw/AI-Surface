@@ -99,10 +99,11 @@ type HTTPClientConfig struct {
 }
 
 // DiscoveryConfig configures the platform's discovery subsystems. Phase 3
-// adds the first of these — HTTP; later phases (DNS, ports, ...) add
-// siblings here, not new top-level config sections.
+// added HTTP; Phase 4 adds Network (TCP connect scanning). Later phases
+// (DNS, ...) add further siblings here, not new top-level config sections.
 type DiscoveryConfig struct {
-	HTTP HTTPDiscoveryConfig `yaml:"http"`
+	HTTP    HTTPDiscoveryConfig    `yaml:"http"`
+	Network NetworkDiscoveryConfig `yaml:"network"`
 }
 
 // ProfileConfig names one reusable set of paths a scan can be run with
@@ -111,6 +112,43 @@ type DiscoveryConfig struct {
 // or edit profiles without recompiling.
 type ProfileConfig struct {
 	Paths []string `yaml:"paths"`
+}
+
+// NetworkProfileConfig names one reusable set of ports a network scan can
+// be run with (e.g. "quick"/"standard"/"comprehensive" — see
+// internal/discovery/network). Data-only, same rationale as ProfileConfig.
+type NetworkProfileConfig struct {
+	Ports []int `yaml:"ports"`
+}
+
+// NetworkDiscoveryConfig configures the TCP connect discovery engine
+// (internal/discovery/network). It does not configure a second HTTP
+// transport or a second database layer — port discovery is TCP-connect
+// only; HTTP/AI candidates it flags are for a later HTTP discovery pass
+// (Phase 3's engine, run separately) to investigate.
+type NetworkDiscoveryConfig struct {
+	Enabled bool `yaml:"enabled"`
+	// ConnectTimeout bounds every individual TCP connection attempt —
+	// never unlimited (phase4.md §15).
+	ConnectTimeout time.Duration `yaml:"connect_timeout"`
+	MaxConcurrency int           `yaml:"max_concurrency"`
+	// MaxHosts bounds how many addresses a CIDR target may expand to —
+	// exceeding it is a configuration/validation error, not a truncation
+	// (phase4.md §11).
+	MaxHosts int `yaml:"max_hosts"`
+	// RequestsPerSecond paces connection attempts; 0 means unlimited. This
+	// is a safety/stability control, not stealth/evasion timing
+	// (phase4.md §18/§50).
+	RequestsPerSecond float64 `yaml:"requests_per_second"`
+	// HTTPCandidatePorts are ports whose OPEN state additionally sets
+	// HTTPCandidate=true on the result/asset — "worth a Phase 3 HTTP scan
+	// later", never a confirmed HTTP service.
+	HTTPCandidatePorts []int `yaml:"http_candidate_ports"`
+	// AICandidatePorts are ports whose OPEN state additionally sets
+	// AIServiceCandidate=true — "worth further investigation", never a
+	// confirmed AI service (phase4.md §24).
+	AICandidatePorts []int                           `yaml:"ai_candidate_ports"`
+	Profiles         map[string]NetworkProfileConfig `yaml:"profiles"`
 }
 
 // HTTPDiscoveryConfig configures the HTTP discovery engine
@@ -299,6 +337,37 @@ func (c *Config) Validate() error {
 					errs = append(errs, fmt.Sprintf("discovery.http.profiles.%s.paths: %q must start with \"/\"", name, p))
 				}
 			}
+		}
+	}
+
+	if c.Discovery.Network.Enabled {
+		n := c.Discovery.Network
+		if n.ConnectTimeout <= 0 {
+			errs = append(errs, "discovery.network.connect_timeout must be positive")
+		}
+		if n.MaxConcurrency < 1 {
+			errs = append(errs, "discovery.network.max_concurrency must be at least 1")
+		}
+		if n.MaxHosts < 1 {
+			errs = append(errs, "discovery.network.max_hosts must be at least 1")
+		}
+		if n.RequestsPerSecond < 0 {
+			errs = append(errs, "discovery.network.requests_per_second must not be negative")
+		}
+		validatePortList := func(field string, ports []int) {
+			for _, p := range ports {
+				if p < 1 || p > 65535 {
+					errs = append(errs, fmt.Sprintf("%s: port %d must be between 1 and 65535", field, p))
+				}
+			}
+		}
+		validatePortList("discovery.network.http_candidate_ports", n.HTTPCandidatePorts)
+		validatePortList("discovery.network.ai_candidate_ports", n.AICandidatePorts)
+		for name, profile := range n.Profiles {
+			if len(profile.Ports) == 0 {
+				errs = append(errs, fmt.Sprintf("discovery.network.profiles.%s.ports must not be empty", name))
+			}
+			validatePortList(fmt.Sprintf("discovery.network.profiles.%s.ports", name), profile.Ports)
 		}
 	}
 

@@ -22,6 +22,69 @@ func TestValidateRejectsInvalidPort(t *testing.T) {
 	}
 }
 
+func TestValidateRejectsInvalidNetworkConnectTimeout(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Network.Enabled = true
+	cfg.Discovery.Network.ConnectTimeout = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero connect_timeout")
+	}
+}
+
+func TestValidateRejectsInvalidNetworkConcurrency(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Network.Enabled = true
+	cfg.Discovery.Network.MaxConcurrency = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero max_concurrency")
+	}
+}
+
+func TestValidateRejectsInvalidNetworkMaxHosts(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Network.Enabled = true
+	cfg.Discovery.Network.MaxHosts = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero max_hosts")
+	}
+}
+
+func TestValidateRejectsNegativeNetworkRate(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Network.Enabled = true
+	cfg.Discovery.Network.RequestsPerSecond = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative requests_per_second")
+	}
+}
+
+func TestValidateRejectsInvalidNetworkCandidatePort(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Network.Enabled = true
+	cfg.Discovery.Network.AICandidatePorts = []int{70000}
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for an out-of-range candidate port")
+	}
+}
+
+func TestValidateRejectsInvalidNetworkProfile(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Network.Enabled = true
+	cfg.Discovery.Network.Profiles["broken"] = NetworkProfileConfig{Ports: nil}
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for a profile with no ports")
+	}
+}
+
+func TestValidateAllowsNetworkDiscoveryDisabled(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Network.Enabled = false
+	cfg.Discovery.Network.MaxConcurrency = -1 // would be invalid if enabled
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("disabled network discovery should skip its own validation, got: %v", err)
+	}
+}
+
 func TestValidateRejectsMissingDatabaseFields(t *testing.T) {
 	cfg := defaultConfig()
 	cfg.Database.Host = ""
