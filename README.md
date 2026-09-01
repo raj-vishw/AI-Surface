@@ -239,19 +239,67 @@ addresses (network/broadcast excluded for ordinary subnets), bounded by
 `discovery.network.max_hosts` (default 256) — exceeding the limit is
 rejected outright, never silently truncated.
 
+## DNS & Subdomain Discovery
+
+`ai-recon dns-scan` performs authorized DNS record discovery (A, AAAA,
+CNAME, MX, NS, TXT, SOA, CAA, plus reverse PTR) against a `DOMAIN`/`HOST`
+target; `ai-recon subdomain-scan` is the same engine with wordlist-based
+subdomain enumeration always on — see
+[docs/architecture/dns-discovery.md](docs/architecture/dns-discovery.md)
+for the full architecture, including wildcard DNS detection and why a
+resolved name is never itself treated as proof an HTTP service is
+listening there. **Scanning requires authorization**, exactly like
+`ai-recon scan`/`network-scan`: the target must already exist and have
+`authorization_status = AUTHORIZED` before `dns-scan`/`subdomain-scan`
+will run against it.
+
+```sh
+# Local, fully offline DNS test fixture — no public DNS required.
+go run ./test/fixtures/dns/cmd/dnsserver -port 5300
+
+ai-recon target create --name "local test" --type DOMAIN --value example.test
+ai-recon target authorize --id <uuid-printed-above>
+
+# Record discovery only, against the local fixture.
+ai-recon dns-scan --target example.test --resolvers 127.0.0.1:5300
+
+# Subdomain enumeration with a wordlist.
+ai-recon subdomain-scan --target example.test --resolvers 127.0.0.1:5300 --wordlist words.txt
+
+# Profiles (quick / standard / comprehensive — see configs/defaults/config.yaml)
+ai-recon dns-scan --target example.test --resolvers 127.0.0.1:5300 --profile quick
+
+# Dry run — reports record types / candidate names without querying or persisting anything
+ai-recon dns-scan --target example.test --profile comprehensive --dry-run
+
+# Machine-readable output (stdout is always valid, log-free JSON)
+ai-recon dns-scan --target example.test --resolvers 127.0.0.1:5300 --format json
+```
+
+Subdomain candidate generation is capped by
+`discovery.dns.subdomains.max_candidates` (default 10,000) and
+`max_depth` (default 1, higher only via an explicit `--max-depth` flag or
+a profile that opts in) — both hard ceilings, never exceeded, never a
+random sample when the ceiling is reached. Wildcard DNS is detected
+before subdomain results are counted: a candidate indistinguishable from
+the domain's wildcard baseline is excluded from
+`Subdomains discovered`, while a distinct record under the same wildcard
+domain is still recognized as genuine.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
 `ai-recon asset` (and `target create`/`target list`) remain development
 diagnostics for exercising the Phase 2 persistence layer by hand (see
-their `--help`); `ai-recon target authorize`, `ai-recon scan`, and
-`ai-recon network-scan` are real, required parts of running Phase 3/4
+their `--help`); `ai-recon target authorize`, `ai-recon scan`,
+`ai-recon network-scan`, `ai-recon dns-scan`, and `ai-recon
+subdomain-scan` are real, required parts of running Phase 3/4/5
 discovery.
 
 ## Further reading
@@ -265,3 +313,6 @@ discovery.
 - [docs/architecture/network-discovery.md](docs/architecture/network-discovery.md) —
   Phase 4 network discovery engine: TCP connect scanning, CIDR expansion,
   service/AI candidate detection
+- [docs/architecture/dns-discovery.md](docs/architecture/dns-discovery.md) —
+  Phase 5 DNS & subdomain discovery engine: resolver abstraction, record
+  types, wildcard detection, TXT secret redaction, historical DNS tracking

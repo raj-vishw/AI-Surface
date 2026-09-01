@@ -120,6 +120,47 @@ discovery:
             9200, 9300, 11211, 11434, 27017, 50000,
           ]
 
+  dns:
+    enabled: true
+    timeout: 3s
+    max_concurrency: 20
+    resolvers: []
+    record_types: [A, AAAA, CNAME, MX, NS, TXT, SOA, CAA]
+    reverse_ptr: true
+    requests_per_second: 0
+    subdomains:
+      enabled: true
+      max_candidates: 10000
+      wordlist: ""
+      words: [api, app, dev, staging, test, admin, portal, chat, model, models, inference, llm, ai, ml]
+      wildcard_detection: true
+      max_depth: 1 # conservative base default; profiles/--max-depth opt into deeper enumeration explicitly
+    profiles:
+      quick:
+        record_types: [A, AAAA, CNAME, NS, MX, SOA]
+        subdomain_words: [api, www, app, dev, admin]
+        max_depth: 1
+      standard:
+        record_types: [A, AAAA, CNAME, MX, NS, TXT, SOA, CAA]
+        subdomain_words:
+          [
+            api, www, app, dev, staging, test, admin, portal, chat, model,
+            models, inference, llm, ai, ml, mail, ftp, vpn, secure, beta,
+          ]
+        max_depth: 1
+      comprehensive:
+        record_types: [A, AAAA, CNAME, MX, NS, TXT, SOA, CAA]
+        subdomain_words:
+          [
+            api, www, app, dev, staging, test, admin, portal, chat, model,
+            models, inference, llm, ai, ml, mail, ftp, vpn, secure, beta,
+            auth, gateway, internal, private, backend, service, static, cdn,
+            assets, docs, status, monitor, grafana, prometheus, jenkins,
+            gitlab, git, ci, cd, k8s, kube, docker, registry, npm, pypi,
+            old, legacy, sandbox, demo, qa,
+          ]
+        max_depth: 2
+
 logging:
   level: info
   format: json

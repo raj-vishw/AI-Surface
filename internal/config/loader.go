@@ -69,6 +69,17 @@ const (
 	envDiscoveryNetworkMaxHosts          = "AI_RECON_DISCOVERY_NETWORK_MAX_HOSTS"
 	envDiscoveryNetworkRequestsPerSecond = "AI_RECON_DISCOVERY_NETWORK_REQUESTS_PER_SECOND"
 
+	// Same scalars-only-via-env convention — resolvers/record_types/
+	// subdomains.wordlist/profiles are YAML-only.
+	envDiscoveryDNSEnabled           = "AI_RECON_DISCOVERY_DNS_ENABLED"
+	envDiscoveryDNSTimeout           = "AI_RECON_DISCOVERY_DNS_TIMEOUT"
+	envDiscoveryDNSMaxConcurrency    = "AI_RECON_DISCOVERY_DNS_MAX_CONCURRENCY"
+	envDiscoveryDNSReversePTR        = "AI_RECON_DISCOVERY_DNS_REVERSE_PTR"
+	envDiscoveryDNSRequestsPerSecond = "AI_RECON_DISCOVERY_DNS_REQUESTS_PER_SECOND"
+	envDiscoveryDNSSubdomainsEnabled = "AI_RECON_DISCOVERY_DNS_SUBDOMAINS_ENABLED"
+	envDiscoveryDNSMaxCandidates     = "AI_RECON_DISCOVERY_DNS_MAX_CANDIDATES"
+	envDiscoveryDNSMaxDepth          = "AI_RECON_DISCOVERY_DNS_MAX_DEPTH"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -177,6 +188,64 @@ func defaultConfig() *Config {
 							8000, 8008, 8080, 8081, 8088, 8443, 8888, 9000, 9090,
 							9200, 9300, 11211, 11434, 27017, 50000,
 						},
+					},
+				},
+			},
+			DNS: DNSDiscoveryConfig{
+				Enabled:           true,
+				Timeout:           3 * time.Second,
+				MaxConcurrency:    20,
+				Resolvers:         nil, // empty = system resolver
+				RecordTypes:       []string{"A", "AAAA", "CNAME", "MX", "NS", "TXT", "SOA", "CAA"},
+				ReversePTR:        true,
+				RequestsPerSecond: 0,
+				Subdomains: DNSSubdomainConfig{
+					Enabled:       true,
+					MaxCandidates: 10000,
+					Wordlist:      "",
+					Words: []string{
+						"api", "app", "dev", "staging", "test", "admin",
+						"portal", "chat", "model", "models", "inference",
+						"llm", "ai", "ml",
+					},
+					WildcardDetection: true,
+					// A conservative base default — depth-1 only. Combining
+					// even a modest wordlist at depth 3 explodes
+					// combinatorially (14 words -> 14 + 196 + 2744 = 2954
+					// candidates); an operator opts into deeper enumeration
+					// explicitly via --max-depth or a profile that raises it
+					// (see "comprehensive" below), matching this project's
+					// safe-by-default convention throughout every phase.
+					MaxDepth: 1,
+				},
+				Profiles: map[string]DNSProfileConfig{
+					"quick": {
+						RecordTypes:    []string{"A", "AAAA", "CNAME", "NS", "MX", "SOA"},
+						SubdomainWords: []string{"api", "www", "app", "dev", "admin"},
+						MaxDepth:       1, // "a small high-value set" — never broad enumeration (phase5.md §50)
+					},
+					"standard": {
+						RecordTypes: []string{"A", "AAAA", "CNAME", "MX", "NS", "TXT", "SOA", "CAA"},
+						SubdomainWords: []string{
+							"api", "www", "app", "dev", "staging", "test", "admin",
+							"portal", "chat", "model", "models", "inference", "llm",
+							"ai", "ml", "mail", "ftp", "vpn", "secure", "beta",
+						},
+						MaxDepth: 1,
+					},
+					"comprehensive": {
+						RecordTypes: []string{"A", "AAAA", "CNAME", "MX", "NS", "TXT", "SOA", "CAA"},
+						SubdomainWords: []string{
+							"api", "www", "app", "dev", "staging", "test", "admin",
+							"portal", "chat", "model", "models", "inference", "llm",
+							"ai", "ml", "mail", "ftp", "vpn", "secure", "beta",
+							"auth", "gateway", "internal", "private", "backend",
+							"service", "static", "cdn", "assets", "docs", "status",
+							"monitor", "grafana", "prometheus", "jenkins", "gitlab",
+							"git", "ci", "cd", "k8s", "kube", "docker", "registry",
+							"npm", "pypi", "old", "legacy", "sandbox", "demo", "qa",
+						},
+						MaxDepth: 2, // deeper combination space, still explicitly bounded (phase5.md §52) — not depth 3's ~130k-candidate explosion by default
 					},
 				},
 			},
@@ -369,6 +438,15 @@ func applyEnvOverrides(cfg *Config) error {
 	setInt(envDiscoveryNetworkMaxConcurrency, &cfg.Discovery.Network.MaxConcurrency)
 	setInt(envDiscoveryNetworkMaxHosts, &cfg.Discovery.Network.MaxHosts)
 	setFloat64(envDiscoveryNetworkRequestsPerSecond, &cfg.Discovery.Network.RequestsPerSecond)
+
+	setBool(envDiscoveryDNSEnabled, &cfg.Discovery.DNS.Enabled)
+	setDuration(envDiscoveryDNSTimeout, &cfg.Discovery.DNS.Timeout)
+	setInt(envDiscoveryDNSMaxConcurrency, &cfg.Discovery.DNS.MaxConcurrency)
+	setBool(envDiscoveryDNSReversePTR, &cfg.Discovery.DNS.ReversePTR)
+	setFloat64(envDiscoveryDNSRequestsPerSecond, &cfg.Discovery.DNS.RequestsPerSecond)
+	setBool(envDiscoveryDNSSubdomainsEnabled, &cfg.Discovery.DNS.Subdomains.Enabled)
+	setInt(envDiscoveryDNSMaxCandidates, &cfg.Discovery.DNS.Subdomains.MaxCandidates)
+	setInt(envDiscoveryDNSMaxDepth, &cfg.Discovery.DNS.Subdomains.MaxDepth)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

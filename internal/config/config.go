@@ -99,11 +99,13 @@ type HTTPClientConfig struct {
 }
 
 // DiscoveryConfig configures the platform's discovery subsystems. Phase 3
-// added HTTP; Phase 4 adds Network (TCP connect scanning). Later phases
-// (DNS, ...) add further siblings here, not new top-level config sections.
+// added HTTP; Phase 4 added Network (TCP connect scanning); Phase 5 adds
+// DNS. Later phases add further siblings here, not new top-level config
+// sections.
 type DiscoveryConfig struct {
 	HTTP    HTTPDiscoveryConfig    `yaml:"http"`
 	Network NetworkDiscoveryConfig `yaml:"network"`
+	DNS     DNSDiscoveryConfig     `yaml:"dns"`
 }
 
 // ProfileConfig names one reusable set of paths a scan can be run with
@@ -151,6 +153,81 @@ type NetworkDiscoveryConfig struct {
 	Profiles         map[string]NetworkProfileConfig `yaml:"profiles"`
 }
 
+// DNSProfileConfig names one reusable record-type + subdomain-wordlist
+// combination a DNS scan can be run with ("quick"/"standard"/
+// "comprehensive" — see internal/discovery/dns). Data-only, same
+// rationale as ProfileConfig/NetworkProfileConfig.
+type DNSProfileConfig struct {
+	RecordTypes    []string `yaml:"record_types"`
+	SubdomainWords []string `yaml:"subdomain_words"`
+	// MaxDepth overrides discovery.dns.subdomains.max_depth for this
+	// profile; 0 means "use the base max_depth". This exists so "quick"
+	// can stay at depth 1 (phase5.md §50: "do not perform broad
+	// enumeration") while "comprehensive" uses a deeper combination space
+	// (§52), without one shared setting forcing every profile to the same
+	// depth.
+	MaxDepth int `yaml:"max_depth"`
+}
+
+// DNSSubdomainConfig configures subdomain enumeration specifically —
+// separate from record-type discovery, per phase5.md §1's explicit
+// requirement that the two concepts not be mixed.
+type DNSSubdomainConfig struct {
+	Enabled bool `yaml:"enabled"`
+	// MaxCandidates bounds how many subdomain candidates are ever
+	// resolved in one scan, regardless of how large the wordlist or how
+	// deep MaxDepth allows — exceeding it truncates the candidate list
+	// (deterministically, not silently unbounded), never queries more
+	// (phase5.md §23).
+	MaxCandidates int `yaml:"max_candidates"`
+	// Wordlist is a path to a newline-delimited file of candidate labels.
+	// Empty means "use Words below (or the selected profile's
+	// SubdomainWords, which take precedence when a profile is given)".
+	Wordlist string `yaml:"wordlist"`
+	// Words is the built-in default candidate label list, used when
+	// neither Wordlist nor a profile is given. Configurable, never
+	// hard-coded as the *only* option (phase5.md §22).
+	Words             []string `yaml:"words"`
+	WildcardDetection bool     `yaml:"wildcard_detection"`
+	// MaxDepth bounds how many label levels of combination are generated
+	// from the wordlist (1 = "word.domain", 2 = "word.word.domain", ...)
+	// — never unlimited recursive combination (phase5.md §24).
+	MaxDepth int `yaml:"max_depth"`
+}
+
+// DNSDiscoveryConfig configures the DNS record and subdomain discovery
+// engine (internal/discovery/dns). It does not configure a second HTTP
+// client or a second database layer — a discovered subdomain may be
+// flagged as an HTTP candidate for a later, separate Phase 3 scan, but
+// this package never performs an HTTP request itself.
+type DNSDiscoveryConfig struct {
+	Enabled bool `yaml:"enabled"`
+	// Timeout bounds every individual DNS query — never unlimited.
+	Timeout        time.Duration `yaml:"timeout"`
+	MaxConcurrency int           `yaml:"max_concurrency"`
+	// Resolvers are explicit "host:port" DNS servers to query; empty uses
+	// the operating system's configured resolver
+	// (internal/discovery/dns.SystemResolver). Never required to be a
+	// public resolver — tests use a local fixture exclusively.
+	Resolvers []string `yaml:"resolvers"`
+	// RecordTypes are queried for the target domain itself (and, for a
+	// discovered subdomain, that subdomain) — A, AAAA, CNAME, MX, NS, TXT,
+	// SOA, CAA. PTR is handled separately (see ReversePTR): it is a
+	// reverse (IP -> name) lookup, not a forward query for a domain name,
+	// so it doesn't belong in this forward-query list.
+	RecordTypes []string `yaml:"record_types"`
+	// ReversePTR, when true, additionally attempts a PTR lookup for every
+	// A/AAAA address this scan discovers — only addresses already
+	// discovered within scope, never unrestricted reverse-DNS scanning
+	// (phase5.md §19).
+	ReversePTR bool `yaml:"reverse_ptr"`
+	// RequestsPerSecond paces DNS queries; 0 means unlimited. A safety/
+	// stability control, not stealth/evasion timing (phase5.md §41).
+	RequestsPerSecond float64                     `yaml:"requests_per_second"`
+	Subdomains        DNSSubdomainConfig          `yaml:"subdomains"`
+	Profiles          map[string]DNSProfileConfig `yaml:"profiles"`
+}
+
 // HTTPDiscoveryConfig configures the HTTP discovery engine
 // (internal/discovery/http). It reuses HTTPClientConfig's underlying
 // transport (internal/httpclient) — this section only adds discovery-
@@ -189,6 +266,15 @@ var validLogLevels = map[string]bool{"debug": true, "info": true, "warn": true, 
 var validLogFormats = map[string]bool{"json": true, "text": true}
 var validSSLModes = map[string]bool{"disable": true, "require": true, "verify-ca": true, "verify-full": true, "prefer": true, "allow": true}
 var validEnvironments = map[string]bool{"development": true, "staging": true, "production": true, "test": true}
+
+// validDNSRecordTypes are the forward-query record types
+// discovery.dns.record_types (and profile record_types) may name. PTR is
+// deliberately excluded — it's a reverse (IP -> name) lookup controlled by
+// discovery.dns.reverse_ptr, not a type to query for a domain name.
+var validDNSRecordTypes = map[string]bool{
+	"A": true, "AAAA": true, "CNAME": true, "MX": true,
+	"NS": true, "TXT": true, "SOA": true, "CAA": true,
+}
 
 // Validate checks that the configuration is internally consistent and
 // usable. It is intentionally strict: an invalid configuration should fail
@@ -368,6 +454,48 @@ func (c *Config) Validate() error {
 				errs = append(errs, fmt.Sprintf("discovery.network.profiles.%s.ports must not be empty", name))
 			}
 			validatePortList(fmt.Sprintf("discovery.network.profiles.%s.ports", name), profile.Ports)
+		}
+	}
+
+	if c.Discovery.DNS.Enabled {
+		d := c.Discovery.DNS
+		if d.Timeout <= 0 {
+			errs = append(errs, "discovery.dns.timeout must be positive")
+		}
+		if d.MaxConcurrency < 1 {
+			errs = append(errs, "discovery.dns.max_concurrency must be at least 1")
+		}
+		if d.RequestsPerSecond < 0 {
+			errs = append(errs, "discovery.dns.requests_per_second must not be negative")
+		}
+		for _, addr := range d.Resolvers {
+			if _, _, err := net.SplitHostPort(addr); err != nil {
+				errs = append(errs, fmt.Sprintf("discovery.dns.resolvers: %q must be a host:port pair", addr))
+			}
+		}
+		validateRecordTypes := func(field string, types []string) {
+			if len(types) == 0 {
+				errs = append(errs, field+" must not be empty")
+			}
+			for _, rt := range types {
+				if !validDNSRecordTypes[rt] {
+					errs = append(errs, fmt.Sprintf("%s: %q is not a recognized (forward-query) record type", field, rt))
+				}
+			}
+		}
+		validateRecordTypes("discovery.dns.record_types", d.RecordTypes)
+
+		if d.Subdomains.Enabled {
+			s := d.Subdomains
+			if s.MaxCandidates < 1 {
+				errs = append(errs, "discovery.dns.subdomains.max_candidates must be at least 1")
+			}
+			if s.MaxDepth < 1 {
+				errs = append(errs, "discovery.dns.subdomains.max_depth must be at least 1")
+			}
+		}
+		for name, profile := range d.Profiles {
+			validateRecordTypes(fmt.Sprintf("discovery.dns.profiles.%s.record_types", name), profile.RecordTypes)
 		}
 	}
 

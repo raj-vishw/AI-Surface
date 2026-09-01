@@ -10,10 +10,11 @@ import (
 //
 // Phase 1 shipped lifecycle/introspection commands (version, config
 // validate, health). Phase 2 added `target`/`asset` as development
-// diagnostics for the persistence layer — see their Long help text. Phase
-// 3 adds the platform's first real capability, `scan` (HTTP discovery).
-// Commands belonging to later phases (fingerprint, report, monitor) must
-// not be added here yet.
+// diagnostics for the persistence layer — see their Long help text.
+// Phase 3 added `scan` (HTTP discovery); Phase 4 added `network-scan`
+// (TCP connect discovery); Phase 5 adds `dns-scan`/`subdomain-scan` (DNS
+// record and subdomain discovery). Commands belonging to later phases
+// (fingerprint, report, monitor) must not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -34,6 +35,8 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewAssetCommand())
 	root.AddCommand(commands.NewScanCommand())
 	root.AddCommand(commands.NewNetworkScanCommand())
+	root.AddCommand(commands.NewDNSScanCommand())
+	root.AddCommand(commands.NewSubdomainScanCommand())
 
 	return root
 }

@@ -185,3 +185,116 @@ func TestServerAddr(t *testing.T) {
 		t.Errorf("unexpected server addr: %q", got)
 	}
 }
+
+func TestValidateRejectsInvalidDNSTimeout(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.Timeout = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.dns.timeout")
+	}
+}
+
+func TestValidateRejectsInvalidDNSConcurrency(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.MaxConcurrency = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.dns.max_concurrency")
+	}
+}
+
+func TestValidateRejectsNegativeDNSRate(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.RequestsPerSecond = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative discovery.dns.requests_per_second")
+	}
+}
+
+func TestValidateRejectsInvalidDNSResolverAddress(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.Resolvers = []string{"not-a-host-port"}
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for a malformed discovery.dns.resolvers entry")
+	}
+}
+
+func TestValidateRejectsInvalidDNSRecordType(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.RecordTypes = []string{"BOGUS"}
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for an unrecognized discovery.dns.record_types entry")
+	}
+}
+
+func TestValidateRejectsPTRAsForwardRecordType(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.RecordTypes = []string{"PTR"}
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error: PTR is reverse-only, not valid in record_types")
+	}
+}
+
+func TestValidateRejectsEmptyDNSRecordTypes(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.RecordTypes = nil
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for empty discovery.dns.record_types")
+	}
+}
+
+func TestValidateRejectsInvalidDNSMaxCandidates(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.Subdomains.Enabled = true
+	cfg.Discovery.DNS.Subdomains.MaxCandidates = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.dns.subdomains.max_candidates")
+	}
+}
+
+func TestValidateRejectsInvalidDNSMaxDepth(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.Subdomains.Enabled = true
+	cfg.Discovery.DNS.Subdomains.MaxDepth = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.dns.subdomains.max_depth")
+	}
+}
+
+func TestValidateAllowsDNSSubdomainsDisabledSkipsTheirValidation(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.Subdomains.Enabled = false
+	cfg.Discovery.DNS.Subdomains.MaxCandidates = 0 // would be invalid if subdomains were enabled
+	cfg.Discovery.DNS.Subdomains.MaxDepth = 0
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("disabled DNS subdomain enumeration should skip its own validation, got: %v", err)
+	}
+}
+
+func TestValidateRejectsInvalidDNSProfileRecordType(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = true
+	cfg.Discovery.DNS.Profiles["broken"] = DNSProfileConfig{RecordTypes: []string{"BOGUS"}}
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for an unrecognized record type in a discovery.dns.profiles entry")
+	}
+}
+
+func TestValidateAllowsDNSDiscoveryDisabled(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.DNS.Enabled = false
+	cfg.Discovery.DNS.MaxConcurrency = -1 // would be invalid if enabled
+	cfg.Discovery.DNS.RecordTypes = nil
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("disabled DNS discovery should skip its own validation, got: %v", err)
+	}
+}
