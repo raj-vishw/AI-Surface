@@ -32,6 +32,13 @@ type Response struct {
 	// BodySHA256 is the hex-encoded SHA-256 hash of Body, used by later
 	// asset/fingerprint components to detect identical responses.
 	BodySHA256 string
+	// RedirectChain lists the URL of every redirect *target* this request
+	// followed, in order — i.e. it excludes the original request URL
+	// (Request.URL / this Response's own URL field before redirects) but
+	// includes every subsequent hop, including the final one. Empty means
+	// no redirect occurred. See Options.AllowRedirectTo for how a caller
+	// stops the chain at a disallowed hop.
+	RedirectChain []string
 }
 
 func extractTLSMetadata(state *tls.ConnectionState) *TLSMetadata {

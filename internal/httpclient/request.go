@@ -20,6 +20,21 @@ type Request struct {
 	Body    io.Reader
 }
 
+// redirectChainKey is the context key Do attaches a per-request
+// *redirectChain collector under, so the Client-wide CheckRedirect closure
+// (shared by every concurrent request) can record each request's own hop
+// URLs without any cross-request data race — see Client's CheckRedirect
+// and Response.RedirectChain.
+type redirectChainKey struct{}
+
+// redirectChain accumulates the URL of every hop CheckRedirect is invoked
+// for during one logical request (net/http propagates the original
+// request's context to every redirected request, which is what makes this
+// safe to key off context rather than the Client itself).
+type redirectChain struct {
+	hops []string
+}
+
 // Do executes req and returns a normalized Response. It respects ctx
 // cancellation/deadlines, the Client's configured timeout, redirect limit,
 // and maximum response size — the response body is never read unbounded
@@ -30,6 +45,9 @@ type Request struct {
 // status codes are not errors — they are returned as a normal Response
 // with StatusCode set, exactly as net/http behaves.
 func (c *Client) Do(ctx context.Context, req Request) (*Response, error) {
+	collector := &redirectChain{}
+	ctx = context.WithValue(ctx, redirectChainKey{}, collector)
+
 	httpReq, err := http.NewRequestWithContext(ctx, req.Method, req.URL, req.Body)
 	if err != nil {
 		return nil, apperrors.NewValidation(fmt.Sprintf("building %s request to %s", req.Method, req.URL), err)
@@ -69,15 +87,16 @@ func (c *Client) Do(ctx context.Context, req Request) (*Response, error) {
 	}
 
 	return &Response{
-		StatusCode:  httpResp.StatusCode,
-		Headers:     httpResp.Header,
-		ContentType: httpResp.Header.Get("Content-Type"),
-		Body:        data,
-		BodySize:    int64(len(data)),
-		Duration:    duration,
-		URL:         respURL,
-		TLSMetadata: extractTLSMetadata(httpResp.TLS),
-		BodySHA256:  hex.EncodeToString(sum[:]),
+		StatusCode:    httpResp.StatusCode,
+		Headers:       httpResp.Header,
+		ContentType:   httpResp.Header.Get("Content-Type"),
+		Body:          data,
+		BodySize:      int64(len(data)),
+		Duration:      duration,
+		URL:           respURL,
+		TLSMetadata:   extractTLSMetadata(httpResp.TLS),
+		BodySHA256:    hex.EncodeToString(sum[:]),
+		RedirectChain: collector.hops,
 	}, nil
 }
 

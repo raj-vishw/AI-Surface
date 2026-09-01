@@ -19,6 +19,7 @@ package httpclient
 import (
 	"crypto/tls"
 	"net/http"
+	"net/url"
 	"time"
 
 	"ai-recon-platform/internal/config"
@@ -32,6 +33,18 @@ type Options struct {
 	MaxResponseSize       int64
 	MaxRedirects          int
 	TLSConfig             *tls.Config
+	// AllowRedirectTo, if set, is consulted before following each
+	// redirect hop; returning false stops the client from following that
+	// (or any further) redirect — the same http.ErrUseLastResponse
+	// mechanism already used for MaxRedirects, so the caller still gets a
+	// normal Response back (the redirect response itself, e.g. a 3xx with
+	// a Location header) rather than an error. This is how callers that
+	// need scope/SSRF protection (see internal/discovery/http) prevent the
+	// client from ever connecting to a disallowed host mid-redirect,
+	// without needing a second transport implementation. A nil
+	// AllowRedirectTo (the default) imposes no additional restriction,
+	// preserving every existing caller's behavior unchanged.
+	AllowRedirectTo func(*url.URL) bool
 }
 
 // OptionsFromConfig builds Options from the application's HTTPClientConfig.
@@ -65,12 +78,19 @@ func New(opts Options) *Client {
 	}
 
 	maxRedirects := opts.MaxRedirects
+	allowRedirectTo := opts.AllowRedirectTo
 
 	httpClient := &http.Client{
 		Transport: transport,
 		Timeout:   opts.Timeout,
-		CheckRedirect: func(_ *http.Request, via []*http.Request) error {
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if collector, ok := req.Context().Value(redirectChainKey{}).(*redirectChain); ok {
+				collector.hops = append(collector.hops, req.URL.String())
+			}
 			if len(via) >= maxRedirects {
+				return http.ErrUseLastResponse
+			}
+			if allowRedirectTo != nil && !allowRedirectTo(req.URL) {
 				return http.ErrUseLastResponse
 			}
 			return nil

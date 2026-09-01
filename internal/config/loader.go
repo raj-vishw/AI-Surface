@@ -49,6 +49,18 @@ const (
 	envHTTPClientMaxResponseSize       = "AI_RECON_HTTP_MAX_RESPONSE_SIZE"
 	envHTTPClientMaxRedirects          = "AI_RECON_HTTP_MAX_REDIRECTS"
 
+	// Discovery HTTP env overrides cover scalar fields only — methods,
+	// schemes, paths, and profiles are structured/list-shaped and are
+	// configured exclusively via YAML (configs/*/config.yaml), the same
+	// convention every other list-shaped setting in this project follows.
+	envDiscoveryHTTPEnabled           = "AI_RECON_DISCOVERY_HTTP_ENABLED"
+	envDiscoveryHTTPTimeout           = "AI_RECON_DISCOVERY_HTTP_TIMEOUT"
+	envDiscoveryHTTPMaxConcurrency    = "AI_RECON_DISCOVERY_HTTP_MAX_CONCURRENCY"
+	envDiscoveryHTTPMaxResponseSize   = "AI_RECON_DISCOVERY_HTTP_MAX_RESPONSE_SIZE"
+	envDiscoveryHTTPFollowRedirects   = "AI_RECON_DISCOVERY_HTTP_FOLLOW_REDIRECTS"
+	envDiscoveryHTTPMaxRedirects      = "AI_RECON_DISCOVERY_HTTP_MAX_REDIRECTS"
+	envDiscoveryHTTPDetectAIEndpoints = "AI_RECON_DISCOVERY_HTTP_DETECT_AI_ENDPOINTS"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -103,6 +115,38 @@ func defaultConfig() *Config {
 			MaxConnectionsPerHost: 20,
 			MaxResponseSize:       10 * 1024 * 1024, // 10 MiB
 			MaxRedirects:          5,
+		},
+		Discovery: DiscoveryConfig{
+			HTTP: HTTPDiscoveryConfig{
+				Enabled:           true,
+				Timeout:           10 * time.Second,
+				MaxConcurrency:    10,
+				MaxResponseSize:   10 * 1024 * 1024, // 10 MiB
+				FollowRedirects:   true,
+				MaxRedirects:      5,
+				Methods:           []string{"GET"},
+				Schemes:           []string{"https", "http"},
+				DetectAIEndpoints: true,
+				Paths: []string{
+					"/", "/robots.txt", "/openapi.json", "/swagger.json",
+					"/api", "/api/", "/v1", "/v1/", "/v1/models",
+					"/v1/chat/completions", "/v1/completions", "/v1/embeddings",
+					"/models", "/health", "/healthz", "/ready", "/status",
+				},
+				Profiles: map[string]ProfileConfig{
+					"quick": {
+						Paths: []string{"/", "/robots.txt", "/openapi.json", "/v1/models", "/health"},
+					},
+					"comprehensive": {
+						Paths: []string{
+							"/", "/robots.txt", "/openapi.json", "/swagger.json",
+							"/api", "/api/", "/v1", "/v1/", "/v1/models",
+							"/v1/chat/completions", "/v1/completions", "/v1/embeddings",
+							"/models", "/health", "/healthz", "/ready", "/status",
+						},
+					},
+				},
+			},
 		},
 		Logging: LoggingConfig{
 			Level:  "info",
@@ -269,6 +313,14 @@ func applyEnvOverrides(cfg *Config) error {
 	setInt64(envHTTPClientMaxResponseSize, &cfg.HTTPClient.MaxResponseSize)
 	setInt(envHTTPClientMaxRedirects, &cfg.HTTPClient.MaxRedirects)
 
+	setBool(envDiscoveryHTTPEnabled, &cfg.Discovery.HTTP.Enabled)
+	setDuration(envDiscoveryHTTPTimeout, &cfg.Discovery.HTTP.Timeout)
+	setInt(envDiscoveryHTTPMaxConcurrency, &cfg.Discovery.HTTP.MaxConcurrency)
+	setInt64(envDiscoveryHTTPMaxResponseSize, &cfg.Discovery.HTTP.MaxResponseSize)
+	setBool(envDiscoveryHTTPFollowRedirects, &cfg.Discovery.HTTP.FollowRedirects)
+	setInt(envDiscoveryHTTPMaxRedirects, &cfg.Discovery.HTTP.MaxRedirects)
+	setBool(envDiscoveryHTTPDetectAIEndpoints, &cfg.Discovery.HTTP.DetectAIEndpoints)
+
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)
 
@@ -289,6 +341,7 @@ type Overrides struct {
 	ServerHost   *string
 	ServerPort   *int
 	LoggingLevel *string
+	DryRun       *bool
 }
 
 // ApplyOverrides layers o onto cfg in place.
@@ -301,5 +354,8 @@ func ApplyOverrides(cfg *Config, o Overrides) {
 	}
 	if o.LoggingLevel != nil {
 		cfg.Logging.Level = *o.LoggingLevel
+	}
+	if o.DryRun != nil {
+		cfg.Security.DryRun = *o.DryRun
 	}
 }

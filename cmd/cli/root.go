@@ -9,11 +9,11 @@ import (
 // newRootCommand builds the `ai-recon` command tree.
 //
 // Phase 1 shipped lifecycle/introspection commands (version, config
-// validate, health). Phase 2 adds `target`/`asset` as development
-// diagnostics for the new persistence layer only — see their Long help
-// text. Commands that perform discovery, fingerprinting, or probing (scan,
-// fingerprint, report, monitor) still belong to later phases and must not
-// be added here yet.
+// validate, health). Phase 2 added `target`/`asset` as development
+// diagnostics for the persistence layer — see their Long help text. Phase
+// 3 adds the platform's first real capability, `scan` (HTTP discovery).
+// Commands belonging to later phases (fingerprint, report, monitor) must
+// not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -32,6 +32,7 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewHealthCommand())
 	root.AddCommand(commands.NewTargetCommand())
 	root.AddCommand(commands.NewAssetCommand())
+	root.AddCommand(commands.NewScanCommand())
 
 	return root
 }

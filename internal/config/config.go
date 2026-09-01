@@ -17,6 +17,7 @@ type Config struct {
 	Database    DatabaseConfig    `yaml:"database"`
 	Redis       RedisConfig       `yaml:"redis"`
 	HTTPClient  HTTPClientConfig  `yaml:"http_client"`
+	Discovery   DiscoveryConfig   `yaml:"discovery"`
 	Logging     LoggingConfig     `yaml:"logging"`
 	Security    SecurityConfig    `yaml:"security"`
 }
@@ -95,6 +96,40 @@ type HTTPClientConfig struct {
 	MaxConnectionsPerHost int           `yaml:"max_connections_per_host"`
 	MaxResponseSize       int64         `yaml:"max_response_size"`
 	MaxRedirects          int           `yaml:"max_redirects"`
+}
+
+// DiscoveryConfig configures the platform's discovery subsystems. Phase 3
+// adds the first of these — HTTP; later phases (DNS, ports, ...) add
+// siblings here, not new top-level config sections.
+type DiscoveryConfig struct {
+	HTTP HTTPDiscoveryConfig `yaml:"http"`
+}
+
+// ProfileConfig names one reusable set of paths a scan can be run with
+// (e.g. "quick" vs "comprehensive" — see internal/discovery/http). Kept
+// data-only and configurable rather than hard-coded so an operator can add
+// or edit profiles without recompiling.
+type ProfileConfig struct {
+	Paths []string `yaml:"paths"`
+}
+
+// HTTPDiscoveryConfig configures the HTTP discovery engine
+// (internal/discovery/http). It reuses HTTPClientConfig's underlying
+// transport (internal/httpclient) — this section only adds discovery-
+// specific policy: which paths/methods/schemes to try, concurrency, and AI
+// candidate detection.
+type HTTPDiscoveryConfig struct {
+	Enabled           bool                     `yaml:"enabled"`
+	Timeout           time.Duration            `yaml:"timeout"`
+	MaxConcurrency    int                      `yaml:"max_concurrency"`
+	MaxResponseSize   int64                    `yaml:"max_response_size"`
+	FollowRedirects   bool                     `yaml:"follow_redirects"`
+	MaxRedirects      int                      `yaml:"max_redirects"`
+	Methods           []string                 `yaml:"methods"`
+	Schemes           []string                 `yaml:"schemes"`
+	Paths             []string                 `yaml:"paths"`
+	DetectAIEndpoints bool                     `yaml:"detect_ai_endpoints"`
+	Profiles          map[string]ProfileConfig `yaml:"profiles"`
 }
 
 // LoggingConfig configures the structured logger.
@@ -213,6 +248,58 @@ func (c *Config) Validate() error {
 	}
 	if c.HTTPClient.MaxRedirects < 0 {
 		errs = append(errs, "http_client.max_redirects must not be negative")
+	}
+
+	if c.Discovery.HTTP.Enabled {
+		h := c.Discovery.HTTP
+		if h.Timeout <= 0 {
+			errs = append(errs, "discovery.http.timeout must be positive")
+		}
+		if h.MaxConcurrency < 1 {
+			errs = append(errs, "discovery.http.max_concurrency must be at least 1")
+		}
+		if h.MaxResponseSize < 1 {
+			errs = append(errs, "discovery.http.max_response_size must be at least 1")
+		}
+		if h.MaxRedirects < 0 {
+			errs = append(errs, "discovery.http.max_redirects must not be negative")
+		}
+		if len(h.Methods) == 0 {
+			errs = append(errs, "discovery.http.methods must not be empty")
+		}
+		for _, m := range h.Methods {
+			// Phase 3 is discovery only: GET-only is a required safe
+			// default (master spec phase3.md §6), not merely a suggestion.
+			if m != "GET" {
+				errs = append(errs, fmt.Sprintf("discovery.http.methods: %q is not permitted — HTTP discovery is GET-only", m))
+			}
+		}
+		if len(h.Schemes) == 0 {
+			errs = append(errs, "discovery.http.schemes must not be empty")
+		}
+		for _, s := range h.Schemes {
+			if s != "http" && s != "https" {
+				errs = append(errs, fmt.Sprintf("discovery.http.schemes: %q must be \"http\" or \"https\"", s))
+			}
+		}
+		if len(h.Paths) == 0 {
+			errs = append(errs, "discovery.http.paths must not be empty")
+		}
+		for _, p := range h.Paths {
+			if !strings.HasPrefix(p, "/") {
+				errs = append(errs, fmt.Sprintf("discovery.http.paths: %q must start with \"/\"", p))
+			}
+		}
+		for name, profile := range h.Profiles {
+			if len(profile.Paths) == 0 {
+				errs = append(errs, fmt.Sprintf("discovery.http.profiles.%s.paths must not be empty", name))
+			}
+			for _, p := range profile.Paths {
+				if !strings.HasPrefix(p, "/") {
+					errs = append(errs, fmt.Sprintf("discovery.http.profiles.%s.paths: %q must start with \"/\"", name, p))
+				}
+			}
+		}
 	}
 
 	if !validLogLevels[strings.ToLower(c.Logging.Level)] {

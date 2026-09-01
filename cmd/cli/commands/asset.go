@@ -18,19 +18,62 @@ import (
 
 // NewTargetCommand returns the `ai-recon target` command group.
 //
-// This is a development diagnostic for exercising internal/service/target
-// and internal/repository/target against a real database — it is NOT the
-// platform's scan/target-management CLI. That belongs to a later phase
-// once discovery and the API exist; see phase2.md §43.
+// create/list started as Phase 2 development diagnostics for exercising
+// internal/service/target directly (phase2.md §43) — this is still not
+// the platform's full scan/target-management CLI (no update-name,
+// deletion, etc.). authorize, however, is load-bearing as of Phase 3:
+// it's the only way to move a target to AUTHORIZED, which `ai-recon scan`
+// requires (phase3.md §7).
 func NewTargetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "target",
-		Short: "[dev diagnostic] Create and list targets directly against the database",
-		Long: "[dev diagnostic] Exercises internal/service/target's persistence directly — useful for\n" +
-			"manually verifying Phase 2 without writing SQL by hand. This is not the platform's\n" +
-			"scan/target-management CLI; that arrives in a later phase.",
+		Short: "Create, authorize, and list targets",
+		Long: "Exercises internal/service/target's persistence directly. create/list are Phase 2\n" +
+			"development diagnostics; authorize is required before `ai-recon scan` will run against\n" +
+			"a target — a target is never authorized merely by existing (see SECURITY.md).",
 	}
-	cmd.AddCommand(newTargetCreateCommand(), newTargetListCommand())
+	cmd.AddCommand(newTargetCreateCommand(), newTargetListCommand(), newTargetAuthorizeCommand())
+	return cmd
+}
+
+func newTargetAuthorizeCommand() *cobra.Command {
+	var id, status string
+	cmd := &cobra.Command{
+		Use:   "authorize",
+		Short: "Explicitly set a target's authorization status (default: AUTHORIZED)",
+		Long: "Sets a target's authorization_status. This is the only way a target becomes\n" +
+			"AUTHORIZED — required before `ai-recon scan` will run against it. Accepts\n" +
+			"UNVERIFIED|AUTHORIZED|EXPIRED|REVOKED via --status; defaults to AUTHORIZED.",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			cfg, err := loadConfig(cmd)
+			if err != nil {
+				return fmt.Errorf("configuration is invalid: %w", err)
+			}
+			targetUUID, err := uuid.Parse(id)
+			if err != nil {
+				return fmt.Errorf("invalid --id: %w", err)
+			}
+
+			ctx := context.Background()
+			db, err := database.Connect(ctx, cfg.Database)
+			if err != nil {
+				return err
+			}
+			defer db.Close()
+
+			svc := targetsvc.NewService(db)
+			updated, err := svc.UpdateAuthorizationStatus(ctx, targetUUID, domaintarget.AuthorizationStatus(status))
+			if err != nil {
+				return err
+			}
+
+			_, err = fmt.Fprintf(cmd.OutOrStdout(), "target %s authorization_status is now %s\n", updated.ID, updated.AuthorizationStatus)
+			return err
+		},
+	}
+	cmd.Flags().StringVar(&id, "id", "", "target UUID (required — see `ai-recon target list`)")
+	cmd.Flags().StringVar(&status, "status", string(domaintarget.AuthorizationAuthorized), "UNVERIFIED|AUTHORIZED|EXPIRED|REVOKED")
+	_ = cmd.MarkFlagRequired("id")
 	return cmd
 }
 

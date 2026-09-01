@@ -4,14 +4,15 @@ A platform for discovering, fingerprinting, and performing authorized
 security assessments of AI/LLM systems. See `../doc_by_me/` for the full
 project specification, architecture, and phased roadmap.
 
-**Status: Phase 2 — asset model & persistence engine.** Phase 1's platform
-foundation (configuration, structured logging, internal error model, HTTP
-client, PostgreSQL/Redis connectivity, migrations, liveness/readiness,
-executables) plus a canonical, deduplicated asset inventory backed by
-PostgreSQL — targets, assets, evidence, endpoints — with a repository/
-service architecture future discovery, fingerprinting, and probing phases
-build on. Discovery, fingerprinting, vulnerability probing, distributed
-workers, the dashboard, authentication, and RBAC are not implemented yet.
+**Status: Phase 3 — HTTP discovery engine.** Phase 1's platform foundation
+plus Phase 2's asset/evidence/endpoint persistence layer, now with the
+platform's first real reconnaissance capability: `ai-recon scan` discovers
+HTTP/HTTPS services and endpoints against an authorized target, classifies
+them (including AI/LLM API *candidate* detection — never a specific
+provider/model claim), and persists everything through the Phase 2
+persistence layer. Fingerprinting, vulnerability probing, DNS/port/
+subdomain discovery, distributed workers, the dashboard, authentication,
+and RBAC are not implemented yet.
 
 ## 1. Prerequisites
 
@@ -146,21 +147,68 @@ CRUD, upsert/deduplication, evidence persistence, endpoint URL
 normalization, concurrent upserts (50 goroutines against the same
 identity), pagination, filters, and transaction atomicity.
 
+## HTTP Discovery
+
+`ai-recon scan` discovers HTTP/HTTPS services and endpoints against an
+already-created, already-**authorized** target, classifies each response
+(including AI/LLM API *candidate* detection, never a specific provider or
+model — see
+[docs/architecture/http-discovery.md](docs/architecture/http-discovery.md)),
+and persists everything through the Asset Persistence layer above. Full
+walkthrough:
+
+```sh
+# 1. Create a target and authorize it — scan refuses an unauthorized target.
+ai-recon target create --name "local test" --type URL --value http://127.0.0.1:9000
+ai-recon target authorize --id <uuid-printed-above>
+
+# 2. Start a local test target (no real Internet target required):
+go run ./test/fixtures/http/cmd/fixtureserver -port 9000
+
+# 3. Scan it.
+ai-recon scan --target http://127.0.0.1:9000 --profile quick
+```
+
+- **Authorization requirement** — `scan` loads the target, validates it,
+  and checks `authorization_status == AUTHORIZED` before generating a
+  single candidate URL or sending a single request; an unauthorized
+  target fails immediately with "target is not authorized for active
+  discovery".
+- **`--profile quick`** — a small, high-value path set (`/`,
+  `/robots.txt`, `/openapi.json`, `/v1/models`, `/health` by default).
+- **`--profile comprehensive`** — the full configured path set
+  (`discovery.http.paths`). Both profiles, and any custom ones, are
+  defined in configuration (`discovery.http.profiles`), never hard-coded.
+- **`--dry-run`** (or `security.dry_run: true`) — prints the candidate
+  `METHOD path` list without sending any request or persisting anything.
+- **`--format json`** — machine-readable output on stdout; operational
+  logs always go to stderr, so stdout is always valid JSON in this mode.
+- **Troubleshooting**: "target is not authorized for active discovery"
+  means run `ai-recon target authorize --id <uuid>` first; "target type ...
+  is not supported by HTTP discovery" means the target's type isn't
+  `URL`/`HOST`/`DOMAIN`; an empty result table with all rows `ERROR`
+  usually means the target isn't reachable — confirm the fixture/target is
+  actually running and the port matches.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
-`ai-recon target` and `ai-recon asset` are development diagnostics for
-exercising the Phase 2 persistence layer by hand (see their `--help`) —
-not the platform's future scan CLI.
+`ai-recon asset` (and `target create`/`target list`) remain development
+diagnostics for exercising the Phase 2 persistence layer by hand (see
+their `--help`); `ai-recon target authorize` and `ai-recon scan` are real,
+required parts of running Phase 3 discovery.
 
 ## Further reading
 
 - [SECURITY.md](SECURITY.md) — authorization boundary, safe defaults
 - [docs/architecture/asset-model.md](docs/architecture/asset-model.md) —
   Phase 2 asset model, identity/deduplication, persistence architecture
+- [docs/architecture/http-discovery.md](docs/architecture/http-discovery.md) —
+  Phase 3 HTTP discovery engine: scope, concurrency, AI candidate
+  detection, redirect handling
