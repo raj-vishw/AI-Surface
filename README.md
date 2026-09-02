@@ -286,21 +286,63 @@ the domain's wildcard baseline is excluded from
 `Subdomains discovered`, while a distinct record under the same wildcard
 domain is still recognized as genuine.
 
+## Passive Fingerprinting
+
+`ai-recon fingerprint` identifies technologies (web servers, frameworks,
+frontends, CDNs, cloud providers, AI API candidates, database candidates,
+...) from evidence Phase 3/4/5 already collected and persisted — see
+[docs/architecture/fingerprinting.md](docs/architecture/fingerprinting.md)
+for the full architecture. **It never performs a network or DNS request
+of its own**: running it against an asset that was never actually
+scanned produces no fingerprints, not an error. Every result names the
+concrete signals (header values, DNS records, discovered paths, ...) that
+produced it and is a candidate backed by a transparent, evidence-based
+confidence score — never an opaque classification, and never a claim of
+having actively verified anything.
+
+```sh
+# Analyze every asset discovered for a target so far.
+ai-recon fingerprint --target example.com
+
+# Analyze one specific asset.
+ai-recon fingerprint --asset <asset-uuid>
+
+# Show the supporting evidence behind each result.
+ai-recon fingerprint --target example.com --explain
+
+# Filter by category / minimum confidence.
+ai-recon fingerprint --target example.com --category web_server --min-confidence 0.60
+
+# Evaluate without persisting anything.
+ai-recon fingerprint --target example.com --dry-run
+
+# Machine-readable output (stdout is always valid, log-free JSON)
+ai-recon fingerprint --target example.com --format json
+```
+
+Signatures are declarative YAML
+(`internal/fingerprint/signatures/*.yaml`), not hard-coded Go — an
+operator can point `fingerprint.signatures_path` at a custom directory to
+extend or replace the built-in set. Re-running fingerprinting against
+unchanged evidence is idempotent (no duplicate rows); a fingerprint that
+stops matching is preserved as `INACTIVE`, never deleted, and every
+add/remove/version-change/significant-confidence-change is reported as a
+`Change` relative to the previous analysis.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
 `ai-recon asset` (and `target create`/`target list`) remain development
 diagnostics for exercising the Phase 2 persistence layer by hand (see
 their `--help`); `ai-recon target authorize`, `ai-recon scan`,
-`ai-recon network-scan`, `ai-recon dns-scan`, and `ai-recon
-subdomain-scan` are real, required parts of running Phase 3/4/5
-discovery.
+`ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`, and
+`ai-recon fingerprint` are real, required parts of running Phase 3/4/5/6.
 
 ## Further reading
 
@@ -316,3 +358,7 @@ discovery.
 - [docs/architecture/dns-discovery.md](docs/architecture/dns-discovery.md) —
   Phase 5 DNS & subdomain discovery engine: resolver abstraction, record
   types, wildcard detection, TXT secret redaction, historical DNS tracking
+- [docs/architecture/fingerprinting.md](docs/architecture/fingerprinting.md) —
+  Phase 6 passive fingerprinting engine: signature format, matching,
+  scoring, conflict handling, AI/database candidate handling, historical
+  fingerprint tracking

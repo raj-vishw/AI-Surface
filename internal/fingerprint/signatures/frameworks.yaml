@@ -1,0 +1,118 @@
+# Backend framework signatures (phase6.md §15 category: framework).
+#
+# Each signature requires evidence more specific than a single generic
+# marker where one exists (phase6.md §32/§15: a bare "X-Powered-By: PHP"
+# must not imply Laravel, and "Server: nginx" must not imply Node.js) —
+# no signature here fires from another technology's evidence alone.
+signatures:
+  - name: express
+    category: framework
+    vendor: OpenJS Foundation
+    signals:
+      - type: http_header
+        field: X-Powered-By
+        pattern: "^Express"
+        weight: 1.0
+
+  - name: django
+    category: framework
+    vendor: Django Software Foundation
+    signals:
+      - type: cookie_name
+        pattern: "^csrftoken$"
+        weight: 0.5
+      - type: cookie_name
+        pattern: "^sessionid$"
+        weight: 0.3
+      - type: http_header
+        field: X-Frame-Options
+        pattern: "^DENY$"
+        weight: 0.2
+
+  - name: flask
+    category: framework
+    vendor: Pallets
+    signals:
+      - type: cookie_name
+        pattern: "^session$"
+        weight: 0.4
+      - type: http_header
+        field: Server
+        pattern: "^Werkzeug"
+        weight: 0.6
+
+  - name: laravel
+    category: framework
+    vendor: Laravel LLC
+    signals:
+      - type: cookie_name
+        pattern: "^laravel_session$"
+        weight: 0.7
+      - type: cookie_name
+        pattern: "^XSRF-TOKEN$"
+        weight: 0.3
+
+  - name: ruby-on-rails
+    category: framework
+    product: Ruby on Rails
+    signals:
+      - type: cookie_name
+        pattern: "_session$"
+        weight: 0.4
+      - type: http_header
+        field: X-Runtime
+        pattern: "^[0-9.]+$"
+        weight: 0.6
+
+  - name: aspnet
+    category: framework
+    product: ASP.NET
+    vendor: Microsoft
+    signals:
+      - type: http_header
+        field: X-AspNet-Version
+        pattern: "^([0-9][0-9.]*)$"
+        weight: 0.5
+        version_group: 1
+      - type: http_header
+        field: X-Powered-By
+        pattern: "^ASP\\.NET"
+        weight: 0.3
+      - type: cookie_name
+        pattern: "^ASP\\.NET_SessionId$"
+        weight: 0.2
+
+  - name: aspnet-mvc
+    category: framework
+    product: ASP.NET MVC
+    vendor: Microsoft
+    signals:
+      - type: http_header
+        field: X-AspNetMvc-Version
+        pattern: "^([0-9][0-9.]*)$"
+        weight: 1.0
+        version_group: 1
+
+  - name: spring
+    category: framework
+    vendor: VMware (Spring)
+    signals:
+      - type: cookie_name
+        pattern: "^JSESSIONID$"
+        weight: 0.4
+      - type: http_header
+        field: X-Application-Context
+        pattern: ".+"
+        weight: 0.6
+
+  - name: fastapi
+    category: framework
+    vendor: FastAPI
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^uvicorn"
+        weight: 0.7
+      - type: api_path
+        pattern: "^/openapi\\.json$"
+        weight: 0.3

@@ -1,0 +1,76 @@
+# Cloud provider signatures (phase6.md §18, category: cloud).
+#
+# Deliberately NOT IP-range-based (phase6.md §18: "do not claim cloud
+# ownership merely from an IP address... avoid simplistic AWS IP =
+# AWS-hosted logic") — every signal here is a DNS CNAME relationship or an
+# HTTP header the provider's own edge sets, multiple independent signals
+# corroborating each other rather than one address lookup.
+signatures:
+  - name: aws
+    category: cloud
+    vendor: Amazon Web Services
+    signals:
+      - type: dns_cname
+        pattern: "\\.amazonaws\\.com$"
+        weight: 0.5
+      - type: dns_cname
+        pattern: "\\.cloudfront\\.net$"
+        weight: 0.3
+      - type: http_header
+        field: X-Amz-Cf-Id
+        pattern: ".+"
+        weight: 0.2
+
+  - name: azure
+    category: cloud
+    vendor: Microsoft
+    signals:
+      - type: dns_cname
+        pattern: "\\.azurewebsites\\.net$"
+        weight: 0.5
+      - type: dns_cname
+        pattern: "\\.azure-api\\.net$"
+        weight: 0.3
+      - type: http_header
+        field: X-Azure-Ref
+        pattern: ".+"
+        weight: 0.2
+
+  - name: google-cloud
+    category: cloud
+    vendor: Google
+    signals:
+      - type: dns_cname
+        pattern: "\\.run\\.app$"
+        weight: 0.5
+      - type: dns_cname
+        pattern: "\\.appspot\\.com$"
+        weight: 0.3
+      - type: http_header
+        field: X-Goog-Meta
+        pattern: ".+"
+        weight: 0.2
+
+  - name: vercel
+    category: cloud
+    vendor: Vercel
+    signals:
+      - type: dns_cname
+        pattern: "\\.vercel-dns\\.com$|\\.vercel\\.app$"
+        weight: 0.6
+      - type: http_header
+        field: X-Vercel-Id
+        pattern: ".+"
+        weight: 0.4
+
+  - name: heroku
+    category: cloud
+    vendor: Salesforce (Heroku)
+    signals:
+      - type: dns_cname
+        pattern: "\\.herokuapp\\.com$|\\.herokudns\\.com$"
+        weight: 0.6
+      - type: http_header
+        field: Via
+        pattern: "heroku"
+        weight: 0.4

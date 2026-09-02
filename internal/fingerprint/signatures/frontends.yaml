@@ -1,0 +1,79 @@
+# Frontend technology / CMS signatures (phase6.md §14, category: frontend
+# or cms). Signal types html/html_meta/script/stylesheet inspect
+# Observation.HTML/Scripts/Stylesheets — fields with no real backing data
+# from the current persistence layer (Phase 3 never retains response
+# bodies; see docs/architecture/fingerprinting.md's Known Limitations).
+# These signatures are fully implemented and exercised by synthetic test
+# fixtures, ready for whenever a future phase adds body-snippet capture.
+signatures:
+  - name: nextjs
+    category: frontend
+    product: Next.js
+    vendor: Vercel
+    signals:
+      - type: script
+        pattern: "/_next/static/"
+        weight: 0.5
+      - type: html
+        pattern: "__NEXT_DATA__"
+        weight: 0.5
+
+  - name: react
+    category: frontend
+    product: React
+    vendor: Meta
+    signals:
+      - type: html
+        pattern: "data-reactroot|id=\"root\""
+        weight: 0.4
+      - type: script
+        pattern: "react(-dom)?(\\.[a-z0-9]+)?\\.js"
+        weight: 0.6
+
+  - name: vuejs
+    category: frontend
+    product: Vue.js
+    signals:
+      - type: html
+        pattern: "id=\"app\""
+        weight: 0.3
+      - type: script
+        pattern: "vue(\\.[a-z0-9]+)?\\.js"
+        weight: 0.7
+
+  - name: angular
+    category: frontend
+    product: Angular
+    vendor: Google
+    signals:
+      - type: html
+        pattern: "ng-version=\"([0-9][0-9.]*)\""
+        weight: 0.6
+        version_group: 1
+      - type: script
+        pattern: "runtime\\.[a-z0-9]+\\.js"
+        weight: 0.4
+
+  - name: wordpress
+    category: cms
+    product: WordPress
+    signals:
+      - type: url_path
+        pattern: "/wp-content/|/wp-includes/"
+        weight: 0.5
+      - type: html_meta
+        pattern: "generator[^>]*WordPress ([0-9][0-9.]*)"
+        weight: 0.5
+        version_group: 1
+
+  - name: drupal
+    category: cms
+    product: Drupal
+    signals:
+      - type: http_header
+        field: X-Generator
+        pattern: "^Drupal"
+        weight: 0.5
+      - type: url_path
+        pattern: "/sites/default/"
+        weight: 0.5

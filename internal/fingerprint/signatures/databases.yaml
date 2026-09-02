@@ -1,0 +1,55 @@
+# Database candidate signatures (phase6.md §19). A port number is
+# explicitly never treated as confirmation (phase6.md §19 in capitals:
+# "PORT NUMBER ALONE MUST NOT BE TREATED AS CONFIRMATION") — every
+# signature here declares a second, stronger corroborating signal type
+# (a product-specific service classification) that Phase 4's current
+# port-classifier never actually produces (it only yields a generic
+# "DATABASE" bucket for these ports, not a per-product identification),
+# which is precisely what keeps the achievable score capped low until a
+# future phase adds real banner/protocol-level confirmation — see
+# internal/fingerprint/scorer.go's doc comment for why this is a
+# deliberate scoring pattern, not an oversight.
+signatures:
+  - name: mysql-candidate
+    category: database
+    product: MySQL
+    signals:
+      - type: port
+        equals: "3306"
+        weight: 0.25
+      - type: service
+        equals: "MySQL"
+        weight: 0.75
+
+  - name: postgresql-candidate
+    category: database
+    product: PostgreSQL
+    signals:
+      - type: port
+        equals: "5432"
+        weight: 0.25
+      - type: service
+        equals: "PostgreSQL"
+        weight: 0.75
+
+  - name: redis-candidate
+    category: database
+    product: Redis
+    signals:
+      - type: port
+        equals: "6379"
+        weight: 0.25
+      - type: service
+        equals: "Redis"
+        weight: 0.75
+
+  - name: mongodb-candidate
+    category: database
+    product: MongoDB
+    signals:
+      - type: port
+        equals: "27017"
+        weight: 0.25
+      - type: service
+        equals: "MongoDB"
+        weight: 0.75

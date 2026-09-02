@@ -115,3 +115,38 @@ func TestSanitizeMetadata_CaseInsensitive(t *testing.T) {
 		t.Errorf("expected case-insensitive redaction, got %#v", out)
 	}
 }
+
+// TestSanitizeMetadata_CookieNamesException documents and locks the one
+// deliberate exception to the "cookie" substring rule (phase6.md §13/
+// §31): a "cookie_names" key holds cookie *names only*, never a value,
+// so Phase 6's passive fingerprinting can use it without every other key
+// containing "cookie" (which legitimately does carry secret-shaped
+// content, e.g. a raw Cookie/Set-Cookie header) losing its redaction.
+func TestSanitizeMetadata_CookieNamesException(t *testing.T) {
+	input := map[string]any{
+		"cookie_names": []any{"JSESSIONID", "csrftoken"},
+		"Set-Cookie":   "session=abc123; HttpOnly",
+		"Cookie":       "session=abc123",
+	}
+	out := SanitizeMetadata(input)
+
+	names, ok := out["cookie_names"].([]any)
+	if !ok || len(names) != 2 || names[0] != "JSESSIONID" || names[1] != "csrftoken" {
+		t.Errorf("cookie_names should pass through untouched, got %#v", out["cookie_names"])
+	}
+	if out["Set-Cookie"] != redactedValue {
+		t.Errorf("Set-Cookie should still be fully redacted, got %v", out["Set-Cookie"])
+	}
+	if out["Cookie"] != redactedValue {
+		t.Errorf("Cookie should still be fully redacted, got %v", out["Cookie"])
+	}
+}
+
+func TestSanitizeMetadata_CookieNamesException_CaseInsensitive(t *testing.T) {
+	input := map[string]any{"Cookie_Names": []any{"sid"}}
+	out := SanitizeMetadata(input)
+	names, ok := out["Cookie_Names"].([]any)
+	if !ok || len(names) != 1 || names[0] != "sid" {
+		t.Errorf("Cookie_Names (any casing) should pass through untouched, got %#v", out["Cookie_Names"])
+	}
+}

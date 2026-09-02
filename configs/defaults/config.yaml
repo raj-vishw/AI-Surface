@@ -161,6 +161,16 @@ discovery:
           ]
         max_depth: 2
 
+fingerprint:
+  enabled: true
+  signatures_path: "" # empty = use the built-in signature set (internal/fingerprint.DefaultSignaturesFS)
+  min_confidence: 0.30 # matches the "low" confidence-level boundary — weaker matches aren't worth reporting
+  confidence_change_threshold: 0.10
+  thresholds: {} # empty = internal/fingerprint.DefaultThresholds (weak/low/medium/high/very_high at 0/0.30/0.60/0.80/0.95)
+  historical_tracking: true
+  detect_changes: true
+  redact_sensitive_data: true
+
 logging:
   level: info
   format: json

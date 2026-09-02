@@ -80,6 +80,13 @@ const (
 	envDiscoveryDNSMaxCandidates     = "AI_RECON_DISCOVERY_DNS_MAX_CANDIDATES"
 	envDiscoveryDNSMaxDepth          = "AI_RECON_DISCOVERY_DNS_MAX_DEPTH"
 
+	envFingerprintEnabled                   = "AI_RECON_FINGERPRINT_ENABLED"
+	envFingerprintSignaturesPath            = "AI_RECON_FINGERPRINT_SIGNATURES_PATH"
+	envFingerprintMinConfidence             = "AI_RECON_FINGERPRINT_MIN_CONFIDENCE"
+	envFingerprintConfidenceChangeThreshold = "AI_RECON_FINGERPRINT_CONFIDENCE_CHANGE_THRESHOLD"
+	envFingerprintHistoricalTracking        = "AI_RECON_FINGERPRINT_HISTORICAL_TRACKING"
+	envFingerprintDetectChanges             = "AI_RECON_FINGERPRINT_DETECT_CHANGES"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -249,6 +256,14 @@ func defaultConfig() *Config {
 					},
 				},
 			},
+		},
+		Fingerprint: FingerprintConfig{
+			Enabled:                   true,
+			MinConfidence:             0.30, // matches internal/fingerprint.DefaultThresholds' "low" boundary — below this, a match isn't worth reporting at all
+			ConfidenceChangeThreshold: 0.10,
+			HistoricalTracking:        true,
+			DetectChanges:             true,
+			RedactSensitiveData:       true,
 		},
 		Logging: LoggingConfig{
 			Level:  "info",
@@ -447,6 +462,13 @@ func applyEnvOverrides(cfg *Config) error {
 	setBool(envDiscoveryDNSSubdomainsEnabled, &cfg.Discovery.DNS.Subdomains.Enabled)
 	setInt(envDiscoveryDNSMaxCandidates, &cfg.Discovery.DNS.Subdomains.MaxCandidates)
 	setInt(envDiscoveryDNSMaxDepth, &cfg.Discovery.DNS.Subdomains.MaxDepth)
+
+	setBool(envFingerprintEnabled, &cfg.Fingerprint.Enabled)
+	setString(envFingerprintSignaturesPath, &cfg.Fingerprint.SignaturesPath)
+	setFloat64(envFingerprintMinConfidence, &cfg.Fingerprint.MinConfidence)
+	setFloat64(envFingerprintConfidenceChangeThreshold, &cfg.Fingerprint.ConfidenceChangeThreshold)
+	setBool(envFingerprintHistoricalTracking, &cfg.Fingerprint.HistoricalTracking)
+	setBool(envFingerprintDetectChanges, &cfg.Fingerprint.DetectChanges)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

@@ -1,0 +1,37 @@
+# General network service candidates (phase6.md §19) — the same
+# "port alone is never confirmation" discipline as databases.yaml, applied
+# to non-database well-known ports Phase 4 may have discovered as PORT
+# assets.
+signatures:
+  - name: ssh-candidate
+    category: service
+    product: SSH
+    signals:
+      - type: port
+        equals: "22"
+        weight: 0.3
+      - type: service
+        equals: "SSH"
+        weight: 0.7
+
+  - name: smtp-candidate
+    category: service
+    product: SMTP
+    signals:
+      - type: port
+        equals: "25"
+        weight: 0.3
+      - type: service
+        equals: "SMTP"
+        weight: 0.7
+
+  - name: monitoring-candidate
+    category: monitoring
+    product: Prometheus-style metrics endpoint
+    signals:
+      - type: url_path
+        pattern: "^/metrics$"
+        weight: 0.5
+      - type: content_type
+        pattern: "text/plain"
+        weight: 0.5

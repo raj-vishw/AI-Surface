@@ -25,7 +25,24 @@ var sensitiveKeyFragments = []string{
 	"credential",
 }
 
+// sensitiveKeyExceptions carves out exact, deliberately-safe keys that
+// would otherwise be swallowed by sensitiveKeyFragments' substring match
+// — "cookie_names" legitimately contains "cookie" but, unlike every other
+// key that fragment is meant to catch, its value is a list of cookie
+// *names only*, never a value (phase6.md §13/§31: Phase 6's passive
+// fingerprinting needs exactly this to fingerprint framework-specific
+// session cookies like JSESSIONID/PHPSESSID without ever persisting what
+// a cookie actually contains). This is an exact match against the key as
+// a whole, never a substring — it can only narrow, never broaden, what
+// isSensitiveKey catches.
+var sensitiveKeyExceptions = map[string]bool{
+	"cookie_names": true,
+}
+
 func isSensitiveKey(key string) bool {
+	if sensitiveKeyExceptions[strings.ToLower(key)] {
+		return false
+	}
 	lower := strings.ToLower(key)
 	for _, fragment := range sensitiveKeyFragments {
 		if strings.Contains(lower, fragment) {

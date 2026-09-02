@@ -1,0 +1,88 @@
+# Web server signatures (phase6.md §14 category: web_server).
+#
+# Scoring model reminder (see internal/fingerprint/scorer.go): a
+# signature's confidence = (sum of matched signal weights) / (sum of
+# every *declared* signal weight). Declaring a signal type this phase has
+# no real corroborating data for yet (e.g. a second, independent probe) is
+# a deliberate way to cap a single-source signature's achievable score
+# below 1.0 — it is never certain from one header alone.
+signatures:
+  - name: nginx
+    category: web_server
+    vendor: nginx
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^nginx(/([0-9][0-9.]*))?"
+        weight: 0.75
+        version_group: 2
+      - type: http_header
+        field: Via
+        pattern: "nginx"
+        weight: 0.25
+    negative_signals:
+      - type: http_header
+        field: Server
+        pattern: "Apache"
+        weight: 1.0
+
+  - name: apache
+    category: web_server
+    vendor: Apache Software Foundation
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^Apache(/([0-9][0-9.]*))?"
+        weight: 0.75
+        version_group: 2
+      - type: http_header
+        field: Via
+        pattern: "Apache"
+        weight: 0.25
+    negative_signals:
+      - type: http_header
+        field: Server
+        pattern: "^nginx"
+        weight: 1.0
+
+  - name: iis
+    category: web_server
+    vendor: Microsoft
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^Microsoft-IIS(/([0-9][0-9.]*))?"
+        weight: 0.75
+        version_group: 2
+      - type: http_header
+        field: X-Powered-By
+        pattern: "ASP\\.NET"
+        weight: 0.25
+
+  - name: werkzeug
+    category: web_server
+    vendor: Pallets
+    product: Werkzeug
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^Werkzeug(/([0-9][0-9.]*))?"
+        weight: 0.75
+        version_group: 2
+      - type: http_header
+        field: Server
+        pattern: "Python"
+        weight: 0.25
+
+  - name: caddy
+    category: web_server
+    vendor: Caddy
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^Caddy"
+        weight: 0.75
+      - type: http_header
+        field: Alt-Svc
+        pattern: "h3"
+        weight: 0.25

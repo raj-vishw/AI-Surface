@@ -282,6 +282,24 @@ func buildMetadata(result model.Result, includeScanID bool) map[string]any {
 	if server := headerValue(result.Headers, "Server"); server != "" {
 		metadata["server"] = server
 	}
+	// A curated, safe subset of additional response headers — Phase 6's
+	// passive fingerprinting engine needs these to identify frameworks/
+	// CDNs/reverse proxies beyond the bare Server header (phase6.md §13);
+	// every name here is metadata-only (a framework/product marker, never
+	// a credential), so none needs redaction beyond what SanitizeMetadata
+	// already applies uniformly. Set-Cookie itself is deliberately never
+	// included here — see cookie_names below for the safe (name-only)
+	// alternative.
+	if headers := safeHeaderSubset(result.Headers); len(headers) > 0 {
+		metadata["headers"] = headers
+	}
+	if len(result.CookieNames) > 0 {
+		names := make([]any, len(result.CookieNames))
+		for i, v := range result.CookieNames {
+			names[i] = v
+		}
+		metadata["cookie_names"] = names
+	}
 	if result.TLSMetadata != nil {
 		metadata["tls_version"] = result.TLSMetadata.Version
 		metadata["tls_cipher_suite"] = result.TLSMetadata.CipherSuite
@@ -294,6 +312,30 @@ func buildMetadata(result model.Result, includeScanID bool) map[string]any {
 		metadata["redirect_chain"] = chain
 	}
 	return metadata
+}
+
+// fingerprintHeaderAllowlist names the response headers Phase 6's
+// signature set actually inspects (see internal/fingerprint/signatures/
+// *.yaml) — deliberately a closed list rather than "every header", so
+// this extension's scope stays exactly what fingerprinting needs, not an
+// unbounded capture of whatever a server happens to send.
+var fingerprintHeaderAllowlist = []string{
+	"X-Powered-By", "Via", "X-Generator", "X-Cache", "X-Served-By",
+	"X-Runtime", "X-AspNet-Version", "X-AspNetMvc-Version", "X-Frame-Options",
+	"X-Application-Context", "CF-Ray", "CF-Cache-Status", "X-Akamai-Transformed",
+	"X-Proxy-Cache", "Alt-Svc", "X-RateLimit-Limit", "X-RateLimit-Remaining",
+	"X-RateLimit-Reset", "Retry-After", "Openai-Version", "Openai-Organization",
+	"Anthropic-Version", "X-Amz-Cf-Id", "X-Azure-Ref", "X-Goog-Meta", "X-Vercel-Id",
+}
+
+func safeHeaderSubset(headers map[string][]string) map[string]any {
+	out := map[string]any{}
+	for _, name := range fingerprintHeaderAllowlist {
+		if v := headerValue(headers, name); v != "" {
+			out[name] = v
+		}
+	}
+	return out
 }
 
 func headerValue(headers map[string][]string, key string) string {

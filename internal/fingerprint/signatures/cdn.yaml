@@ -1,0 +1,67 @@
+# CDN / reverse-proxy signatures (phase6.md §18, categories: cdn,
+# reverse_proxy). CDN and origin web-server/framework signatures are never
+# declared incompatible — Cloudflare in front of nginx running Next.js is
+# a completely ordinary, simultaneously-true stack (phase6.md §10).
+signatures:
+  - name: cloudflare
+    category: cdn
+    vendor: Cloudflare
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^cloudflare$"
+        weight: 0.5
+      - type: http_header
+        field: CF-Ray
+        pattern: ".+"
+        weight: 0.3
+      - type: http_header
+        field: CF-Cache-Status
+        pattern: ".+"
+        weight: 0.2
+
+  - name: fastly
+    category: cdn
+    vendor: Fastly
+    signals:
+      - type: http_header
+        field: X-Served-By
+        pattern: "^cache-"
+        weight: 0.4
+      - type: http_header
+        field: X-Cache
+        pattern: ".+"
+        weight: 0.2
+      - type: http_header
+        field: Via
+        pattern: "fastly"
+        weight: 0.4
+
+  - name: akamai
+    category: cdn
+    vendor: Akamai
+    signals:
+      - type: http_header
+        field: X-Akamai-Transformed
+        pattern: ".+"
+        weight: 0.6
+      - type: http_header
+        field: Server
+        pattern: "^AkamaiGHost$"
+        weight: 0.4
+
+  - name: generic-reverse-proxy
+    category: reverse_proxy
+    signals:
+      - type: http_header
+        field: Via
+        pattern: ".+"
+        weight: 0.5
+      - type: http_header
+        field: X-Cache
+        pattern: ".+"
+        weight: 0.3
+      - type: http_header
+        field: X-Proxy-Cache
+        pattern: ".+"
+        weight: 0.2

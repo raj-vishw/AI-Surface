@@ -23,9 +23,10 @@ import (
 // steerable out of scope via ?to=), an oversized response, and an HTTP
 // error.
 type Server struct {
-	mu             sync.RWMutex
-	modelsResponse map[string]any
-	httpServer     *httptest.Server
+	mu                sync.RWMutex
+	modelsResponse    map[string]any
+	fingerprintServer string // Server header served by /fingerprint-target; "nginx/1.25.3" until SetFingerprintServerHeader changes it
+	httpServer        *httptest.Server
 }
 
 // New starts a Server on an OS-assigned ephemeral port and returns
@@ -53,7 +54,7 @@ func NewOnPort(port int) (*Server, error) {
 }
 
 func newUnstarted() *Server {
-	return &Server{modelsResponse: defaultModelsResponse()}
+	return &Server{modelsResponse: defaultModelsResponse(), fingerprintServer: "nginx/1.25.3"}
 }
 
 func (s *Server) mux() *http.ServeMux {
@@ -66,6 +67,7 @@ func (s *Server) mux() *http.ServeMux {
 	mux.HandleFunc("/redirect", s.handleRedirect)
 	mux.HandleFunc("/large-response", s.handleLargeResponse)
 	mux.HandleFunc("/error", s.handleError)
+	mux.HandleFunc("/fingerprint-target", s.handleFingerprintTarget)
 	return mux
 }
 
@@ -89,6 +91,44 @@ func (s *Server) handleRoot(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Server", "fixture-web/1.0")
 	_, _ = fmt.Fprint(w, "<html><body><h1>Fixture Web Service</h1></body></html>")
+}
+
+// handleFingerprintTarget serves a response shaped for Phase 6's
+// integration tests (test/integration/fingerprint_persistence_test.go):
+// realistic, multi-technology-corroborating headers and a session cookie
+// — additive to this fixture, no existing route/behavior is touched.
+func (s *Server) handleFingerprintTarget(w http.ResponseWriter, _ *http.Request) {
+	s.mu.RLock()
+	server := s.fingerprintServer
+	s.mu.RUnlock()
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("X-Powered-By", "Express")
+	if server != "" {
+		// Via is only sent alongside a Server value — an empty
+		// fingerprintServer means "simulate nginx being entirely
+		// replaced/removed", not just its version header disappearing,
+		// for the fingerprint-removed integration test.
+		w.Header().Set("Server", server)
+		w.Header().Set("Via", "1.1 nginx")
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name: "JSESSIONID", Value: "synthetic-test-value", Path: "/",
+		HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode,
+	})
+	_, _ = fmt.Fprint(w, "<html><body><h1>Fingerprint Fixture</h1></body></html>")
+}
+
+// SetFingerprintServerHeader replaces the Server (and, together, Via)
+// header(s) /fingerprint-target serves — "" serves neither, simulating
+// nginx being entirely replaced/removed rather than merely changing
+// version — for Phase 6's change-detection integration tests (phase6.md
+// §23), the same "mutate a fixture's response at runtime, identity
+// unchanged" pattern SetModelsResponse established for Phase 3.
+func (s *Server) SetFingerprintServerHeader(server string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.fingerprintServer = server
 }
 
 func (s *Server) handleOpenAPI(w http.ResponseWriter, _ *http.Request) {

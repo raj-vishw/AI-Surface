@@ -18,6 +18,7 @@ type Config struct {
 	Redis       RedisConfig       `yaml:"redis"`
 	HTTPClient  HTTPClientConfig  `yaml:"http_client"`
 	Discovery   DiscoveryConfig   `yaml:"discovery"`
+	Fingerprint FingerprintConfig `yaml:"fingerprint"`
 	Logging     LoggingConfig     `yaml:"logging"`
 	Security    SecurityConfig    `yaml:"security"`
 }
@@ -253,6 +254,59 @@ type LoggingConfig struct {
 	Format string `yaml:"format"`
 }
 
+// FingerprintConfig configures Phase 6's passive fingerprinting engine
+// (internal/fingerprint / internal/service/fingerprint). It is a
+// top-level Config section, not nested under Discovery, because
+// fingerprinting is a distinct pipeline stage that runs against
+// already-collected evidence rather than performing discovery itself
+// (phase6.md §25's pipeline: Discovery -> Evidence Store ->
+// Fingerprinting).
+type FingerprintConfig struct {
+	Enabled bool `yaml:"enabled"`
+	// SignaturesPath, if set, points at an external directory of
+	// "*.yaml" signature files to use INSTEAD of the platform's built-in
+	// set (internal/fingerprint.DefaultSignaturesFS) — empty uses the
+	// built-in set.
+	SignaturesPath string `yaml:"signatures_path"`
+	// MinConfidence filters out any engine match below this score
+	// (phase6.md §32's "minimum score"); a signature's own min_score
+	// (see internal/fingerprint.Signature), if higher, still applies on
+	// top of this.
+	MinConfidence float64 `yaml:"min_confidence"`
+	// ConfidenceChangeThreshold is the minimum confidence delta between
+	// two analysis runs required to report a "confidence_changed" change
+	// — see internal/service/fingerprint.Config (phase6.md §23).
+	ConfidenceChangeThreshold float64    `yaml:"confidence_change_threshold"`
+	Thresholds                Thresholds `yaml:"thresholds"`
+	// HistoricalTracking/DetectChanges are documented, honored toggles:
+	// historical fingerprint rows (fingerprint_evidence) are always
+	// preserved regardless (phase6.md §22 — "do not delete historical
+	// observations" is not optional), but DetectChanges=false skips the
+	// Change-computation step entirely (useful for a first-ever scan of
+	// a large target, where every match is trivially "added" and the
+	// comparison work is pure overhead).
+	HistoricalTracking bool `yaml:"historical_tracking"`
+	DetectChanges      bool `yaml:"detect_changes"`
+	// RedactSensitiveData is always effectively true — Phase 2's
+	// SanitizeMetadata redaction boundary is mandatory and not
+	// bypassable by configuration (phase6.md §31) — this field exists
+	// only so the setting is visible/documented in configuration, the
+	// same way security.require_authorization documents a boundary that
+	// isn't actually optional either.
+	RedactSensitiveData bool `yaml:"redact_sensitive_data"`
+}
+
+// Thresholds are the confidence-level bucket boundaries
+// (internal/fingerprint.Thresholds's configuration-file mirror —
+// phase6.md §8: "these thresholds should be configurable"). The zero
+// value means "use internal/fingerprint.DefaultThresholds".
+type Thresholds struct {
+	Low      float64 `yaml:"low"`
+	Medium   float64 `yaml:"medium"`
+	High     float64 `yaml:"high"`
+	VeryHigh float64 `yaml:"very_high"`
+}
+
 // SecurityConfig enforces the platform's authorization/safety boundary
 // (see work.md §2). RequireAuthorization and DryRun are read by later
 // phases' scanning subsystems; Phase 1 only carries the settings through
@@ -260,6 +314,23 @@ type LoggingConfig struct {
 type SecurityConfig struct {
 	RequireAuthorization bool `yaml:"require_authorization"`
 	DryRun               bool `yaml:"dry_run"`
+}
+
+// validateFingerprintThresholds mirrors internal/fingerprint.Thresholds.
+// Validate's exact rule, kept as a local, dependency-free copy rather
+// than importing the engine package here — the same "config.go never
+// imports an engine package, only mirrors its shape" boundary
+// discovery.DNSDiscoveryConfig/NetworkDiscoveryConfig already establish
+// relative to internal/discovery/{dns,network}.
+func validateFingerprintThresholds(t Thresholds) error {
+	if t == (Thresholds{}) {
+		return nil // zero value means "use engine defaults"
+	}
+	if !(0 <= t.Low && t.Low < t.Medium && t.Medium < t.High && t.High < t.VeryHigh && t.VeryHigh <= 1) {
+		return fmt.Errorf("must satisfy 0 <= low < medium < high < very_high <= 1 (got low=%v medium=%v high=%v very_high=%v)",
+			t.Low, t.Medium, t.High, t.VeryHigh)
+	}
+	return nil
 }
 
 var validLogLevels = map[string]bool{"debug": true, "info": true, "warn": true, "error": true}
@@ -496,6 +567,19 @@ func (c *Config) Validate() error {
 		}
 		for name, profile := range d.Profiles {
 			validateRecordTypes(fmt.Sprintf("discovery.dns.profiles.%s.record_types", name), profile.RecordTypes)
+		}
+	}
+
+	if c.Fingerprint.Enabled {
+		fp := c.Fingerprint
+		if fp.MinConfidence < 0 || fp.MinConfidence > 1 {
+			errs = append(errs, "fingerprint.min_confidence must be between 0.0 and 1.0")
+		}
+		if fp.ConfidenceChangeThreshold < 0 || fp.ConfidenceChangeThreshold > 1 {
+			errs = append(errs, "fingerprint.confidence_change_threshold must be between 0.0 and 1.0")
+		}
+		if err := validateFingerprintThresholds(fp.Thresholds); err != nil {
+			errs = append(errs, "fingerprint.thresholds: "+err.Error())
 		}
 	}
 

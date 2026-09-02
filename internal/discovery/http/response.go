@@ -45,6 +45,7 @@ func buildResult(scanID, targetID uuid.UUID, c Candidate, resp *httpclient.Respo
 	result.TLSMetadata = resp.TLSMetadata
 	result.RedirectChain = resp.RedirectChain
 	result.Headers = sanitizeHeaders(resp.Headers)
+	result.CookieNames = extractCookieNames(resp.Headers)
 
 	if isRedirectStatus(resp.StatusCode) {
 		location := resp.Headers.Get("Location")
@@ -113,6 +114,29 @@ func sanitizeHeaders(h http.Header) map[string][]string {
 		}
 	}
 	return out
+}
+
+// extractCookieNames returns every distinct cookie name set via
+// Set-Cookie — never a value (phase6.md §13/§31). It must run against h,
+// the raw pre-redaction header set — sanitizeHeaders (above) replaces
+// Set-Cookie's entire value with "[REDACTED]", which would make name
+// extraction impossible if this ran afterward.
+func extractCookieNames(h http.Header) []string {
+	raw := h["Set-Cookie"]
+	if len(raw) == 0 {
+		return nil
+	}
+	seen := make(map[string]bool, len(raw))
+	var names []string
+	for _, line := range raw {
+		c, err := http.ParseSetCookie(line)
+		if err != nil || c.Name == "" || seen[c.Name] {
+			continue
+		}
+		seen[c.Name] = true
+		names = append(names, c.Name)
+	}
+	return names
 }
 
 func isRedirectStatus(code int) bool {

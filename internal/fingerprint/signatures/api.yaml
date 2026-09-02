@@ -1,0 +1,61 @@
+# API characteristic signatures (phase6.md §16, category: api). These
+# analyze only *already-discovered* paths (Phase 3's Endpoint rows) —
+# never a fresh request to probe for /swagger.json etc (phase6.md §16:
+# "Do not request these paths. Only analyze paths already discovered.").
+signatures:
+  - name: rest-api
+    category: api
+    product: REST API
+    signals:
+      - type: url_path
+        pattern: "^/api(/|$)"
+        weight: 0.5
+      - type: content_type
+        pattern: "application/json"
+        weight: 0.5
+
+  - name: versioned-api
+    category: api
+    product: Versioned API
+    signals:
+      - type: url_path
+        pattern: "^/v[0-9]+(/|$)"
+        weight: 0.6
+      - type: content_type
+        pattern: "application/json"
+        weight: 0.4
+
+  - name: graphql
+    category: api
+    product: GraphQL
+    signals:
+      - type: url_path
+        pattern: "^/graphql/?$"
+        weight: 0.7
+      - type: content_type
+        pattern: "application/json"
+        weight: 0.3
+
+  - name: openapi
+    category: api
+    product: OpenAPI
+    signals:
+      - type: api_path
+        pattern: "^/openapi\\.json$"
+        weight: 1.0
+
+  - name: swagger
+    category: api
+    product: Swagger
+    signals:
+      - type: api_path
+        pattern: "^/swagger(\\.json|/)?$"
+        weight: 1.0
+
+  - name: api-documentation
+    category: api
+    product: API Documentation
+    signals:
+      - type: api_path
+        pattern: "^/(docs|redoc)/?$"
+        weight: 1.0

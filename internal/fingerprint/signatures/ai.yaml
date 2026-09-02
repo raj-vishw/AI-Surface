@@ -1,0 +1,65 @@
+# AI/ML provider and platform signatures (phase6.md §17). Every category
+# here is explicitly a *candidate*, never a confirmation — no signature in
+# this file can reach full confidence from path shape alone; a
+# provider-specific response header is required to corroborate the path
+# before confidence climbs meaningfully. ai-model-candidate is the one
+# exception: it only ever fires when an explicit model identifier was
+# actually observed in response metadata (Observation.ExplicitModel),
+# never inferred from endpoint shape (phase6.md §17: "do not infer GPT-5
+# from /v1/chat/completions unless the existing response evidence
+# explicitly identifies the model").
+signatures:
+  - name: openai-compatible-api
+    category: ai_provider
+    product: OpenAI-compatible API
+    vendor: OpenAI
+    signals:
+      - type: api_path
+        pattern: "^/v1/(chat/completions|completions|embeddings)$"
+        weight: 0.4
+      - type: http_header
+        field: Openai-Version
+        pattern: ".+"
+        weight: 0.3
+      - type: http_header
+        field: Openai-Organization
+        pattern: ".+"
+        weight: 0.3
+
+  - name: anthropic-compatible-api
+    category: ai_provider
+    product: Anthropic-compatible API
+    vendor: Anthropic
+    signals:
+      - type: api_path
+        pattern: "^/v1/messages$"
+        weight: 0.4
+      - type: http_header
+        field: Anthropic-Version
+        pattern: ".+"
+        weight: 0.6
+
+  - name: ollama-local-api
+    category: ai_platform
+    product: Ollama
+    signals:
+      - type: api_path
+        pattern: "^/api/(generate|chat|tags)$"
+        weight: 0.6
+      - type: port
+        equals: "11434"
+        weight: 0.4
+
+  - name: ai-model-candidate
+    category: ai_model_candidate
+    product: Observed model identifier
+    signals:
+      # Field "model" is special-cased by the matcher (see matcher.go) to
+      # inspect Observation.ExplicitModel — a value only ever populated
+      # when a response's own JSON body explicitly named a model, never
+      # derived from the endpoint path. The matched Value is that exact
+      # observed string, verbatim.
+      - type: json_structure
+        field: model
+        pattern: ".+"
+        weight: 1.0

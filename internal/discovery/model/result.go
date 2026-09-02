@@ -55,6 +55,14 @@ type Result struct {
 	RedirectChain   []string
 	RedirectBlocked bool // a hop was refused by scope validation — see ScopeValidator
 
+	// CookieNames holds every distinct cookie *name* set via Set-Cookie —
+	// never a value (phase6.md §13/§31: cookie fingerprinting must never
+	// persist a cookie's value). Extracted from the raw, pre-redaction
+	// response headers, since Headers itself replaces Set-Cookie's entire
+	// value with "[REDACTED]" (see sanitizeHeaders) — by the time Headers
+	// is populated, the name is no longer recoverable from it.
+	CookieNames []string
+
 	ServiceType         ServiceType
 	Indicators          []string // human-readable evidence for ServiceType/AIEndpointCandidate
 	AIEndpointCandidate bool

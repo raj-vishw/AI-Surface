@@ -1,0 +1,39 @@
+# Runtime / programming-language signatures (phase6.md §15, categories:
+# runtime, programming_language). Each requires a marker specific to the
+# runtime itself, never inferred from a generic response shape (phase6.md
+# §15: "JSON response does NOT automatically mean Node.js").
+signatures:
+  - name: nodejs
+    category: runtime
+    product: Node.js
+    signals:
+      - type: http_header
+        field: X-Powered-By
+        pattern: "^Node\\.js"
+        weight: 0.6
+      - type: http_header
+        field: Server
+        pattern: "^Node"
+        weight: 0.4
+
+  - name: php
+    category: programming_language
+    product: PHP
+    signals:
+      - type: http_header
+        field: X-Powered-By
+        pattern: "^PHP/([0-9][0-9.]*)"
+        weight: 0.7
+        version_group: 1
+      - type: cookie_name
+        pattern: "^PHPSESSID$"
+        weight: 0.3
+
+  - name: python-wsgi
+    category: runtime
+    product: Python (WSGI)
+    signals:
+      - type: http_header
+        field: Server
+        pattern: "^(gunicorn|uWSGI|Werkzeug)"
+        weight: 1.0
