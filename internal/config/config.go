@@ -19,6 +19,7 @@ type Config struct {
 	HTTPClient  HTTPClientConfig  `yaml:"http_client"`
 	Discovery   DiscoveryConfig   `yaml:"discovery"`
 	Fingerprint FingerprintConfig `yaml:"fingerprint"`
+	Detection   DetectionConfig   `yaml:"detection"`
 	Logging     LoggingConfig     `yaml:"logging"`
 	Security    SecurityConfig    `yaml:"security"`
 }
@@ -382,6 +383,49 @@ type Thresholds struct {
 	VeryHigh float64 `yaml:"very_high"`
 }
 
+// DetectionConfig configures Phase 8's finding/vulnerability detection
+// engine (internal/detection / internal/service/detection). Like
+// FingerprintConfig, it is a top-level Config section, not nested under
+// Discovery — detection is a distinct pipeline stage that runs against
+// already-collected evidence (plus, only in safe-active mode, a small set
+// of additional bounded requests), never a discovery source itself
+// (phase8.md §53's pipeline: discovery -> asset/endpoint inventory ->
+// detection engine -> findings).
+type DetectionConfig struct {
+	Enabled bool `yaml:"enabled"`
+	// Mode is "passive" or "safe_active" (phase8.md §54); empty defaults
+	// to "passive" — the safe default this project never silently
+	// upgrades away from.
+	Mode string `yaml:"mode"`
+	// Detectors maps a detector id to enabled/disabled (phase8.md §6);
+	// absent from the map means enabled. Detector ids match
+	// internal/detection/detectors' registered ID() values, e.g.
+	// "security_headers.missing-hsts".
+	Detectors  map[string]bool           `yaml:"detectors"`
+	Evidence   DetectionEvidenceConfig   `yaml:"evidence"`
+	Thresholds DetectionThresholdsConfig `yaml:"thresholds"`
+	// Timeout/MaxResponseSize bound every safe-active request a detector
+	// issues (phase8.md §84); unused entirely in passive mode.
+	Timeout         time.Duration `yaml:"timeout"`
+	MaxResponseSize int64         `yaml:"max_response_size"`
+}
+
+// DetectionEvidenceConfig bounds how much of a response a safe-active
+// detector may retain as evidence (phase8.md §9/§27/§56).
+type DetectionEvidenceConfig struct {
+	MaxExcerptSize int `yaml:"max_excerpt_size"`
+}
+
+// DetectionThresholdsConfig configures detector-specific thresholds that
+// aren't confidence-level buckets (unlike Thresholds, reused by
+// FingerprintConfig) — currently just certificate-expiry warning
+// (phase8.md §25/§56).
+type DetectionThresholdsConfig struct {
+	CertificateExpiryDays int `yaml:"certificate_expiry_days"`
+}
+
+var validDetectionModes = map[string]bool{"": true, "passive": true, "safe_active": true}
+
 // SecurityConfig enforces the platform's authorization/safety boundary
 // (see work.md §2). RequireAuthorization and DryRun are read by later
 // phases' scanning subsystems; Phase 1 only carries the settings through
@@ -693,6 +737,25 @@ func (c *Config) Validate() error {
 		}
 		if err := validateFingerprintThresholds(fp.Thresholds); err != nil {
 			errs = append(errs, "fingerprint.thresholds: "+err.Error())
+		}
+	}
+
+	if c.Detection.Enabled {
+		det := c.Detection
+		if !validDetectionModes[strings.ToLower(det.Mode)] {
+			errs = append(errs, fmt.Sprintf("detection.mode %q must be one of \"\", passive, safe_active", det.Mode))
+		}
+		if det.Timeout < 0 {
+			errs = append(errs, "detection.timeout must not be negative")
+		}
+		if det.MaxResponseSize < 0 {
+			errs = append(errs, "detection.max_response_size must not be negative")
+		}
+		if det.Evidence.MaxExcerptSize < 0 {
+			errs = append(errs, "detection.evidence.max_excerpt_size must not be negative")
+		}
+		if det.Thresholds.CertificateExpiryDays < 0 {
+			errs = append(errs, "detection.thresholds.certificate_expiry_days must not be negative")
 		}
 	}
 

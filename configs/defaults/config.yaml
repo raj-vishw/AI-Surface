@@ -230,6 +230,17 @@ fingerprint:
   detect_changes: true
   redact_sensitive_data: true
 
+detection:
+  enabled: true
+  mode: passive # passive | safe_active — safe_active also requires the target to be AUTHORIZED
+  detectors: {} # empty = every built-in detector enabled; set a specific id to false to disable it
+  evidence:
+    max_excerpt_size: 2048 # bytes — bounds any response excerpt a safe-active detector records as evidence
+  thresholds:
+    certificate_expiry_days: 14 # "expiring soon" warning threshold for tls.certificate-expiration
+  timeout: 10s # bounds each safe-active request; unused in passive mode
+  max_response_size: 262144 # bytes — bounds each safe-active response; unused in passive mode
+
 logging:
   level: info
   format: json

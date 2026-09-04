@@ -300,6 +300,24 @@ func buildMetadata(result model.Result, includeScanID bool) map[string]any {
 		}
 		metadata["cookie_names"] = names
 	}
+	// cookie_attributes carries each Set-Cookie's *attributes* (Secure/
+	// HttpOnly/SameSite) — never a value — so Phase 8's cookie-security
+	// detector can evaluate them without a fresh request (phase8.md
+	// §22/§23). It is extracted from the same raw pre-redaction headers
+	// cookie_names is, for the identical reason: sanitizeHeaders replaces
+	// Set-Cookie's entire value before Headers is ever built. Named
+	// "cookie_attributes" rather than "cookies" — see
+	// internal/domain/asset/redact.go's sensitiveKeyExceptions doc
+	// comment for why that distinction matters.
+	if len(result.Cookies) > 0 {
+		cookies := make([]any, len(result.Cookies))
+		for i, c := range result.Cookies {
+			cookies[i] = map[string]any{
+				"name": c.Name, "secure": c.Secure, "httponly": c.HTTPOnly, "samesite": c.SameSite,
+			}
+		}
+		metadata["cookie_attributes"] = cookies
+	}
 	if result.TLSMetadata != nil {
 		metadata["tls_version"] = result.TLSMetadata.Version
 		metadata["tls_cipher_suite"] = result.TLSMetadata.CipherSuite
@@ -328,9 +346,29 @@ var fingerprintHeaderAllowlist = []string{
 	"Anthropic-Version", "X-Amz-Cf-Id", "X-Azure-Ref", "X-Goog-Meta", "X-Vercel-Id",
 }
 
+// detectionHeaderAllowlist names the response headers Phase 8's security-
+// header, CORS, and information-disclosure detectors inspect (phase8.md
+// §16/§34) — a second closed list, kept separate from
+// fingerprintHeaderAllowlist so each extension's scope stays legible as
+// exactly what its own consumer needs, mirroring how Phase 6 and Phase 7
+// each added their own narrow extension here rather than one growing,
+// undocumented "capture everything" list.
+var detectionHeaderAllowlist = []string{
+	"Strict-Transport-Security", "Content-Security-Policy", "X-Content-Type-Options",
+	"Referrer-Policy", "Permissions-Policy", "Cross-Origin-Opener-Policy",
+	"Cross-Origin-Resource-Policy", "Cross-Origin-Embedder-Policy",
+	"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials",
+	"Access-Control-Allow-Methods", "Access-Control-Allow-Headers",
+}
+
 func safeHeaderSubset(headers map[string][]string) map[string]any {
 	out := map[string]any{}
 	for _, name := range fingerprintHeaderAllowlist {
+		if v := headerValue(headers, name); v != "" {
+			out[name] = v
+		}
+	}
+	for _, name := range detectionHeaderAllowlist {
 		if v := headerValue(headers, name); v != "" {
 			out[name] = v
 		}

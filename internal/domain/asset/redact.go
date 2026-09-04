@@ -37,6 +37,15 @@ var sensitiveKeyFragments = []string{
 // isSensitiveKey catches.
 var sensitiveKeyExceptions = map[string]bool{
 	"cookie_names": true,
+	// "cookie_attributes" carries each Set-Cookie's name plus Secure/
+	// HttpOnly/SameSite attributes only — never a value (phase8.md
+	// §22/§23: Phase 8's cookie-security detector needs exactly this, the
+	// same name-only-safety argument cookie_names above already
+	// documents). Deliberately named "cookie_attributes", not "cookies" —
+	// the latter is exactly the kind of key a raw, unsafe cookie dump
+	// would plausibly use, and TestSanitizeMetadata_RecursesIntoArrays
+	// pins "cookies" itself to still redact wholesale for that reason.
+	"cookie_attributes": true,
 }
 
 func isSensitiveKey(key string) bool {

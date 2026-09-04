@@ -366,12 +366,56 @@ enforced and configurable; an out-of-scope link is scope-rejected and
 never requested, the same boundary every other discovery command in this
 project enforces.
 
+## Finding & Vulnerability Detection
+
+`ai-recon findings scan` transforms evidence Phase 3/4/6/7 already
+collected into structured, evidence-backed security findings — see
+[docs/architecture/finding-detection.md](docs/architecture/finding-detection.md)
+for the full architecture. **It defaults to passive analysis**: reading
+already-persisted response headers, cookie attributes, TLS metadata,
+endpoint classification, and technology fingerprints, with zero network
+requests of its own. An optional `--mode safe_active` additionally allows
+a small, bounded set of requests — only against an already-known endpoint
+or one of a fixed handful of well-known paths (`/.git/HEAD`, `/.env`,
+`/.well-known/security.txt`) — and requires the target be `AUTHORIZED`.
+
+```sh
+# Passive analysis (default) — no network request of its own.
+ai-recon findings scan --target example.com
+
+# Safe-active mode: a small set of additional bounded, already-known-path requests.
+ai-recon findings scan --target example.com --mode safe_active
+
+# Report the detection plan (enabled detectors, 0 network requests) without persisting anything.
+ai-recon findings scan --target example.com --dry-run
+
+# List / filter persisted findings.
+ai-recon findings list --target example.com --severity high --format json
+ai-recon findings list --target example.com --format csv
+
+# One finding's full detail, evidence, and lifecycle history.
+ai-recon findings show <finding-id>
+
+# What changed during one specific scan.
+ai-recon findings diff --target example.com --scan <scan-id>
+```
+
+Every finding separates **severity** ("how serious could this be") from
+**confidence** ("how sure are we it's actually present") and never claims
+exploitability — a missing header means exactly that, not "the
+application is exploitable." A finding is never deleted: its lifecycle
+moves `open -> resolved -> reopened` (or into a sticky, human-controlled
+`accepted_risk`/`false_positive`), and every transition is recorded as an
+immutable audit event. No detector performs exploitation, credential
+attacks, brute-forcing, or evasion — see the architecture doc's "Not
+Implemented" section for the complete boundary.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
@@ -379,8 +423,8 @@ project enforces.
 diagnostics for exercising the Phase 2 persistence layer by hand (see
 their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
-`ai-recon fingerprint`, and `ai-recon endpoint-scan` are real, required
-parts of running Phase 3/4/5/6/7.
+`ai-recon fingerprint`, `ai-recon endpoint-scan`, and `ai-recon findings`
+are real, required parts of running Phase 3/4/5/6/7/8.
 
 ## Further reading
 
@@ -404,3 +448,7 @@ parts of running Phase 3/4/5/6/7.
   Phase 7 endpoint & API discovery engine: bounded crawling, scope
   enforcement, HTML/JavaScript extraction, OpenAPI/Swagger/GraphQL,
   documented-vs-observed-vs-inferred, historical endpoint tracking
+- [docs/architecture/finding-detection.md](docs/architecture/finding-detection.md) —
+  Phase 8 finding & vulnerability detection engine: detector interface/
+  registry, finding identity/lifecycle/diff, severity vs. confidence,
+  passive vs. safe-active detection, evidence redaction

@@ -63,6 +63,13 @@ type Result struct {
 	// is populated, the name is no longer recoverable from it.
 	CookieNames []string
 
+	// Cookies holds each Set-Cookie's *attributes* only (Secure/HttpOnly/
+	// SameSite) — never a value, for the identical reason CookieNames
+	// never carries one (phase8.md §22/§23: Phase 8's cookie-security
+	// detector needs these to evaluate configuration without ever storing
+	// what a cookie actually contains).
+	Cookies []CookieAttribute
+
 	ServiceType         ServiceType
 	Indicators          []string // human-readable evidence for ServiceType/AIEndpointCandidate
 	AIEndpointCandidate bool
@@ -87,6 +94,16 @@ type Result struct {
 // opposed to a transport failure or a skipped candidate).
 func (r Result) Succeeded() bool {
 	return r.Error == "" && !r.Skipped
+}
+
+// CookieAttribute is one Set-Cookie's name and security-relevant
+// attributes — deliberately never its value (phase6.md §13/§31,
+// phase8.md §23).
+type CookieAttribute struct {
+	Name     string
+	Secure   bool
+	HTTPOnly bool
+	SameSite string // "Strict", "Lax", "None", or "" if unset
 }
 
 // Summary aggregates every Result from one discovery run.

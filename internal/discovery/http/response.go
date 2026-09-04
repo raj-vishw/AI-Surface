@@ -46,6 +46,7 @@ func buildResult(scanID, targetID uuid.UUID, c Candidate, resp *httpclient.Respo
 	result.RedirectChain = resp.RedirectChain
 	result.Headers = sanitizeHeaders(resp.Headers)
 	result.CookieNames = extractCookieNames(resp.Headers)
+	result.Cookies = extractCookieAttributes(resp.Headers)
 
 	if isRedirectStatus(resp.StatusCode) {
 		location := resp.Headers.Get("Location")
@@ -137,6 +138,37 @@ func extractCookieNames(h http.Header) []string {
 		names = append(names, c.Name)
 	}
 	return names
+}
+
+// extractCookieAttributes returns each Set-Cookie's name plus its
+// Secure/HttpOnly/SameSite attributes — never a value (phase8.md §22/§23).
+// It must run against h, the raw pre-redaction header set, for the same
+// reason extractCookieNames does.
+func extractCookieAttributes(h http.Header) []model.CookieAttribute {
+	raw := h["Set-Cookie"]
+	if len(raw) == 0 {
+		return nil
+	}
+	var cookies []model.CookieAttribute
+	for _, line := range raw {
+		c, err := http.ParseSetCookie(line)
+		if err != nil || c.Name == "" {
+			continue
+		}
+		sameSite := ""
+		switch c.SameSite {
+		case http.SameSiteStrictMode:
+			sameSite = "Strict"
+		case http.SameSiteLaxMode:
+			sameSite = "Lax"
+		case http.SameSiteNoneMode:
+			sameSite = "None"
+		}
+		cookies = append(cookies, model.CookieAttribute{
+			Name: c.Name, Secure: c.Secure, HTTPOnly: c.HttpOnly, SameSite: sameSite,
+		})
+	}
+	return cookies
 }
 
 func isRedirectStatus(code int) bool {

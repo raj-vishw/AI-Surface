@@ -392,3 +392,57 @@ func TestValidateAllowsEndpointDiscoveryDisabled(t *testing.T) {
 		t.Fatalf("disabled endpoint discovery should skip its own validation, got: %v", err)
 	}
 }
+
+func TestValidateRejectsInvalidDetectionMode(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Detection.Enabled = true
+	cfg.Detection.Mode = "aggressive"
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for invalid detection.mode")
+	}
+}
+
+func TestValidateAllowsEmptyDetectionMode(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Detection.Enabled = true
+	cfg.Detection.Mode = ""
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("expected empty detection.mode (defaults to passive) to be valid, got: %v", err)
+	}
+}
+
+func TestValidateRejectsNegativeDetectionTimeout(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Detection.Enabled = true
+	cfg.Detection.Timeout = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative detection.timeout")
+	}
+}
+
+func TestValidateRejectsNegativeDetectionMaxExcerptSize(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Detection.Enabled = true
+	cfg.Detection.Evidence.MaxExcerptSize = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative detection.evidence.max_excerpt_size")
+	}
+}
+
+func TestValidateRejectsNegativeCertificateExpiryDays(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Detection.Enabled = true
+	cfg.Detection.Thresholds.CertificateExpiryDays = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative detection.thresholds.certificate_expiry_days")
+	}
+}
+
+func TestValidateAllowsDetectionDisabled(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Detection.Enabled = false
+	cfg.Detection.Mode = "not-a-real-mode" // would be invalid if enabled
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("disabled detection should skip its own validation, got: %v", err)
+	}
+}

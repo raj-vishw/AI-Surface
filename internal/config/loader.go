@@ -101,6 +101,13 @@ const (
 	envFingerprintHistoricalTracking        = "AI_RECON_FINGERPRINT_HISTORICAL_TRACKING"
 	envFingerprintDetectChanges             = "AI_RECON_FINGERPRINT_DETECT_CHANGES"
 
+	envDetectionEnabled               = "AI_RECON_DETECTION_ENABLED"
+	envDetectionMode                  = "AI_RECON_DETECTION_MODE"
+	envDetectionTimeout               = "AI_RECON_DETECTION_TIMEOUT"
+	envDetectionMaxResponseSize       = "AI_RECON_DETECTION_MAX_RESPONSE_SIZE"
+	envDetectionMaxExcerptSize        = "AI_RECON_DETECTION_MAX_EXCERPT_SIZE"
+	envDetectionCertificateExpiryDays = "AI_RECON_DETECTION_CERTIFICATE_EXPIRY_DAYS"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -316,6 +323,18 @@ func defaultConfig() *Config {
 			HistoricalTracking:        true,
 			DetectChanges:             true,
 			RedactSensitiveData:       true,
+		},
+		Detection: DetectionConfig{
+			Enabled: true,
+			Mode:    "passive",
+			Evidence: DetectionEvidenceConfig{
+				MaxExcerptSize: 2048,
+			},
+			Thresholds: DetectionThresholdsConfig{
+				CertificateExpiryDays: 14,
+			},
+			Timeout:         10 * time.Second,
+			MaxResponseSize: 262144,
 		},
 		Logging: LoggingConfig{
 			Level:  "info",
@@ -533,6 +552,13 @@ func applyEnvOverrides(cfg *Config) error {
 	setFloat64(envFingerprintConfidenceChangeThreshold, &cfg.Fingerprint.ConfidenceChangeThreshold)
 	setBool(envFingerprintHistoricalTracking, &cfg.Fingerprint.HistoricalTracking)
 	setBool(envFingerprintDetectChanges, &cfg.Fingerprint.DetectChanges)
+
+	setBool(envDetectionEnabled, &cfg.Detection.Enabled)
+	setString(envDetectionMode, &cfg.Detection.Mode)
+	setDuration(envDetectionTimeout, &cfg.Detection.Timeout)
+	setInt64(envDetectionMaxResponseSize, &cfg.Detection.MaxResponseSize)
+	setInt(envDetectionMaxExcerptSize, &cfg.Detection.Evidence.MaxExcerptSize)
+	setInt(envDetectionCertificateExpiryDays, &cfg.Detection.Thresholds.CertificateExpiryDays)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

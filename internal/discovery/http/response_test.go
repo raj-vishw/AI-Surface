@@ -47,6 +47,34 @@ func TestExtractCookieNames_NoCookies(t *testing.T) {
 	}
 }
 
+func TestExtractCookieAttributes_CapturesAttributesNotValues(t *testing.T) {
+	h := http.Header{}
+	h.Add("Set-Cookie", "session=super-secret-value-123; Secure; HttpOnly; SameSite=Strict")
+	h.Add("Set-Cookie", "tracking=abc; SameSite=None")
+	h.Add("Set-Cookie", "insecure=xyz")
+
+	cookies := extractCookieAttributes(h)
+	if len(cookies) != 3 {
+		t.Fatalf("expected 3 cookies, got %d: %#v", len(cookies), cookies)
+	}
+
+	if cookies[0].Name != "session" || !cookies[0].Secure || !cookies[0].HTTPOnly || cookies[0].SameSite != "Strict" {
+		t.Errorf("session cookie attributes wrong: %#v", cookies[0])
+	}
+	if cookies[1].Name != "tracking" || cookies[1].Secure || cookies[1].HTTPOnly || cookies[1].SameSite != "None" {
+		t.Errorf("tracking cookie attributes wrong: %#v", cookies[1])
+	}
+	if cookies[2].Name != "insecure" || cookies[2].Secure || cookies[2].HTTPOnly || cookies[2].SameSite != "" {
+		t.Errorf("insecure cookie attributes wrong: %#v", cookies[2])
+	}
+}
+
+func TestExtractCookieAttributes_NoCookies(t *testing.T) {
+	if cookies := extractCookieAttributes(http.Header{}); cookies != nil {
+		t.Errorf("extractCookieAttributes(empty) = %v, want nil", cookies)
+	}
+}
+
 func TestExtractCookieNames_MalformedIgnored(t *testing.T) {
 	h := http.Header{}
 	h.Add("Set-Cookie", "") // malformed

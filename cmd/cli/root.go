@@ -17,7 +17,9 @@ import (
 // technology identification against already-collected evidence — no
 // network/DNS request of its own); Phase 7 adds `endpoint-scan` (bounded
 // endpoint & API discovery/crawling — GET requests only, never a
-// vulnerability scanner). Commands belonging to later phases (report,
+// vulnerability scanner); Phase 8 adds `findings` (evidence-driven
+// finding/vulnerability detection — passive by default, never an exploit
+// or credential-attack tool). Commands belonging to later phases (report,
 // monitor) must not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
@@ -43,6 +45,7 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewSubdomainScanCommand())
 	root.AddCommand(commands.NewFingerprintCommand())
 	root.AddCommand(commands.NewEndpointScanCommand())
+	root.AddCommand(commands.NewFindingsCommand())
 
 	return root
 }

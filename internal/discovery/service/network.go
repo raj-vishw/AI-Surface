@@ -10,6 +10,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -245,6 +246,14 @@ func buildNetworkMetadata(result discoverynet.PortResult, includeScanID bool) ma
 		}
 		if result.TLSMetadata.Issuer != "" {
 			metadata["certificate_issuer"] = result.TLSMetadata.Issuer
+		}
+		// certificate_not_after lets Phase 8's certificate-expiration
+		// detector evaluate expiry from already-persisted evidence,
+		// without a fresh handshake of its own (phase8.md §25) — Phase 4's
+		// probeTLS already captures cert.NotAfter into TLSMetadata; this
+		// is the first extension that actually persists it.
+		if !result.TLSMetadata.NotAfter.IsZero() {
+			metadata["certificate_not_after"] = result.TLSMetadata.NotAfter.UTC().Format(time.RFC3339)
 		}
 	}
 	return metadata
