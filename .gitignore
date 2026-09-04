@@ -52,3 +52,10 @@ CHANGELOG.md
 
 # Local scratch
 /tmp/
+
+# Unit test suite (internal/**) and integration test suite/fixtures —
+# removed from version control; kept out so a broad `git add` doesn't
+# silently re-add them.
+internal/**/*_test.go
+/test/integration/
+/test/fixtures/

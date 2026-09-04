@@ -1,5 +1,0 @@
-{
-  "description": "Fixed response body served by a local httptest server in test/integration/httpclient_fixture_test.go, so internal/httpclient's behavior can be checked against a known, deterministic payload without depending on any Internet service.",
-  "content_type": "application/json",
-  "body": "the quick brown fox jumps over the lazy dog"
-}
