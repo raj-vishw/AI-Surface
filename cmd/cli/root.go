@@ -19,8 +19,10 @@ import (
 // endpoint & API discovery/crawling — GET requests only, never a
 // vulnerability scanner); Phase 8 adds `findings` (evidence-driven
 // finding/vulnerability detection — passive by default, never an exploit
-// or credential-attack tool). Commands belonging to later phases (report,
-// monitor) must not be added here yet.
+// or credential-attack tool); Phase 9 adds `investigate` (analyst case
+// management and finding correlation — an analytical aid, never an
+// offensive or automatic-remediation tool). Commands belonging to later
+// phases (report, monitor) must not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -46,6 +48,7 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewFingerprintCommand())
 	root.AddCommand(commands.NewEndpointScanCommand())
 	root.AddCommand(commands.NewFindingsCommand())
+	root.AddCommand(commands.NewInvestigateCommand())
 
 	return root
 }

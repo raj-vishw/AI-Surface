@@ -446,3 +446,32 @@ func TestValidateAllowsDetectionDisabled(t *testing.T) {
 		t.Fatalf("disabled detection should skip its own validation, got: %v", err)
 	}
 }
+
+func TestValidateRejectsInvalidCorrelationThreshold(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Investigation.Enabled = true
+	cfg.Investigation.Correlation.Enabled = true
+	cfg.Investigation.Correlation.Threshold = 150
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for out-of-range investigation.correlation.threshold")
+	}
+}
+
+func TestValidateRejectsNegativeTemporalWindow(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Investigation.Enabled = true
+	cfg.Investigation.Correlation.Enabled = true
+	cfg.Investigation.Correlation.TemporalWindow = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative investigation.correlation.temporal_window")
+	}
+}
+
+func TestValidateAllowsInvestigationDisabled(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Investigation.Enabled = false
+	cfg.Investigation.Correlation.Threshold = 999 // would be invalid if enabled
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("disabled investigation should skip its own validation, got: %v", err)
+	}
+}

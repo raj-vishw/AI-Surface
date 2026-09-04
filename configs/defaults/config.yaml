@@ -241,6 +241,14 @@ detection:
   timeout: 10s # bounds each safe-active request; unused in passive mode
   max_response_size: 262144 # bytes — bounds each safe-active response; unused in passive mode
 
+investigation:
+  enabled: true
+  correlation:
+    enabled: true
+    threshold: 60 # score >= threshold => confirmed relationship; below => candidate
+    temporal_window: 5m
+    rules: {} # empty = every built-in correlation rule enabled; set a specific id to false to disable it
+
 logging:
   level: info
   format: json

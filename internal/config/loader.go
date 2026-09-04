@@ -108,6 +108,11 @@ const (
 	envDetectionMaxExcerptSize        = "AI_RECON_DETECTION_MAX_EXCERPT_SIZE"
 	envDetectionCertificateExpiryDays = "AI_RECON_DETECTION_CERTIFICATE_EXPIRY_DAYS"
 
+	envInvestigationEnabled            = "AI_RECON_INVESTIGATION_ENABLED"
+	envInvestigationCorrelationEnabled = "AI_RECON_INVESTIGATION_CORRELATION_ENABLED"
+	envInvestigationThreshold          = "AI_RECON_INVESTIGATION_CORRELATION_THRESHOLD"
+	envInvestigationTemporalWindow     = "AI_RECON_INVESTIGATION_CORRELATION_TEMPORAL_WINDOW"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -336,6 +341,14 @@ func defaultConfig() *Config {
 			Timeout:         10 * time.Second,
 			MaxResponseSize: 262144,
 		},
+		Investigation: InvestigationConfig{
+			Enabled: true,
+			Correlation: InvestigationCorrelationConfig{
+				Enabled:        true,
+				Threshold:      60,
+				TemporalWindow: 5 * time.Minute,
+			},
+		},
 		Logging: LoggingConfig{
 			Level:  "info",
 			Format: "json",
@@ -559,6 +572,11 @@ func applyEnvOverrides(cfg *Config) error {
 	setInt64(envDetectionMaxResponseSize, &cfg.Detection.MaxResponseSize)
 	setInt(envDetectionMaxExcerptSize, &cfg.Detection.Evidence.MaxExcerptSize)
 	setInt(envDetectionCertificateExpiryDays, &cfg.Detection.Thresholds.CertificateExpiryDays)
+
+	setBool(envInvestigationEnabled, &cfg.Investigation.Enabled)
+	setBool(envInvestigationCorrelationEnabled, &cfg.Investigation.Correlation.Enabled)
+	setInt(envInvestigationThreshold, &cfg.Investigation.Correlation.Threshold)
+	setDuration(envInvestigationTemporalWindow, &cfg.Investigation.Correlation.TemporalWindow)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

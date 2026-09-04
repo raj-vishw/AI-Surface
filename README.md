@@ -410,12 +410,56 @@ immutable audit event. No detector performs exploitation, credential
 attacks, brute-forcing, or evasion — see the architecture doc's "Not
 Implemented" section for the complete boundary.
 
+## Investigation & Incident Correlation
+
+`ai-recon investigate` gives an analyst a case-management workspace built
+on top of Phase 8's findings — see
+[docs/architecture/investigation-engine.md](docs/architecture/investigation-engine.md)
+for the full architecture. It is an analytical aid: it reasons only over
+evidence already collected, never performs a network request, an
+exploit, a credential attack, or an automatic remediation action.
+
+```sh
+# Open an investigation and attach an initial finding.
+ai-recon investigate create --target example.com --title "Suspicious API Surface Change" \
+  --created-by analyst1 --finding <finding-id>
+
+# Correlate every finding currently attached to it.
+ai-recon investigate correlate <investigation-id>
+
+# Review the timeline, add a note, propose a hypothesis.
+ai-recon investigate timeline <investigation-id>
+ai-recon investigate note <investigation-id> --content "..." --author analyst1
+ai-recon investigate hypothesis <investigation-id> --title "..." --created-by analyst1
+
+# Suggest incident clusters from currently-open findings, and accept one.
+ai-recon investigate cluster suggest --target example.com
+ai-recon investigate cluster accept <cluster-id> --actor analyst1
+
+# Close, reopen (a reason is required), and export.
+ai-recon investigate close <investigation-id> --actor analyst1 --reason "..."
+ai-recon investigate reopen <investigation-id> --actor analyst1 --reason "new evidence surfaced"
+ai-recon investigate export <investigation-id> --format markdown
+```
+
+Every correlation carries an explicit **explanation** and the individual
+**signals** that produced its score — never a bare `related: true`. A
+relationship is `candidate` (below the configured threshold, still
+surfaced for review) or `confirmed` (at/above it); "same IP" and
+temporal proximity alone are deliberately scored too low to ever confirm
+a relationship by themselves (phase9.md §39's false-correlation
+guardrail). An investigation's timeline and audit trail are the same
+append-only record — every state change is there, with real observation
+timestamps, never fabricated ones. Findings are never removed from an
+investigation when resolved; the distinction between active and
+historical evidence is always visible.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
@@ -423,8 +467,9 @@ Implemented" section for the complete boundary.
 diagnostics for exercising the Phase 2 persistence layer by hand (see
 their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
-`ai-recon fingerprint`, `ai-recon endpoint-scan`, and `ai-recon findings`
-are real, required parts of running Phase 3/4/5/6/7/8.
+`ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`, and
+`ai-recon investigate` are real, required parts of running
+Phase 3/4/5/6/7/8/9.
 
 ## Further reading
 
@@ -452,3 +497,7 @@ are real, required parts of running Phase 3/4/5/6/7/8.
   Phase 8 finding & vulnerability detection engine: detector interface/
   registry, finding identity/lifecycle/diff, severity vs. confidence,
   passive vs. safe-active detection, evidence redaction
+- [docs/architecture/investigation-engine.md](docs/architecture/investigation-engine.md) —
+  Phase 9 investigation & correlation engine: case management, timeline,
+  correlation rules/scoring/explainability, incident clusters,
+  hypotheses, evidence provenance, export

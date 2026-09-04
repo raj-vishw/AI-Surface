@@ -12,16 +12,17 @@ import (
 
 // Config is the fully-resolved application configuration.
 type Config struct {
-	Application ApplicationConfig `yaml:"application"`
-	Server      ServerConfig      `yaml:"server"`
-	Database    DatabaseConfig    `yaml:"database"`
-	Redis       RedisConfig       `yaml:"redis"`
-	HTTPClient  HTTPClientConfig  `yaml:"http_client"`
-	Discovery   DiscoveryConfig   `yaml:"discovery"`
-	Fingerprint FingerprintConfig `yaml:"fingerprint"`
-	Detection   DetectionConfig   `yaml:"detection"`
-	Logging     LoggingConfig     `yaml:"logging"`
-	Security    SecurityConfig    `yaml:"security"`
+	Application   ApplicationConfig   `yaml:"application"`
+	Server        ServerConfig        `yaml:"server"`
+	Database      DatabaseConfig      `yaml:"database"`
+	Redis         RedisConfig         `yaml:"redis"`
+	HTTPClient    HTTPClientConfig    `yaml:"http_client"`
+	Discovery     DiscoveryConfig     `yaml:"discovery"`
+	Fingerprint   FingerprintConfig   `yaml:"fingerprint"`
+	Detection     DetectionConfig     `yaml:"detection"`
+	Investigation InvestigationConfig `yaml:"investigation"`
+	Logging       LoggingConfig       `yaml:"logging"`
+	Security      SecurityConfig      `yaml:"security"`
 }
 
 // ApplicationConfig identifies the running application/environment.
@@ -426,6 +427,32 @@ type DetectionThresholdsConfig struct {
 
 var validDetectionModes = map[string]bool{"": true, "passive": true, "safe_active": true}
 
+// InvestigationConfig configures Phase 9's investigation & correlation
+// engine (internal/investigation / internal/service/investigation). Like
+// DetectionConfig, a top-level Config section rather than nested under
+// Discovery — investigation is a distinct pipeline stage that runs
+// against already-collected findings/assets/endpoints, never a discovery
+// source itself.
+type InvestigationConfig struct {
+	Enabled     bool                           `yaml:"enabled"`
+	Correlation InvestigationCorrelationConfig `yaml:"correlation"`
+}
+
+// InvestigationCorrelationConfig configures the correlation engine
+// specifically (phase9.md §79).
+type InvestigationCorrelationConfig struct {
+	Enabled bool `yaml:"enabled"`
+	// Threshold is the minimum score for a relationship to be recorded
+	// as confirmed rather than a candidate (phase9.md §37). 0 uses
+	// internal/investigation.DefaultThreshold.
+	Threshold int `yaml:"threshold"`
+	// TemporalWindow bounds temporal-proximity signal (phase9.md §16). 0
+	// uses internal/investigation.DefaultTemporalWindow.
+	TemporalWindow time.Duration `yaml:"temporal_window"`
+	// Rules maps a rule id to enabled/disabled; absent means enabled.
+	Rules map[string]bool `yaml:"rules"`
+}
+
 // SecurityConfig enforces the platform's authorization/safety boundary
 // (see work.md §2). RequireAuthorization and DryRun are read by later
 // phases' scanning subsystems; Phase 1 only carries the settings through
@@ -756,6 +783,16 @@ func (c *Config) Validate() error {
 		}
 		if det.Thresholds.CertificateExpiryDays < 0 {
 			errs = append(errs, "detection.thresholds.certificate_expiry_days must not be negative")
+		}
+	}
+
+	if c.Investigation.Enabled && c.Investigation.Correlation.Enabled {
+		corr := c.Investigation.Correlation
+		if corr.Threshold < 0 || corr.Threshold > 100 {
+			errs = append(errs, "investigation.correlation.threshold must be between 0 and 100")
+		}
+		if corr.TemporalWindow < 0 {
+			errs = append(errs, "investigation.correlation.temporal_window must not be negative")
 		}
 	}
 
