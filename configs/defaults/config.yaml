@@ -161,6 +161,65 @@ discovery:
           ]
         max_depth: 2
 
+  endpoint:
+    enabled: true
+    timeout: 10s
+    max_concurrency: 10
+    requests_per_second: 0
+    max_response_size: 2097152 # 2 MiB
+    max_depth: 2
+    max_pages: 100
+    max_endpoints: 1000
+    follow_redirects: true
+    max_redirects: 5
+    enable_robots: true
+    enable_sitemap: true
+    enable_javascript: true
+    enable_openapi: true
+    max_sitemaps: 10
+    max_sitemap_urls: 1000
+    seed_paths:
+      - /
+    sensitive_parameters:
+      - token
+      - access_token
+      - refresh_token
+      - api_key
+      - apikey
+      - key
+      - password
+      - passwd
+      - secret
+      - signature
+      - session
+      - code
+      - authorization
+    profiles:
+      quick:
+        max_depth: 1
+        max_pages: 20
+        max_endpoints: 200
+        enable_robots: false
+        enable_sitemap: false
+        enable_javascript: false
+        enable_openapi: true
+      standard:
+        max_depth: 2
+        max_pages: 100
+        max_endpoints: 1000
+        enable_robots: true
+        enable_sitemap: true
+        enable_javascript: true
+        enable_openapi: true
+      comprehensive:
+        max_depth: 3
+        max_pages: 500
+        max_endpoints: 5000
+        enable_robots: true
+        enable_sitemap: true
+        enable_javascript: true
+        enable_openapi: true
+
 fingerprint:
   enabled: true
   signatures_path: "" # empty = use the built-in signature set (internal/fingerprint.DefaultSignaturesFS)

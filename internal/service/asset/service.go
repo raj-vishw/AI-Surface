@@ -7,6 +7,7 @@ package asset
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,20 +24,25 @@ import (
 
 // Service implements asset business logic.
 type Service struct {
-	pool      *database.Pool
-	assets    assetrepo.Repository
-	evidence  assetrepo.EvidenceRepository
-	endpoints endpointrepo.Repository
+	pool             *database.Pool
+	assets           assetrepo.Repository
+	evidence         assetrepo.EvidenceRepository
+	endpoints        endpointrepo.Repository
+	endpointParams   endpointrepo.ParameterRepository
+	endpointEvidence endpointrepo.EvidenceRepository
 }
 
 // NewService builds a Service backed by pool.
 func NewService(pool *database.Pool) *Service {
 	repo := assetrepo.NewPostgresRepository(pool)
+	endpointRepo := endpointrepo.NewPostgresRepository(pool)
 	return &Service{
-		pool:      pool,
-		assets:    repo,
-		evidence:  repo,
-		endpoints: endpointrepo.NewPostgresRepository(pool),
+		pool:             pool,
+		assets:           repo,
+		evidence:         repo,
+		endpoints:        endpointRepo,
+		endpointParams:   endpointRepo,
+		endpointEvidence: endpointRepo,
 	}
 }
 
@@ -218,25 +224,40 @@ func (s *Service) ListEvidence(ctx context.Context, filter assetrepo.EvidenceLis
 }
 
 // EndpointInput is the caller-supplied description of an observed
-// endpoint, before URL normalization.
+// endpoint, before URL normalization. The Phase 7 fields
+// (Classification/APIType/APIVersion/Sources/Confidence/Documented/
+// Observed/Inferred/ScanID/ContentLength) are all optional — Phase 3's
+// callers leave them zero-valued, exactly as before this extension.
 type EndpointInput struct {
-	AssetID      uuid.UUID
-	URL          string
-	Method       domainendpoint.Method
-	ContentType  string
-	StatusCode   *int
-	ResponseHash string
-	Metadata     map[string]any
-	ObservedAt   time.Time
+	AssetID       uuid.UUID
+	ScanID        *uuid.UUID
+	URL           string
+	Method        domainendpoint.Method
+	ContentType   string
+	ContentLength *int64
+	StatusCode    *int
+	ResponseHash  string
+
+	Classification domainendpoint.Classification
+	APIType        string
+	APIVersion     string
+	Sources        []string
+	Confidence     float64
+	Documented     bool
+	Observed       bool
+	Inferred       bool
+
+	Metadata   map[string]any
+	ObservedAt time.Time
 }
 
-// UpsertEndpoint normalizes input.URL and persists the resulting endpoint,
-// creating it if this is the first observation of its (asset, method,
-// normalized URL) or merging into the existing row otherwise.
-func (s *Service) UpsertEndpoint(ctx context.Context, input EndpointInput) (domainendpoint.Endpoint, bool, error) {
+// toDomain normalizes input.URL and builds the domain Endpoint it
+// describes — the shared step UpsertEndpoint and
+// RecordEndpointObservation both need.
+func (input EndpointInput) toDomain() (domainendpoint.Endpoint, error) {
 	norm, err := domainendpoint.Normalize(input.URL)
 	if err != nil {
-		return domainendpoint.Endpoint{}, false, apperrors.NewValidation("invalid endpoint URL", err)
+		return domainendpoint.Endpoint{}, fmt.Errorf("invalid endpoint URL: %w", err)
 	}
 
 	observedAt := input.ObservedAt
@@ -244,21 +265,41 @@ func (s *Service) UpsertEndpoint(ctx context.Context, input EndpointInput) (doma
 		observedAt = time.Now().UTC()
 	}
 
-	e := domainendpoint.Endpoint{
-		AssetID:      input.AssetID,
-		URL:          norm.URL,
-		Method:       input.Method,
-		Scheme:       norm.Scheme,
-		Host:         norm.Host,
-		Port:         norm.Port,
-		Path:         norm.Path,
-		QueryPattern: norm.QueryPattern,
-		ContentType:  input.ContentType,
-		StatusCode:   input.StatusCode,
-		ResponseHash: input.ResponseHash,
-		Metadata:     domainasset.SanitizeMetadata(input.Metadata),
-		FirstSeen:    observedAt,
-		LastSeen:     observedAt,
+	return domainendpoint.Endpoint{
+		AssetID:        input.AssetID,
+		ScanID:         input.ScanID,
+		URL:            norm.URL,
+		Method:         input.Method,
+		Scheme:         norm.Scheme,
+		Host:           norm.Host,
+		Port:           norm.Port,
+		Path:           norm.Path,
+		QueryPattern:   norm.QueryPattern,
+		ContentType:    input.ContentType,
+		ContentLength:  input.ContentLength,
+		StatusCode:     input.StatusCode,
+		ResponseHash:   input.ResponseHash,
+		Classification: input.Classification,
+		APIType:        input.APIType,
+		APIVersion:     input.APIVersion,
+		Sources:        input.Sources,
+		Confidence:     input.Confidence,
+		Documented:     input.Documented,
+		Observed:       input.Observed,
+		Inferred:       input.Inferred,
+		Metadata:       domainasset.SanitizeMetadata(input.Metadata),
+		FirstSeen:      observedAt,
+		LastSeen:       observedAt,
+	}, nil
+}
+
+// UpsertEndpoint normalizes input.URL and persists the resulting endpoint,
+// creating it if this is the first observation of its (asset, method,
+// normalized URL) or merging into the existing row otherwise.
+func (s *Service) UpsertEndpoint(ctx context.Context, input EndpointInput) (domainendpoint.Endpoint, bool, error) {
+	e, err := input.toDomain()
+	if err != nil {
+		return domainendpoint.Endpoint{}, false, apperrors.NewValidation(err.Error(), err)
 	}
 	if err := e.Validate(); err != nil {
 		return domainendpoint.Endpoint{}, false, apperrors.NewValidation("invalid endpoint", err)
@@ -267,7 +308,103 @@ func (s *Service) UpsertEndpoint(ctx context.Context, input EndpointInput) (doma
 	return s.endpoints.Upsert(ctx, e)
 }
 
+// EndpointObservationInput extends EndpointInput with the evidence that
+// justifies this observation — RecordEndpointObservation persists both
+// atomically, mirroring RecordObservation's asset+evidence transaction
+// (phase7.md §64: an endpoint must never end up persisted with no
+// evidence backing it, when the caller has evidence to record).
+type EndpointObservationInput struct {
+	Endpoint     EndpointInput
+	Source       string
+	EvidenceData map[string]any
+}
+
+// RecordEndpointObservation upserts the endpoint described by
+// input.Endpoint and records input's evidence in a single database
+// transaction: if either write fails, neither is applied.
+func (s *Service) RecordEndpointObservation(ctx context.Context, input EndpointObservationInput) (domainendpoint.Endpoint, domainendpoint.Evidence, error) {
+	e, err := input.Endpoint.toDomain()
+	if err != nil {
+		return domainendpoint.Endpoint{}, domainendpoint.Evidence{}, apperrors.NewValidation(err.Error(), err)
+	}
+	if err := e.Validate(); err != nil {
+		return domainendpoint.Endpoint{}, domainendpoint.Evidence{}, apperrors.NewValidation("invalid endpoint", err)
+	}
+
+	ev := domainendpoint.Evidence{
+		Source:       input.Source,
+		EvidenceData: domainasset.SanitizeMetadata(input.EvidenceData),
+		Confidence:   e.Confidence,
+		ObservedAt:   e.FirstSeen,
+	}
+
+	var (
+		upserted domainendpoint.Endpoint
+		recorded domainendpoint.Evidence
+	)
+	err = s.pool.WithTx(ctx, func(ctx context.Context, tx pgx.Tx) error {
+		txRepo := endpointrepo.NewPostgresRepository(tx)
+
+		result, _, upsertErr := txRepo.Upsert(ctx, e)
+		if upsertErr != nil {
+			return upsertErr
+		}
+		upserted = result
+
+		ev.EndpointID = upserted.ID
+		ev.AssetID = upserted.AssetID
+		ev.ScanID = e.ScanID
+		if err := ev.Validate(); err != nil {
+			return apperrors.NewValidation("invalid endpoint evidence", err)
+		}
+
+		evResult, _, evidenceErr := txRepo.CreateEvidence(ctx, ev)
+		if evidenceErr != nil {
+			return evidenceErr
+		}
+		recorded = evResult
+		return nil
+	})
+	if err != nil {
+		return domainendpoint.Endpoint{}, domainendpoint.Evidence{}, err
+	}
+
+	return upserted, recorded, nil
+}
+
 // ListEndpoints returns a page of endpoints for an asset.
 func (s *Service) ListEndpoints(ctx context.Context, filter endpointrepo.ListFilter) (pagination.Page[domainendpoint.Endpoint], error) {
 	return s.endpoints.ListByAsset(ctx, filter)
+}
+
+// UpdateEndpointStatus explicitly changes an endpoint's lifecycle status.
+func (s *Service) UpdateEndpointStatus(ctx context.Context, id uuid.UUID, status domainendpoint.Status) (domainendpoint.Endpoint, error) {
+	if !status.Valid() {
+		return domainendpoint.Endpoint{}, apperrors.NewValidation("invalid endpoint status", nil)
+	}
+	return s.endpoints.UpdateStatus(ctx, id, status)
+}
+
+// MarkEndpointsInactiveExcept marks every non-INACTIVE endpoint for
+// assetID not in stillFound as INACTIVE — the "removed" half of Phase
+// 7's change detection (phase7.md §43); rows and their evidence are
+// preserved, never deleted.
+func (s *Service) MarkEndpointsInactiveExcept(ctx context.Context, assetID uuid.UUID, stillFound []uuid.UUID) ([]domainendpoint.Endpoint, error) {
+	return s.endpoints.MarkInactiveExcept(ctx, assetID, stillFound)
+}
+
+// UpsertEndpointParameter records a parameter *name* (never a value) as
+// observed for an endpoint (phase7.md §9/§37).
+func (s *Service) UpsertEndpointParameter(ctx context.Context, input endpointrepo.ParameterInput) (endpointrepo.Parameter, bool, error) {
+	return s.endpointParams.UpsertParameter(ctx, input)
+}
+
+// ListEndpointParameters returns every parameter observed for endpointID.
+func (s *Service) ListEndpointParameters(ctx context.Context, endpointID uuid.UUID) ([]endpointrepo.Parameter, error) {
+	return s.endpointParams.ListParameters(ctx, endpointID)
+}
+
+// ListEndpointEvidence returns a page of evidence for an endpoint.
+func (s *Service) ListEndpointEvidence(ctx context.Context, filter endpointrepo.EvidenceListFilter) (pagination.Page[domainendpoint.Evidence], error) {
+	return s.endpointEvidence.ListEvidenceByEndpoint(ctx, filter)
 }

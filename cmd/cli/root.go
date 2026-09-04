@@ -13,10 +13,12 @@ import (
 // diagnostics for the persistence layer — see their Long help text.
 // Phase 3 added `scan` (HTTP discovery); Phase 4 added `network-scan`
 // (TCP connect discovery); Phase 5 added `dns-scan`/`subdomain-scan` (DNS
-// record and subdomain discovery); Phase 6 adds `fingerprint` (passive
+// record and subdomain discovery); Phase 6 added `fingerprint` (passive
 // technology identification against already-collected evidence — no
-// network/DNS request of its own). Commands belonging to later phases
-// (report, monitor) must not be added here yet.
+// network/DNS request of its own); Phase 7 adds `endpoint-scan` (bounded
+// endpoint & API discovery/crawling — GET requests only, never a
+// vulnerability scanner). Commands belonging to later phases (report,
+// monitor) must not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -40,6 +42,7 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewDNSScanCommand())
 	root.AddCommand(commands.NewSubdomainScanCommand())
 	root.AddCommand(commands.NewFingerprintCommand())
+	root.AddCommand(commands.NewEndpointScanCommand())
 
 	return root
 }

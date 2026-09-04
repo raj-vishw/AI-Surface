@@ -54,3 +54,59 @@ func TestIdentity_DiffersByMethod(t *testing.T) {
 		t.Error("GET and POST to the same URL must have different identities")
 	}
 }
+
+// --- Phase 7 additions below: Classification/Confidence validation ---
+
+func validEndpoint() Endpoint {
+	return Endpoint{
+		AssetID: uuid.New(), URL: "https://example.test/api/users", Method: MethodGet,
+		Scheme: "https", Host: "example.test", Port: 443, Path: "/api/users",
+		Classification: ClassificationAPI, Confidence: 0.9,
+	}
+}
+
+func TestEndpoint_Validate_Valid(t *testing.T) {
+	if err := validEndpoint().Validate(); err != nil {
+		t.Errorf("expected valid, got: %v", err)
+	}
+}
+
+func TestEndpoint_Validate_EmptyClassificationIsValid(t *testing.T) {
+	e := validEndpoint()
+	e.Classification = ""
+	if err := e.Validate(); err != nil {
+		t.Errorf("expected empty classification to be valid (means unset, not invalid), got: %v", err)
+	}
+}
+
+func TestEndpoint_Validate_InvalidClassification(t *testing.T) {
+	e := validEndpoint()
+	e.Classification = "not_a_real_classification"
+	if err := e.Validate(); err == nil {
+		t.Error("expected an error for an invalid classification")
+	}
+}
+
+func TestEndpoint_Validate_InvalidConfidence(t *testing.T) {
+	e := validEndpoint()
+	e.Confidence = 1.5
+	if err := e.Validate(); err == nil {
+		t.Error("expected an error for out-of-range confidence")
+	}
+}
+
+func TestClassification_Valid(t *testing.T) {
+	for _, c := range []Classification{
+		ClassificationPage, ClassificationAPI, ClassificationGraphQL, ClassificationOpenAPI,
+		ClassificationSwagger, ClassificationAuth, ClassificationStatic, ClassificationAsset,
+		ClassificationDocumentation, ClassificationSitemap, ClassificationRobots,
+		ClassificationWebSocketCandidate, ClassificationUnknown,
+	} {
+		if !c.Valid() {
+			t.Errorf("Classification %q should be valid", c)
+		}
+	}
+	if Classification("bogus").Valid() {
+		t.Error("expected an unrecognized classification to be invalid")
+	}
+}

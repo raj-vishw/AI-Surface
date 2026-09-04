@@ -298,3 +298,97 @@ func TestValidateAllowsDNSDiscoveryDisabled(t *testing.T) {
 		t.Fatalf("disabled DNS discovery should skip its own validation, got: %v", err)
 	}
 }
+
+func TestValidateRejectsInvalidEndpointTimeout(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.Timeout = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.endpoint.timeout")
+	}
+}
+
+func TestValidateRejectsInvalidEndpointConcurrency(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.MaxConcurrency = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.endpoint.max_concurrency")
+	}
+}
+
+func TestValidateRejectsNegativeEndpointRate(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.RequestsPerSecond = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative discovery.endpoint.requests_per_second")
+	}
+}
+
+func TestValidateRejectsNegativeEndpointMaxDepth(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.MaxDepth = -1
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for negative discovery.endpoint.max_depth")
+	}
+}
+
+func TestValidateRejectsInvalidEndpointMaxPages(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.MaxPages = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.endpoint.max_pages")
+	}
+}
+
+func TestValidateRejectsInvalidEndpointMaxEndpoints(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.MaxEndpoints = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.endpoint.max_endpoints")
+	}
+}
+
+func TestValidateRejectsInvalidEndpointMaxResponseSize(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.MaxResponseSize = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero discovery.endpoint.max_response_size")
+	}
+}
+
+func TestValidateRejectsInvalidSitemapLimitsWhenEnabled(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.EnableSitemap = true
+	cfg.Discovery.Endpoint.MaxSitemaps = 0
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected validation error for zero max_sitemaps when sitemap discovery is enabled")
+	}
+}
+
+func TestValidateAllowsSitemapLimitsWhenDisabled(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = true
+	cfg.Discovery.Endpoint.EnableSitemap = false
+	cfg.Discovery.Endpoint.MaxSitemaps = 0
+	cfg.Discovery.Endpoint.MaxSitemapURLs = 0
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("disabled sitemap discovery should skip its own limit validation, got: %v", err)
+	}
+}
+
+func TestValidateAllowsEndpointDiscoveryDisabled(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Discovery.Endpoint.Enabled = false
+	cfg.Discovery.Endpoint.MaxConcurrency = -1 // would be invalid if enabled
+	cfg.Discovery.Endpoint.MaxPages = 0
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("disabled endpoint discovery should skip its own validation, got: %v", err)
+	}
+}

@@ -104,9 +104,10 @@ type HTTPClientConfig struct {
 // DNS. Later phases add further siblings here, not new top-level config
 // sections.
 type DiscoveryConfig struct {
-	HTTP    HTTPDiscoveryConfig    `yaml:"http"`
-	Network NetworkDiscoveryConfig `yaml:"network"`
-	DNS     DNSDiscoveryConfig     `yaml:"dns"`
+	HTTP     HTTPDiscoveryConfig     `yaml:"http"`
+	Network  NetworkDiscoveryConfig  `yaml:"network"`
+	DNS      DNSDiscoveryConfig      `yaml:"dns"`
+	Endpoint EndpointDiscoveryConfig `yaml:"endpoint"`
 }
 
 // ProfileConfig names one reusable set of paths a scan can be run with
@@ -227,6 +228,80 @@ type DNSDiscoveryConfig struct {
 	RequestsPerSecond float64                     `yaml:"requests_per_second"`
 	Subdomains        DNSSubdomainConfig          `yaml:"subdomains"`
 	Profiles          map[string]DNSProfileConfig `yaml:"profiles"`
+}
+
+// EndpointProfileConfig names one reusable endpoint-discovery
+// configuration (phase7.md §59: quick/standard/comprehensive) — entirely
+// data, never hard-coded crawl behavior. A zero field inherits the base
+// EndpointDiscoveryConfig's value (the same "0/empty means inherit"
+// convention DNSProfileConfig.MaxDepth established).
+type EndpointProfileConfig struct {
+	MaxDepth         int  `yaml:"max_depth"`
+	MaxPages         int  `yaml:"max_pages"`
+	MaxEndpoints     int  `yaml:"max_endpoints"`
+	EnableRobots     bool `yaml:"enable_robots"`
+	EnableSitemap    bool `yaml:"enable_sitemap"`
+	EnableJavaScript bool `yaml:"enable_javascript"`
+	EnableOpenAPI    bool `yaml:"enable_openapi"`
+}
+
+// EndpointDiscoveryConfig configures Phase 7's endpoint/API discovery
+// engine (internal/discovery/endpoint). It reuses HTTPClientConfig's
+// underlying transport (internal/httpclient) and HTTP discovery's
+// ScopeValidator — this section only adds crawl-specific policy.
+type EndpointDiscoveryConfig struct {
+	Enabled bool `yaml:"enabled"`
+
+	Timeout        time.Duration `yaml:"timeout"`
+	MaxConcurrency int           `yaml:"max_concurrency"`
+	// RequestsPerSecond paces crawl requests; 0 means unlimited — a
+	// safety/stability control, never stealth timing (phase7.md §56).
+	RequestsPerSecond float64 `yaml:"requests_per_second"`
+	MaxResponseSize   int64   `yaml:"max_response_size"`
+
+	// MaxDepth bounds how many link-hops from a seed URL the crawler
+	// follows (phase7.md §24/§25) — depth 0 is the seed itself.
+	MaxDepth int `yaml:"max_depth"`
+	// MaxPages bounds how many distinct pages are fetched in one crawl —
+	// never unbounded (phase7.md §24/§52).
+	MaxPages int `yaml:"max_pages"`
+	// MaxEndpoints bounds how many distinct logical endpoints one crawl
+	// may record, across every source (crawled pages, robots.txt,
+	// sitemap.xml, JavaScript, OpenAPI/Swagger) — the final backstop
+	// against unbounded discovery regardless of source.
+	MaxEndpoints int `yaml:"max_endpoints"`
+
+	FollowRedirects bool `yaml:"follow_redirects"`
+	MaxRedirects    int  `yaml:"max_redirects"`
+
+	// Discovery sources — each independently toggleable (phase7.md §11).
+	// HTML link/form extraction has no separate toggle: it is the
+	// crawler's basic mechanism and is always on when the engine runs at
+	// all (matching every profile in phase7.md §59, "quick" included).
+	EnableRobots     bool `yaml:"enable_robots"`
+	EnableSitemap    bool `yaml:"enable_sitemap"`
+	EnableJavaScript bool `yaml:"enable_javascript"`
+	EnableOpenAPI    bool `yaml:"enable_openapi"`
+
+	// MaxSitemaps/MaxSitemapURLs bound sitemap-index recursion and total
+	// <loc> entries read (phase7.md §22) — never unlimited.
+	MaxSitemaps    int `yaml:"max_sitemaps"`
+	MaxSitemapURLs int `yaml:"max_sitemap_urls"`
+
+	// SeedPaths are appended (after normalization/scope-checking) to
+	// whatever seed URLs are derived from the target's own known
+	// HTTP(S)/service assets (phase7.md §26) — e.g. "/", "/robots.txt".
+	SeedPaths []string `yaml:"seed_paths"`
+
+	// SensitiveParameters names query/form parameter fragments whose
+	// *values* are always redacted if ever transiently inspected
+	// (phase7.md §10) — matched the same case-insensitive-substring way
+	// internal/domain/asset's sensitiveKeyFragments already works; this
+	// section exists so the list is visible/extensible via configuration
+	// rather than only the Go-level default.
+	SensitiveParameters []string `yaml:"sensitive_parameters"`
+
+	Profiles map[string]EndpointProfileConfig `yaml:"profiles"`
 }
 
 // HTTPDiscoveryConfig configures the HTTP discovery engine
@@ -567,6 +642,44 @@ func (c *Config) Validate() error {
 		}
 		for name, profile := range d.Profiles {
 			validateRecordTypes(fmt.Sprintf("discovery.dns.profiles.%s.record_types", name), profile.RecordTypes)
+		}
+	}
+
+	if c.Discovery.Endpoint.Enabled {
+		ep := c.Discovery.Endpoint
+		if ep.Timeout <= 0 {
+			errs = append(errs, "discovery.endpoint.timeout must be positive")
+		}
+		if ep.MaxConcurrency < 1 {
+			errs = append(errs, "discovery.endpoint.max_concurrency must be at least 1")
+		}
+		if ep.RequestsPerSecond < 0 {
+			errs = append(errs, "discovery.endpoint.requests_per_second must not be negative")
+		}
+		if ep.MaxDepth < 0 {
+			errs = append(errs, "discovery.endpoint.max_depth must not be negative")
+		}
+		if ep.MaxPages < 1 {
+			errs = append(errs, "discovery.endpoint.max_pages must be at least 1")
+		}
+		if ep.MaxEndpoints < 1 {
+			errs = append(errs, "discovery.endpoint.max_endpoints must be at least 1")
+		}
+		if ep.MaxResponseSize < 1 {
+			errs = append(errs, "discovery.endpoint.max_response_size must be at least 1")
+		}
+		if ep.EnableSitemap {
+			if ep.MaxSitemaps < 1 {
+				errs = append(errs, "discovery.endpoint.max_sitemaps must be at least 1 when sitemap discovery is enabled")
+			}
+			if ep.MaxSitemapURLs < 1 {
+				errs = append(errs, "discovery.endpoint.max_sitemap_urls must be at least 1 when sitemap discovery is enabled")
+			}
+		}
+		for name, profile := range ep.Profiles {
+			if profile.MaxDepth < 0 {
+				errs = append(errs, fmt.Sprintf("discovery.endpoint.profiles.%s.max_depth must not be negative", name))
+			}
 		}
 	}
 

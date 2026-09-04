@@ -329,20 +329,58 @@ stops matching is preserved as `INACTIVE`, never deleted, and every
 add/remove/version-change/significant-confidence-change is reported as a
 `Change` relative to the previous analysis.
 
+## Endpoint & API Discovery
+
+`ai-recon endpoint-scan` discovers application-level endpoints and API
+surface from an authorized target — bounded crawling, HTML link/form
+extraction, JavaScript static route extraction, robots.txt/sitemap.xml
+parsing, and OpenAPI/Swagger discovery — see
+[docs/architecture/endpoint-discovery.md](docs/architecture/endpoint-discovery.md)
+for the full architecture. **It is an inventory engine, not a
+vulnerability scanner**: it records `/api/users?id=123` as an endpoint
+observation, it never tests `id=123'` or any other attack payload; it
+only ever sends GET requests and never submits a discovered form.
+
+```sh
+# Crawl the target's own known HTTP(S) assets.
+ai-recon endpoint-scan --target example.com --profile quick
+
+# Comprehensive crawl with a machine-readable summary.
+ai-recon endpoint-scan --target example.com --profile comprehensive --format json
+
+# Explicit seed URL(s), bounded depth.
+ai-recon endpoint-scan --target https://example.com --seed https://example.com/app --depth 2
+
+# Report the crawl plan without making any request.
+ai-recon endpoint-scan --target example.com --dry-run
+```
+
+Every discovered endpoint records **documented** (named in an OpenAPI/
+Swagger spec), **observed** (an actual HTTP response was received), and
+**inferred** (a weak signal only, e.g. a bare JavaScript string) as
+independent, non-exclusive facts — a documented `DELETE
+/api/users/{id}` the crawl never independently reached stays `observed =
+false`, never silently upgraded. Crawl limits (`--depth`, `--max-pages`,
+`--max-endpoints`, response size, concurrency, request rate) are all
+enforced and configurable; an out-of-scope link is scope-rejected and
+never requested, the same boundary every other discovery command in this
+project enforces.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
 `ai-recon asset` (and `target create`/`target list`) remain development
 diagnostics for exercising the Phase 2 persistence layer by hand (see
 their `--help`); `ai-recon target authorize`, `ai-recon scan`,
-`ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`, and
-`ai-recon fingerprint` are real, required parts of running Phase 3/4/5/6.
+`ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
+`ai-recon fingerprint`, and `ai-recon endpoint-scan` are real, required
+parts of running Phase 3/4/5/6/7.
 
 ## Further reading
 
@@ -362,3 +400,7 @@ their `--help`); `ai-recon target authorize`, `ai-recon scan`,
   Phase 6 passive fingerprinting engine: signature format, matching,
   scoring, conflict handling, AI/database candidate handling, historical
   fingerprint tracking
+- [docs/architecture/endpoint-discovery.md](docs/architecture/endpoint-discovery.md) —
+  Phase 7 endpoint & API discovery engine: bounded crawling, scope
+  enforcement, HTML/JavaScript extraction, OpenAPI/Swagger/GraphQL,
+  documented-vs-observed-vs-inferred, historical endpoint tracking

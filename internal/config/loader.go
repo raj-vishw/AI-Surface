@@ -80,6 +80,20 @@ const (
 	envDiscoveryDNSMaxCandidates     = "AI_RECON_DISCOVERY_DNS_MAX_CANDIDATES"
 	envDiscoveryDNSMaxDepth          = "AI_RECON_DISCOVERY_DNS_MAX_DEPTH"
 
+	// Same scalars-only-via-env convention — profiles/seed_paths/
+	// sensitive_parameters are YAML-only.
+	envDiscoveryEndpointEnabled           = "AI_RECON_DISCOVERY_ENDPOINT_ENABLED"
+	envDiscoveryEndpointTimeout           = "AI_RECON_DISCOVERY_ENDPOINT_TIMEOUT"
+	envDiscoveryEndpointMaxConcurrency    = "AI_RECON_DISCOVERY_ENDPOINT_MAX_CONCURRENCY"
+	envDiscoveryEndpointRequestsPerSecond = "AI_RECON_DISCOVERY_ENDPOINT_REQUESTS_PER_SECOND"
+	envDiscoveryEndpointMaxDepth          = "AI_RECON_DISCOVERY_ENDPOINT_MAX_DEPTH"
+	envDiscoveryEndpointMaxPages          = "AI_RECON_DISCOVERY_ENDPOINT_MAX_PAGES"
+	envDiscoveryEndpointMaxEndpoints      = "AI_RECON_DISCOVERY_ENDPOINT_MAX_ENDPOINTS"
+	envDiscoveryEndpointEnableRobots      = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_ROBOTS"
+	envDiscoveryEndpointEnableSitemap     = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_SITEMAP"
+	envDiscoveryEndpointEnableJavaScript  = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_JAVASCRIPT"
+	envDiscoveryEndpointEnableOpenAPI     = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_OPENAPI"
+
 	envFingerprintEnabled                   = "AI_RECON_FINGERPRINT_ENABLED"
 	envFingerprintSignaturesPath            = "AI_RECON_FINGERPRINT_SIGNATURES_PATH"
 	envFingerprintMinConfidence             = "AI_RECON_FINGERPRINT_MIN_CONFIDENCE"
@@ -253,6 +267,44 @@ func defaultConfig() *Config {
 							"npm", "pypi", "old", "legacy", "sandbox", "demo", "qa",
 						},
 						MaxDepth: 2, // deeper combination space, still explicitly bounded (phase5.md §52) — not depth 3's ~130k-candidate explosion by default
+					},
+				},
+			},
+			Endpoint: EndpointDiscoveryConfig{
+				Enabled:           true,
+				Timeout:           10 * time.Second,
+				MaxConcurrency:    10,
+				RequestsPerSecond: 0,
+				MaxResponseSize:   2 * 1024 * 1024, // 2 MiB (phase7.md §24's own worked example)
+				MaxDepth:          2,
+				MaxPages:          100,
+				MaxEndpoints:      1000,
+				FollowRedirects:   true,
+				MaxRedirects:      5,
+				EnableRobots:      true,
+				EnableSitemap:     true,
+				EnableJavaScript:  true,
+				EnableOpenAPI:     true,
+				MaxSitemaps:       10,
+				MaxSitemapURLs:    1000,
+				SeedPaths:         []string{"/"},
+				SensitiveParameters: []string{
+					"token", "access_token", "refresh_token", "api_key", "apikey",
+					"key", "password", "passwd", "secret", "signature", "session",
+					"code", "authorization",
+				},
+				Profiles: map[string]EndpointProfileConfig{
+					"quick": {
+						MaxDepth: 1, MaxPages: 20, MaxEndpoints: 200,
+						EnableRobots: false, EnableSitemap: false, EnableJavaScript: false, EnableOpenAPI: true,
+					},
+					"standard": {
+						MaxDepth: 2, MaxPages: 100, MaxEndpoints: 1000,
+						EnableRobots: true, EnableSitemap: true, EnableJavaScript: true, EnableOpenAPI: true,
+					},
+					"comprehensive": {
+						MaxDepth: 3, MaxPages: 500, MaxEndpoints: 5000,
+						EnableRobots: true, EnableSitemap: true, EnableJavaScript: true, EnableOpenAPI: true,
 					},
 				},
 			},
@@ -462,6 +514,18 @@ func applyEnvOverrides(cfg *Config) error {
 	setBool(envDiscoveryDNSSubdomainsEnabled, &cfg.Discovery.DNS.Subdomains.Enabled)
 	setInt(envDiscoveryDNSMaxCandidates, &cfg.Discovery.DNS.Subdomains.MaxCandidates)
 	setInt(envDiscoveryDNSMaxDepth, &cfg.Discovery.DNS.Subdomains.MaxDepth)
+
+	setBool(envDiscoveryEndpointEnabled, &cfg.Discovery.Endpoint.Enabled)
+	setDuration(envDiscoveryEndpointTimeout, &cfg.Discovery.Endpoint.Timeout)
+	setInt(envDiscoveryEndpointMaxConcurrency, &cfg.Discovery.Endpoint.MaxConcurrency)
+	setFloat64(envDiscoveryEndpointRequestsPerSecond, &cfg.Discovery.Endpoint.RequestsPerSecond)
+	setInt(envDiscoveryEndpointMaxDepth, &cfg.Discovery.Endpoint.MaxDepth)
+	setInt(envDiscoveryEndpointMaxPages, &cfg.Discovery.Endpoint.MaxPages)
+	setInt(envDiscoveryEndpointMaxEndpoints, &cfg.Discovery.Endpoint.MaxEndpoints)
+	setBool(envDiscoveryEndpointEnableRobots, &cfg.Discovery.Endpoint.EnableRobots)
+	setBool(envDiscoveryEndpointEnableSitemap, &cfg.Discovery.Endpoint.EnableSitemap)
+	setBool(envDiscoveryEndpointEnableJavaScript, &cfg.Discovery.Endpoint.EnableJavaScript)
+	setBool(envDiscoveryEndpointEnableOpenAPI, &cfg.Discovery.Endpoint.EnableOpenAPI)
 
 	setBool(envFingerprintEnabled, &cfg.Fingerprint.Enabled)
 	setString(envFingerprintSignaturesPath, &cfg.Fingerprint.SignaturesPath)

@@ -59,28 +59,87 @@ var validStatuses = map[Status]bool{
 // Valid reports whether s is a recognized endpoint status.
 func (s Status) Valid() bool { return validStatuses[s] }
 
+// Classification names what kind of thing an endpoint appears to be
+// (phase7.md §32) — deliberately coarse; "unknown" is an acceptable,
+// honest answer, never forced into a more specific bucket without
+// evidence.
+type Classification string
+
+// Recognized endpoint classifications.
+const (
+	ClassificationPage               Classification = "page"
+	ClassificationAPI                Classification = "api"
+	ClassificationGraphQL            Classification = "graphql"
+	ClassificationOpenAPI            Classification = "openapi"
+	ClassificationSwagger            Classification = "swagger"
+	ClassificationAuth               Classification = "auth"
+	ClassificationStatic             Classification = "static"
+	ClassificationAsset              Classification = "asset"
+	ClassificationDocumentation      Classification = "documentation"
+	ClassificationSitemap            Classification = "sitemap"
+	ClassificationRobots             Classification = "robots"
+	ClassificationWebSocketCandidate Classification = "websocket_candidate"
+	ClassificationUnknown            Classification = "unknown"
+)
+
+var validClassifications = map[Classification]bool{
+	ClassificationPage: true, ClassificationAPI: true, ClassificationGraphQL: true,
+	ClassificationOpenAPI: true, ClassificationSwagger: true, ClassificationAuth: true,
+	ClassificationStatic: true, ClassificationAsset: true, ClassificationDocumentation: true,
+	ClassificationSitemap: true, ClassificationRobots: true, ClassificationWebSocketCandidate: true,
+	ClassificationUnknown: true,
+}
+
+// Valid reports whether c is a recognized classification.
+func (c Classification) Valid() bool { return c == "" || validClassifications[c] }
+
 // Endpoint represents a network/application endpoint associated with an
 // Asset. URL, Scheme, Host, Port, Path, and QueryPattern are always the
-// normalized form (see Normalize) — never the raw, as-observed URL.
+// normalized form (see Normalize) — never the raw, as-observed URL; Path
+// IS the normalized path already (phase7.md's "NormalizedPath" concept —
+// this package deliberately does not carry a second, redundant column for
+// it).
+//
+// Documented/Observed/Inferred (phase7.md §46/§47) are independent,
+// non-exclusive facts about how this endpoint came to be known: an
+// endpoint can be both Documented (named in an OpenAPI spec) and Observed
+// (an actual HTTP response was received for it), or Documented alone (the
+// spec names it but crawling never reached it), or Inferred alone (a weak
+// JavaScript string match, nothing else corroborates it yet). Sources
+// lists every discovery source that has ever contributed to this
+// endpoint (phase7.md §40 — one logical endpoint, not one row per
+// source).
 type Endpoint struct {
-	ID           uuid.UUID
-	AssetID      uuid.UUID
-	URL          string
-	Method       Method
-	Scheme       string
-	Host         string
-	Port         int
-	Path         string
-	QueryPattern string
-	ContentType  string
-	StatusCode   *int
-	ResponseHash string
-	FirstSeen    time.Time
-	LastSeen     time.Time
-	Status       Status
-	Metadata     map[string]any
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID            uuid.UUID
+	AssetID       uuid.UUID
+	ScanID        *uuid.UUID
+	URL           string
+	Method        Method
+	Scheme        string
+	Host          string
+	Port          int
+	Path          string
+	QueryPattern  string
+	ContentType   string
+	ContentLength *int64
+	StatusCode    *int
+	ResponseHash  string
+
+	Classification Classification
+	APIType        string // "rest", "graphql", "openapi", "swagger", "" (unknown)
+	APIVersion     string // "" (never guessed — see phase7.md §17) unless explicitly observed
+	Sources        []string
+	Confidence     float64
+	Documented     bool
+	Observed       bool
+	Inferred       bool
+
+	FirstSeen time.Time
+	LastSeen  time.Time
+	Status    Status
+	Metadata  map[string]any
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // Validate checks that e is internally consistent: a non-empty AssetID, a
@@ -109,6 +168,12 @@ func (e Endpoint) Validate() error {
 	}
 	if e.StatusCode != nil && (*e.StatusCode < 100 || *e.StatusCode > 599) {
 		errs = errs.Add("status_code", "must be a valid HTTP status code (100-599)")
+	}
+	if !e.Classification.Valid() {
+		errs = errs.Add("classification", "must be a recognized classification")
+	}
+	if e.Confidence < 0 || e.Confidence > 1 {
+		errs = errs.Add("confidence", "must be between 0.0 and 1.0")
 	}
 
 	return errs.ErrOrNil()
