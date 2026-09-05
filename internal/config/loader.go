@@ -113,6 +113,16 @@ const (
 	envInvestigationThreshold          = "AI_RECON_INVESTIGATION_CORRELATION_THRESHOLD"
 	envInvestigationTemporalWindow     = "AI_RECON_INVESTIGATION_CORRELATION_TEMPORAL_WINDOW"
 
+	envIntelligenceEnabled              = "AI_RECON_INTELLIGENCE_ENABLED"
+	envIntelligenceExternalEnabled      = "AI_RECON_INTELLIGENCE_EXTERNAL_ENABLED"
+	envIntelligenceProviderTimeout      = "AI_RECON_INTELLIGENCE_PROVIDER_TIMEOUT"
+	envIntelligenceReputationTTL        = "AI_RECON_INTELLIGENCE_REPUTATION_TTL"
+	envIntelligenceVulnerabilityTTL     = "AI_RECON_INTELLIGENCE_VULNERABILITY_TTL"
+	envIntelligenceThreatFeedBaseURL    = "AI_RECON_INTELLIGENCE_THREAT_FEED_BASE_URL"
+	envIntelligenceThreatFeedAPIKeyEnv  = "AI_RECON_INTELLIGENCE_THREAT_FEED_API_KEY_ENV"
+	envIntelligenceThreatFeedRPS        = "AI_RECON_INTELLIGENCE_THREAT_FEED_REQUESTS_PER_SECOND"
+	envIntelligenceThreatFeedMaxRetries = "AI_RECON_INTELLIGENCE_THREAT_FEED_MAX_RETRIES"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -349,6 +359,30 @@ func defaultConfig() *Config {
 				TemporalWindow: 5 * time.Minute,
 			},
 		},
+		Intelligence: IntelligenceConfig{
+			Enabled: true,
+			// External enrichment defaults to disabled — the
+			// conservative default phase10.md §29 requires; an
+			// operator must explicitly opt in per-deployment.
+			External: IntelligenceExternalConfig{Enabled: false},
+			Providers: map[string]bool{
+				"local": true, "dns": true, "certificate": true, "technology": true, "threat_feed": true,
+			},
+			ProviderTimeout:  10 * time.Second,
+			ReputationTTL:    24 * time.Hour,
+			VulnerabilityTTL: 7 * 24 * time.Hour,
+			ThreatFeed: IntelligenceThreatFeedConfig{
+				RequestsPerSecond: 1,
+				MaxRetries:        0,
+			},
+			// Risk.Weights is left zero-valued here — internal/
+			// intelligence/risk.DefaultWeights() applies whenever
+			// every field is zero (see risk.NewScorer), the same
+			// all-or-nothing override convention
+			// FingerprintConfig.Thresholds already uses: an operator
+			// customizing weights must supply the complete set via
+			// YAML, not a partial override.
+		},
 		Logging: LoggingConfig{
 			Level:  "info",
 			Format: "json",
@@ -577,6 +611,16 @@ func applyEnvOverrides(cfg *Config) error {
 	setBool(envInvestigationCorrelationEnabled, &cfg.Investigation.Correlation.Enabled)
 	setInt(envInvestigationThreshold, &cfg.Investigation.Correlation.Threshold)
 	setDuration(envInvestigationTemporalWindow, &cfg.Investigation.Correlation.TemporalWindow)
+
+	setBool(envIntelligenceEnabled, &cfg.Intelligence.Enabled)
+	setBool(envIntelligenceExternalEnabled, &cfg.Intelligence.External.Enabled)
+	setDuration(envIntelligenceProviderTimeout, &cfg.Intelligence.ProviderTimeout)
+	setDuration(envIntelligenceReputationTTL, &cfg.Intelligence.ReputationTTL)
+	setDuration(envIntelligenceVulnerabilityTTL, &cfg.Intelligence.VulnerabilityTTL)
+	setString(envIntelligenceThreatFeedBaseURL, &cfg.Intelligence.ThreatFeed.BaseURL)
+	setString(envIntelligenceThreatFeedAPIKeyEnv, &cfg.Intelligence.ThreatFeed.APIKeyEnv)
+	setFloat64(envIntelligenceThreatFeedRPS, &cfg.Intelligence.ThreatFeed.RequestsPerSecond)
+	setInt(envIntelligenceThreatFeedMaxRetries, &cfg.Intelligence.ThreatFeed.MaxRetries)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

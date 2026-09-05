@@ -21,6 +21,7 @@ type Config struct {
 	Fingerprint   FingerprintConfig   `yaml:"fingerprint"`
 	Detection     DetectionConfig     `yaml:"detection"`
 	Investigation InvestigationConfig `yaml:"investigation"`
+	Intelligence  IntelligenceConfig  `yaml:"intelligence"`
 	Logging       LoggingConfig       `yaml:"logging"`
 	Security      SecurityConfig      `yaml:"security"`
 }
@@ -453,6 +454,94 @@ type InvestigationCorrelationConfig struct {
 	Rules map[string]bool `yaml:"rules"`
 }
 
+// IntelligenceConfig configures Phase 10's threat intelligence & risk
+// enrichment engine (internal/intelligence / internal/service/
+// intelligence). Like InvestigationConfig, a top-level Config section —
+// intelligence enrichment is a distinct pipeline stage that runs against
+// already-persisted assets/findings/technologies, never a discovery
+// source itself.
+type IntelligenceConfig struct {
+	Enabled bool `yaml:"enabled"`
+	// External gates every provider capable of a network request off
+	// this platform (phase10.md §29/§30). Conservative default: false.
+	External IntelligenceExternalConfig `yaml:"external"`
+	// Providers maps a provider id to enabled/disabled — absent means
+	// enabled, the same "closed set of explicit opt-outs" convention
+	// detection.Config.Detectors/investigation.Config.Rules use.
+	Providers map[string]bool `yaml:"providers"`
+	// ProviderTimeout bounds each individual provider's Lookup call. <= 0
+	// uses intelligence.DefaultProviderTimeout.
+	ProviderTimeout time.Duration `yaml:"provider_timeout"`
+	// ReputationTTL/VulnerabilityTTL are the intelligence cache's TTLs
+	// (phase10.md §22). <= 0 uses intelligence.DefaultReputationTTL /
+	// DefaultVulnerabilityTTL.
+	ReputationTTL    time.Duration `yaml:"reputation_ttl"`
+	VulnerabilityTTL time.Duration `yaml:"vulnerability_ttl"`
+	// ThreatFeed configures the one external, opt-in provider
+	// (phase10.md §17/§26/§27) — see internal/intelligence/providers.
+	// ThreatFeedProvider.
+	ThreatFeed IntelligenceThreatFeedConfig `yaml:"threat_feed"`
+	Risk       IntelligenceRiskConfig       `yaml:"risk"`
+}
+
+// IntelligenceExternalConfig is intelligence.enabled's own external
+// enrichment opt-in (phase10.md §29/§73) — a project/target-level
+// switch, independent of any individual provider's own enabled flag;
+// both must be true for an external provider to ever run.
+type IntelligenceExternalConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
+// IntelligenceThreatFeedConfig configures
+// internal/intelligence/providers.ThreatFeedProvider. BaseURL/APIKeyEnv
+// are operator-supplied — no vendor is hard-coded, and the credential
+// itself is never stored in configuration (phase10.md §26).
+type IntelligenceThreatFeedConfig struct {
+	BaseURL           string  `yaml:"base_url"`
+	APIKeyEnv         string  `yaml:"api_key_env"`
+	RequestsPerSecond float64 `yaml:"requests_per_second"`
+	MaxRetries        int     `yaml:"max_retries"`
+}
+
+// IntelligenceRiskConfig configures the risk-scoring model's weights
+// (phase10.md §44 — "document the weights", "do not silently change
+// weights"). A zero-valued Weights uses risk.DefaultWeights.
+type IntelligenceRiskConfig struct {
+	Weights IntelligenceRiskWeightsConfig `yaml:"weights"`
+}
+
+// IntelligenceRiskWeightsConfig mirrors internal/intelligence/risk.
+// Weights field-for-field (independent copy, same "config.go never
+// imports an engine package" boundary DetectionThresholdsConfig/
+// InvestigationCorrelationConfig already establish).
+type IntelligenceRiskWeightsConfig struct {
+	FindingSeverityCritical      int `yaml:"finding_severity_critical"`
+	FindingSeverityHigh          int `yaml:"finding_severity_high"`
+	FindingSeverityMedium        int `yaml:"finding_severity_medium"`
+	FindingSeverityLow           int `yaml:"finding_severity_low"`
+	FindingSeverityInformational int `yaml:"finding_severity_informational"`
+	FindingConfidenceHigh        int `yaml:"finding_confidence_high"`
+
+	ExposureInternetFacing     int `yaml:"exposure_internet_facing"`
+	ExposureOpenServicePerUnit int `yaml:"exposure_open_service_per_unit"`
+	ExposureOpenServiceMax     int `yaml:"exposure_open_service_max"`
+	ExposureSensitiveEndpoint  int `yaml:"exposure_sensitive_endpoint"`
+	ExposureExposedAPI         int `yaml:"exposure_exposed_api"`
+
+	VulnerabilityConfirmed int `yaml:"vulnerability_confirmed"`
+	VulnerabilityProbable  int `yaml:"vulnerability_probable"`
+
+	IntelligenceMalicious  int `yaml:"intelligence_malicious"`
+	IntelligenceSuspicious int `yaml:"intelligence_suspicious"`
+
+	AssetCriticalityCritical int `yaml:"asset_criticality_critical"`
+	AssetCriticalityHigh     int `yaml:"asset_criticality_high"`
+	AssetCriticalityNormal   int `yaml:"asset_criticality_normal"`
+	AssetCriticalityLow      int `yaml:"asset_criticality_low"`
+
+	RecentChange int `yaml:"recent_change"`
+}
+
 // SecurityConfig enforces the platform's authorization/safety boundary
 // (see work.md §2). RequireAuthorization and DryRun are read by later
 // phases' scanning subsystems; Phase 1 only carries the settings through
@@ -793,6 +882,28 @@ func (c *Config) Validate() error {
 		}
 		if corr.TemporalWindow < 0 {
 			errs = append(errs, "investigation.correlation.temporal_window must not be negative")
+		}
+	}
+
+	if c.Intelligence.Enabled {
+		intel := c.Intelligence
+		if intel.ProviderTimeout < 0 {
+			errs = append(errs, "intelligence.provider_timeout must not be negative")
+		}
+		if intel.ReputationTTL < 0 {
+			errs = append(errs, "intelligence.reputation_ttl must not be negative")
+		}
+		if intel.VulnerabilityTTL < 0 {
+			errs = append(errs, "intelligence.vulnerability_ttl must not be negative")
+		}
+		if intel.ThreatFeed.RequestsPerSecond < 0 {
+			errs = append(errs, "intelligence.threat_feed.requests_per_second must not be negative")
+		}
+		if intel.ThreatFeed.MaxRetries < 0 {
+			errs = append(errs, "intelligence.threat_feed.max_retries must not be negative")
+		}
+		if intel.External.Enabled && intel.ThreatFeed.BaseURL != "" && intel.ThreatFeed.APIKeyEnv == "" {
+			errs = append(errs, "intelligence.threat_feed.api_key_env must be set when threat_feed.base_url is configured")
 		}
 	}
 

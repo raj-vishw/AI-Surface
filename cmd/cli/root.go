@@ -21,8 +21,12 @@ import (
 // finding/vulnerability detection — passive by default, never an exploit
 // or credential-attack tool); Phase 9 adds `investigate` (analyst case
 // management and finding correlation — an analytical aid, never an
-// offensive or automatic-remediation tool). Commands belonging to later
-// phases (report, monitor) must not be added here yet.
+// offensive or automatic-remediation tool); Phase 10 adds `intel` and
+// `risk` (threat intelligence enrichment and risk scoring over
+// already-known indicators/entities — local platform data by default,
+// external providers only when explicitly opted in; never a blocking,
+// remediation, or attribution tool). Commands belonging to later phases
+// (report, monitor) must not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -49,6 +53,8 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewEndpointScanCommand())
 	root.AddCommand(commands.NewFindingsCommand())
 	root.AddCommand(commands.NewInvestigateCommand())
+	root.AddCommand(commands.NewIntelCommand())
+	root.AddCommand(commands.NewRiskCommand())
 
 	return root
 }

@@ -249,6 +249,27 @@ investigation:
     temporal_window: 5m
     rules: {} # empty = every built-in correlation rule enabled; set a specific id to false to disable it
 
+intelligence:
+  enabled: true
+  external:
+    enabled: false # conservative default — an operator must explicitly opt in before any network request leaves this platform
+  providers:
+    local: true
+    dns: true
+    certificate: true
+    technology: true
+    threat_feed: true # still gated by external.enabled above AND this platform's own configured base_url/api_key_env
+  provider_timeout: 10s
+  reputation_ttl: 24h
+  vulnerability_ttl: 168h # 7 days
+  threat_feed:
+    base_url: "" # operator-supplied — no vendor is hard-coded; empty means the provider is unconfigured and every lookup fails clearly
+    api_key_env: "" # name of the environment variable holding the API key — never the key itself
+    requests_per_second: 1
+    max_retries: 0
+  risk:
+    weights: {} # empty = internal/intelligence/risk.DefaultWeights() (see docs/security/risk-model-v1.md); a customized set must supply every field, not a partial override
+
 logging:
   level: info
   format: json

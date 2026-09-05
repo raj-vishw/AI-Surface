@@ -454,12 +454,67 @@ timestamps, never fabricated ones. Findings are never removed from an
 investigation when resolved; the distinction between active and
 historical evidence is always visible.
 
+## Threat Intelligence & Risk Enrichment
+
+`ai-recon intel` and `ai-recon risk` add structured context and a
+deterministic risk score on top of everything Phase 2-9 already
+collected — see
+[docs/architecture/threat-intelligence.md](docs/architecture/threat-intelligence.md)
+and [docs/security/risk-model-v1.md](docs/security/risk-model-v1.md) for
+the full architecture. Local enrichment (DNS/certificate/technology
+context, asset history) works with zero external dependencies; a single
+external threat-feed provider exists but is disabled by default —
+enabling it requires both `intelligence.external.enabled: true` in
+configuration AND the provider's own `intelligence.threat_feed.base_url`/
+`api_key_env` to be set (the API key itself is read only from the named
+environment variable, never from configuration).
+
+```sh
+# Show already-persisted intelligence for an indicator (no provider is queried).
+ai-recon intel lookup example.com --target example.com
+
+# Actively enrich an indicator, or preview what would run without making any request.
+ai-recon intel enrich example.com --target example.com
+ai-recon intel enrich example.com --target example.com --dry-run
+
+# Invalidate cached results and re-enrich; inspect provider health.
+ai-recon intel refresh example.com --target example.com
+ai-recon intel providers
+ai-recon intel status
+
+# Calculate risk for an asset/finding/investigation (always explains itself).
+ai-recon risk asset <asset-id>
+ai-recon risk finding <finding-id>
+ai-recon risk investigation <investigation-id>
+ai-recon risk asset <asset-id> --history
+
+# Record analyst context that risk scoring can use (never inferred automatically).
+ai-recon risk criticality set <asset-id> --level high --set-by analyst1
+```
+
+Every intelligence record carries full **provenance** (which provider,
+which version of it, when it was retrieved) and is never presented as
+more than what it is: a *provider's* classification, not this platform's
+own confirmed finding — a verdict of "malicious" means "a provider
+classified this indicator as malicious", nothing more. When providers
+disagree, both observations are kept and the conflict is surfaced
+explicitly rather than silently resolved. A vulnerability match is only
+ever `confirmed` when both the product **and** version evidence support
+it; a bare product-name match (no version evidence) is always
+`insufficient_evidence`, never a confirmed vulnerability. A risk score is
+a combined security-context signal (finding severity, exposure,
+vulnerability matches, intelligence, asset criticality, recent change) —
+it is explicitly never a claim of confirmed vulnerability, and every
+score prints exactly which factors produced it. This platform never
+blocks an IP/domain, modifies infrastructure, or infers a threat actor's
+identity from intelligence data.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
@@ -467,9 +522,9 @@ historical evidence is always visible.
 diagnostics for exercising the Phase 2 persistence layer by hand (see
 their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
-`ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`, and
-`ai-recon investigate` are real, required parts of running
-Phase 3/4/5/6/7/8/9.
+`ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`,
+`ai-recon investigate`, `ai-recon intel`, and `ai-recon risk` are real,
+required parts of running Phase 3/4/5/6/7/8/9/10.
 
 ## Further reading
 
@@ -501,3 +556,10 @@ Phase 3/4/5/6/7/8/9.
   Phase 9 investigation & correlation engine: case management, timeline,
   correlation rules/scoring/explainability, incident clusters,
   hypotheses, evidence provenance, export
+- [docs/architecture/threat-intelligence.md](docs/architecture/threat-intelligence.md) —
+  Phase 10 threat intelligence & risk engine: provider interface/registry,
+  indicator normalization, provenance, caching, reputation aggregation,
+  vulnerability matching, external-provider opt-in policy
+- [docs/security/risk-model-v1.md](docs/security/risk-model-v1.md) —
+  the risk-scoring model's factors, weights, normalization, and
+  reproducible worked examples
