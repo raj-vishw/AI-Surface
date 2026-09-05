@@ -50,6 +50,16 @@ const (
 	EventHypothesisUpdated     EventType = "hypothesis_updated"
 	EventRelationshipCreated   EventType = "relationship_created"
 	EventInvestigationReopened EventType = "investigation_reopened"
+
+	// Phase 11 additions — a detection rule producing a match, and an
+	// alert's lifecycle, are both observation-sourced in the same sense
+	// as the first block above (their timestamps trace to a real
+	// detection-engine run, never fabricated); recorded here rather than
+	// in a second timeline table (phase11.md §100/§101/§102's own hedge:
+	// "unless the existing model explicitly supports both" — it does,
+	// via this single append-only EventType vocabulary).
+	EventDetectionMatchCreated EventType = "detection_match_created"
+	EventAlertStatusChanged    EventType = "alert_status_changed"
 )
 
 var validEventTypes = map[EventType]bool{
@@ -62,6 +72,7 @@ var validEventTypes = map[EventType]bool{
 	EventAssignmentChanged: true, EventStatusChanged: true, EventFindingAttached: true,
 	EventEvidenceAttached: true, EventHypothesisCreated: true, EventHypothesisUpdated: true,
 	EventRelationshipCreated: true, EventInvestigationReopened: true,
+	EventDetectionMatchCreated: true, EventAlertStatusChanged: true,
 }
 
 // Valid reports whether t is a recognized timeline event type.

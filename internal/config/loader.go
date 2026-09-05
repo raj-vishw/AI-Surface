@@ -123,6 +123,13 @@ const (
 	envIntelligenceThreatFeedRPS        = "AI_RECON_INTELLIGENCE_THREAT_FEED_REQUESTS_PER_SECOND"
 	envIntelligenceThreatFeedMaxRetries = "AI_RECON_INTELLIGENCE_THREAT_FEED_MAX_RETRIES"
 
+	envDetectionRulesEnabled            = "AI_RECON_DETECTION_RULES_ENABLED"
+	envDetectionRulesMaxConcurrency     = "AI_RECON_DETECTION_RULES_MAX_CONCURRENCY"
+	envDetectionRulesTimeout            = "AI_RECON_DETECTION_RULES_TIMEOUT"
+	envDetectionRulesClockSkew          = "AI_RECON_DETECTION_RULES_CLOCK_SKEW"
+	envDetectionRulesSuppressionWindow  = "AI_RECON_DETECTION_RULES_SUPPRESSION_DEFAULT_WINDOW"
+	envDetectionRulesHistoricalMaxRange = "AI_RECON_DETECTION_RULES_HISTORICAL_MAX_RANGE"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -383,6 +390,18 @@ func defaultConfig() *Config {
 			// customizing weights must supply the complete set via
 			// YAML, not a partial override.
 		},
+		DetectionRules: RuleEngineConfig{
+			Enabled: true,
+			Evaluation: RuleEvaluationConfig{
+				MaxConcurrency: 4,
+				Timeout:        30 * time.Second,
+				ClockSkew:      2 * time.Minute,
+			},
+			SuppressionDefaultWindow: 15 * time.Minute,
+			Historical: RuleHistoricalConfig{
+				MaxRange: 24 * time.Hour,
+			},
+		},
 		Logging: LoggingConfig{
 			Level:  "info",
 			Format: "json",
@@ -621,6 +640,13 @@ func applyEnvOverrides(cfg *Config) error {
 	setString(envIntelligenceThreatFeedAPIKeyEnv, &cfg.Intelligence.ThreatFeed.APIKeyEnv)
 	setFloat64(envIntelligenceThreatFeedRPS, &cfg.Intelligence.ThreatFeed.RequestsPerSecond)
 	setInt(envIntelligenceThreatFeedMaxRetries, &cfg.Intelligence.ThreatFeed.MaxRetries)
+
+	setBool(envDetectionRulesEnabled, &cfg.DetectionRules.Enabled)
+	setInt(envDetectionRulesMaxConcurrency, &cfg.DetectionRules.Evaluation.MaxConcurrency)
+	setDuration(envDetectionRulesTimeout, &cfg.DetectionRules.Evaluation.Timeout)
+	setDuration(envDetectionRulesClockSkew, &cfg.DetectionRules.Evaluation.ClockSkew)
+	setDuration(envDetectionRulesSuppressionWindow, &cfg.DetectionRules.SuppressionDefaultWindow)
+	setDuration(envDetectionRulesHistoricalMaxRange, &cfg.DetectionRules.Historical.MaxRange)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

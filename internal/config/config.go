@@ -12,18 +12,19 @@ import (
 
 // Config is the fully-resolved application configuration.
 type Config struct {
-	Application   ApplicationConfig   `yaml:"application"`
-	Server        ServerConfig        `yaml:"server"`
-	Database      DatabaseConfig      `yaml:"database"`
-	Redis         RedisConfig         `yaml:"redis"`
-	HTTPClient    HTTPClientConfig    `yaml:"http_client"`
-	Discovery     DiscoveryConfig     `yaml:"discovery"`
-	Fingerprint   FingerprintConfig   `yaml:"fingerprint"`
-	Detection     DetectionConfig     `yaml:"detection"`
-	Investigation InvestigationConfig `yaml:"investigation"`
-	Intelligence  IntelligenceConfig  `yaml:"intelligence"`
-	Logging       LoggingConfig       `yaml:"logging"`
-	Security      SecurityConfig      `yaml:"security"`
+	Application    ApplicationConfig   `yaml:"application"`
+	Server         ServerConfig        `yaml:"server"`
+	Database       DatabaseConfig      `yaml:"database"`
+	Redis          RedisConfig         `yaml:"redis"`
+	HTTPClient     HTTPClientConfig    `yaml:"http_client"`
+	Discovery      DiscoveryConfig     `yaml:"discovery"`
+	Fingerprint    FingerprintConfig   `yaml:"fingerprint"`
+	Detection      DetectionConfig     `yaml:"detection"`
+	Investigation  InvestigationConfig `yaml:"investigation"`
+	Intelligence   IntelligenceConfig  `yaml:"intelligence"`
+	DetectionRules RuleEngineConfig    `yaml:"detection_rules"`
+	Logging        LoggingConfig       `yaml:"logging"`
+	Security       SecurityConfig      `yaml:"security"`
 }
 
 // ApplicationConfig identifies the running application/environment.
@@ -542,6 +543,42 @@ type IntelligenceRiskWeightsConfig struct {
 	RecentChange int `yaml:"recent_change"`
 }
 
+// RuleEngineConfig configures Phase 11's detection rule engine
+// (internal/ruleengine / internal/service/rule). The Config field/YAML
+// key is "detection_rules", not "detection" — Phase 8 already claimed
+// that name for DetectionConfig (finding detection); phase11.md §107's
+// own worked example key ("detection:") is adapted here to avoid the
+// collision.
+type RuleEngineConfig struct {
+	Enabled bool `yaml:"enabled"`
+
+	Evaluation RuleEvaluationConfig `yaml:"evaluation"`
+
+	// SuppressionDefaultWindow is the default deduplication window used
+	// when a suppression doesn't specify one (phase11.md §34).  <= 0
+	// uses ruleengine.DefaultSuppressionWindow.
+	SuppressionDefaultWindow time.Duration `yaml:"suppression_default_window"`
+
+	Historical RuleHistoricalConfig `yaml:"historical"`
+}
+
+// RuleEvaluationConfig bounds how one Evaluate call may run
+// (phase11.md §89/§107/§108 — safe defaults, never unbounded).
+type RuleEvaluationConfig struct {
+	MaxConcurrency int           `yaml:"max_concurrency"`
+	Timeout        time.Duration `yaml:"timeout"`
+	// ClockSkew bounds how late an event may arrive relative to its
+	// evaluation window before it's treated as needing re-evaluation
+	// (phase11.md §46).
+	ClockSkew time.Duration `yaml:"clock_skew"`
+}
+
+// RuleHistoricalConfig bounds historical (backfill-style) evaluation
+// (phase11.md §57/§58/§108) — never unlimited without explicit opt-in.
+type RuleHistoricalConfig struct {
+	MaxRange time.Duration `yaml:"max_range"`
+}
+
 // SecurityConfig enforces the platform's authorization/safety boundary
 // (see work.md §2). RequireAuthorization and DryRun are read by later
 // phases' scanning subsystems; Phase 1 only carries the settings through
@@ -904,6 +941,25 @@ func (c *Config) Validate() error {
 		}
 		if intel.External.Enabled && intel.ThreatFeed.BaseURL != "" && intel.ThreatFeed.APIKeyEnv == "" {
 			errs = append(errs, "intelligence.threat_feed.api_key_env must be set when threat_feed.base_url is configured")
+		}
+	}
+
+	if c.DetectionRules.Enabled {
+		det := c.DetectionRules
+		if det.Evaluation.MaxConcurrency < 0 {
+			errs = append(errs, "detection_rules.evaluation.max_concurrency must not be negative")
+		}
+		if det.Evaluation.Timeout < 0 {
+			errs = append(errs, "detection_rules.evaluation.timeout must not be negative")
+		}
+		if det.Evaluation.ClockSkew < 0 {
+			errs = append(errs, "detection_rules.evaluation.clock_skew must not be negative")
+		}
+		if det.SuppressionDefaultWindow < 0 {
+			errs = append(errs, "detection_rules.suppression_default_window must not be negative")
+		}
+		if det.Historical.MaxRange < 0 {
+			errs = append(errs, "detection_rules.historical.max_range must not be negative")
 		}
 	}
 

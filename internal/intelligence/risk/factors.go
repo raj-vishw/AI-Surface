@@ -81,4 +81,16 @@ type Input struct {
 	AssetCriticality Criticality
 
 	RecentChange bool
+
+	// OpenDetectionMatchCount is how many open Phase 11 detection-rule
+	// matches currently exist for this asset — a documented, additive
+	// risk factor (phase11.md §98): a non-zero count contributes once
+	// (the asset has at least one active detection), plus a small
+	// per-match increment capped at
+	// Weights.DetectionMatchRepeatedMax so a large repeated-detection
+	// count can never dominate the score on its own. This never
+	// duplicates Phase 10's own risk calculator — it is a value Phase
+	// 11's service supplies into this same Input (see
+	// internal/service/intelligence's optional detection-match wiring).
+	OpenDetectionMatchCount int
 }

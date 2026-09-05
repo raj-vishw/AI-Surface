@@ -126,6 +126,20 @@ func (s *Scorer) Calculate(input Input) Result {
 		raw += s.weights.RecentChange
 	}
 
+	if input.OpenDetectionMatchCount > 0 {
+		pts := s.weights.DetectionMatchOpen
+		repeated := (input.OpenDetectionMatchCount - 1) * s.weights.DetectionMatchRepeatedPerCount
+		if s.weights.DetectionMatchRepeatedMax > 0 && repeated > s.weights.DetectionMatchRepeatedMax {
+			repeated = s.weights.DetectionMatchRepeatedMax
+		}
+		pts += repeated
+		if pts != 0 {
+			factors = append(factors, Factor{Name: "detection_match", Points: pts,
+				Description: fmt.Sprintf("%d open Phase 11 detection match(es) on this asset", input.OpenDetectionMatchCount)})
+			raw += pts
+		}
+	}
+
 	score := clamp(raw, 0, 100)
 	severity := SeverityForScore(score)
 	confidence := s.confidenceFor(input)
@@ -179,6 +193,9 @@ func (s *Scorer) confidenceFor(input Input) Confidence {
 		signals++
 	}
 	if input.IntelligenceVerdict != "" && input.IntelligenceVerdict != IntelligenceUnknown {
+		signals++
+	}
+	if input.OpenDetectionMatchCount > 0 {
 		signals++
 	}
 	switch {

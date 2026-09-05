@@ -223,11 +223,17 @@ const (
 	EntityScan          EntityType = "scan"
 	EntityTimelineEvent EntityType = "timeline_event"
 	EntityInvestigation EntityType = "investigation"
+	// EntityDetectionMatch/EntityAlert are Phase 11 additions — a
+	// detection match or alert promoted into (or referenced by) an
+	// investigation's timeline/evidence.
+	EntityDetectionMatch EntityType = "detection_match"
+	EntityAlert          EntityType = "alert"
 )
 
 var validEntityTypes = map[EntityType]bool{
 	EntityFinding: true, EntityAsset: true, EntityEndpoint: true, EntityTechnology: true,
 	EntityScan: true, EntityTimelineEvent: true, EntityInvestigation: true,
+	EntityDetectionMatch: true, EntityAlert: true,
 }
 
 // Valid reports whether t is a recognized entity type.

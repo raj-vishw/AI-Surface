@@ -69,6 +69,17 @@ type Weights struct {
 	// RecentChange applies when the asset/technology changed recently
 	// (phase10.md §34/§41's "Recent change: +10").
 	RecentChange int
+
+	// DetectionMatchOpen/DetectionMatchRepeatedPerCount/
+	// DetectionMatchRepeatedMax are Phase 11's documented extension to
+	// this model (phase11.md §98): DetectionMatchOpen applies once when
+	// Input.OpenDetectionMatchCount > 0; DetectionMatchRepeatedPerCount
+	// is added per additional open match beyond the first, capped at
+	// DetectionMatchRepeatedMax so a large repeated-detection count can
+	// never dominate the score.
+	DetectionMatchOpen             int
+	DetectionMatchRepeatedPerCount int
+	DetectionMatchRepeatedMax      int
 }
 
 // DefaultWeights returns the built-in v1 weighting (phase10.md §41's
@@ -102,5 +113,9 @@ func DefaultWeights() Weights {
 		AssetCriticalityLow:      -5,
 
 		RecentChange: 10,
+
+		DetectionMatchOpen:             10,
+		DetectionMatchRepeatedPerCount: 2,
+		DetectionMatchRepeatedMax:      10,
 	}
 }

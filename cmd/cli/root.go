@@ -25,8 +25,12 @@ import (
 // `risk` (threat intelligence enrichment and risk scoring over
 // already-known indicators/entities — local platform data by default,
 // external providers only when explicitly opted in; never a blocking,
-// remediation, or attribution tool). Commands belonging to later phases
-// (report, monitor) must not be added here yet.
+// remediation, or attribution tool); Phase 11 adds `detection` and
+// `alert` (a deterministic, versioned, testable detection rule engine
+// evaluating this platform's own normalized findings/asset/endpoint/
+// fingerprint/intelligence observations — never raw external logs; no
+// autonomous response, no offensive automation). Commands belonging to
+// later phases (report, monitor) must not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -55,6 +59,8 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewInvestigateCommand())
 	root.AddCommand(commands.NewIntelCommand())
 	root.AddCommand(commands.NewRiskCommand())
+	root.AddCommand(commands.NewDetectionCommand())
+	root.AddCommand(commands.NewAlertCommand())
 
 	return root
 }

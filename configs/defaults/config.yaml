@@ -270,6 +270,16 @@ intelligence:
   risk:
     weights: {} # empty = internal/intelligence/risk.DefaultWeights() (see docs/security/risk-model-v1.md); a customized set must supply every field, not a partial override
 
+detection_rules:
+  enabled: true
+  evaluation:
+    max_concurrency: 4
+    timeout: 30s
+    clock_skew: 2m # tolerance for late-arriving events relative to their evaluation window
+  suppression_default_window: 15m
+  historical:
+    max_range: 24h # widest [from, to) range `ai-recon detection evaluate` accepts without --backfill
+
 logging:
   level: info
   format: json

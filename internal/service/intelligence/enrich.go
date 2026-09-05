@@ -12,6 +12,7 @@ import (
 	domainfinding "ai-recon-platform/internal/domain/finding"
 	domainintel "ai-recon-platform/internal/domain/intelligence"
 	domaininvestigation "ai-recon-platform/internal/domain/investigation"
+	domainrule "ai-recon-platform/internal/domain/rule"
 	apperrors "ai-recon-platform/internal/errors"
 	"ai-recon-platform/internal/intelligence"
 	"ai-recon-platform/internal/intelligence/providers"
@@ -21,6 +22,7 @@ import (
 	intelrepo "ai-recon-platform/internal/repository/intelligence"
 	investigationrepo "ai-recon-platform/internal/repository/investigation"
 	"ai-recon-platform/internal/repository/pagination"
+	rulerepo "ai-recon-platform/internal/repository/rule"
 )
 
 // intelrepoVulnFilter builds the catalog listing filter for one observed
@@ -170,6 +172,25 @@ func (s *Service) recordMatchEvent(ctx context.Context, targetID uuid.UUID, vuln
 // signals (phase10.md §34/§37).
 func (s *Service) buildAssetRiskInput(ctx context.Context, asset domainasset.Asset, matches []domainintel.VulnerabilityMatch, overallIntel intelligence.AggregatedResult) risk.Input {
 	input := risk.Input{}
+
+	// Phase 11 extension (phase11.md §98) — optional: only queried when
+	// a caller has wired a detection-match repository via
+	// WithDetectionMatches. Detection matches are scoped by target, not
+	// individually by asset (a threshold/sequence match may span several
+	// assets), so this counts open matches for the ASSET'S TARGET as a
+	// whole — every asset within one target currently sees the same
+	// count. See docs/architecture/detection-engine.md's Known
+	// Limitations for the honest granularity tradeoff.
+	if s.detectionMatches != nil {
+		matchPage, err := s.detectionMatches.ListMatches(ctx, rulerepo.MatchListFilter{
+			TargetID: asset.TargetID, Status: domainrule.MatchOpen, Pagination: pagination.Params{Limit: pagination.MaxLimit},
+		})
+		if err != nil {
+			s.logger.Error("intelligence_risk_detection_match_list_failed", "asset_id", asset.ID, "error", err)
+		} else {
+			input.OpenDetectionMatchCount = len(matchPage.Items)
+		}
+	}
 
 	openPage, err := s.findings.List(ctx, findingrepo.ListFilter{AssetID: asset.ID, Pagination: pagination.Params{Limit: pagination.MaxLimit}})
 	if err != nil {

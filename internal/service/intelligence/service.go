@@ -31,6 +31,7 @@ import (
 	intelrepo "ai-recon-platform/internal/repository/intelligence"
 	investigationrepo "ai-recon-platform/internal/repository/investigation"
 	"ai-recon-platform/internal/repository/pagination"
+	rulerepo "ai-recon-platform/internal/repository/rule"
 	assetsvc "ai-recon-platform/internal/service/asset"
 	targetsvc "ai-recon-platform/internal/service/target"
 )
@@ -58,8 +59,24 @@ type Service struct {
 	datasetSource *providers.DatasetSource
 	scorer        *risk.Scorer
 
+	// detectionMatches is Phase 11's optional risk-model extension
+	// (phase11.md §98) — nil unless a caller opts in via
+	// WithDetectionMatches, so a deployment that hasn't wired Phase 11
+	// still gets a normal (zero-contribution) risk calculation. See
+	// buildAssetRiskInput.
+	detectionMatches rulerepo.MatchRepository
+
 	cfg    intelligence.Config
 	logger *slog.Logger
+}
+
+// WithDetectionMatches opts a Service into Phase 11's "detection_match"
+// risk factor (phase11.md §98) — CLI wiring that has already built a
+// Phase 11 repository may call this once after NewService. Returns s for
+// chaining.
+func (s *Service) WithDetectionMatches(m rulerepo.MatchRepository) *Service {
+	s.detectionMatches = m
+	return s
 }
 
 // NewService builds a Service. targets/assets are Phase 2's services;

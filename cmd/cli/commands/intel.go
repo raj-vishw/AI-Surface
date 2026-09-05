@@ -20,6 +20,7 @@ import (
 	"ai-recon-platform/internal/intelligence/risk"
 	"ai-recon-platform/internal/logging"
 	"ai-recon-platform/internal/repository/pagination"
+	rulerepo "ai-recon-platform/internal/repository/rule"
 	assetsvc "ai-recon-platform/internal/service/asset"
 	intelligencesvc "ai-recon-platform/internal/service/intelligence"
 	targetsvc "ai-recon-platform/internal/service/target"
@@ -108,6 +109,11 @@ func buildIntelligenceService(cmd *cobra.Command) (*intelligencesvc.Service, *da
 	targets := targetsvc.NewService(db)
 	assets := assetsvc.NewService(db)
 	svc := intelligencesvc.NewService(db, targets, assets, registry, datasetSource, engineCfg, weights, logger)
+	// Phase 11 extension (phase11.md §98) — optional, additive: risk
+	// calculations also consider open detection-rule matches when
+	// Phase 11's tables exist. Never a second risk calculator — see
+	// internal/intelligence/risk.Weights.DetectionMatchOpen.
+	svc.WithDetectionMatches(rulerepo.NewPostgresRepository(db))
 	return svc, db, nil
 }
 

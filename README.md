@@ -509,12 +509,56 @@ score prints exactly which factors produced it. This platform never
 blocks an IP/domain, modifies infrastructure, or infers a threat actor's
 identity from intelligence data.
 
+## Detection Engineering
+
+`ai-recon detection` and `ai-recon alert` let an analyst define, version,
+test, and evaluate deterministic detection rules against this platform's
+own already-normalized findings, asset/endpoint observations, technology
+fingerprints, and threat intelligence — see
+[docs/architecture/detection-engine.md](docs/architecture/detection-engine.md),
+[docs/detection/rule-authoring.md](docs/detection/rule-authoring.md), and
+[docs/detection/builtin-rules.md](docs/detection/builtin-rules.md).
+There is no raw-log-ingestion pipeline in this platform, so a rule's
+"event" is always a projection of a row Phase 2/6/7/8/10 already
+persisted, never an external log line.
+
+```sh
+# Inspect, test, and install the 5 built-in rules — no database needed to test.
+ai-recon detection builtin list
+ai-recon detection builtin test high_severity_finding_burst
+ai-recon detection builtin install repeated_malicious_intelligence_signal --target example.com --created-by analyst1
+
+# Author your own rule (JSON or YAML — see docs/detection/rule-authoring.md).
+ai-recon detection create --target example.com --name my_rule --definition-file my_rule.yaml --created-by analyst1
+ai-recon detection evaluate <rule-id> --dry-run --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
+ai-recon detection enable <rule-id> --actor analyst1
+
+# Work the resulting alerts.
+ai-recon alert list
+ai-recon alert acknowledge <alert-id>
+ai-recon alert suppress <alert-id> --reason "known scanner" --actor analyst1 --duration 30m
+ai-recon alert investigate <alert-id> --actor analyst1
+```
+
+Four rule types only (`field_match`, `threshold`, `sequence`,
+`aggregation`) — never an arbitrary expression language. A rule version
+is immutable once created (editing always creates a new version, so a
+historical match always remains reproducible); a disabled rule produces
+no new matches while its history stays queryable. Every match carries
+its evidence (which events caused it) and a human-readable explanation —
+never a bare "rule matched". Suppressing a match or alert always
+requires a reason and never deletes the underlying evidence. Promoting
+an alert to a Phase 9 investigation automatically attaches its evidence
+and a timeline event — no manual reconstruction needed. This platform
+implements no autonomous response and no offensive automation of any
+kind.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
@@ -523,8 +567,9 @@ diagnostics for exercising the Phase 2 persistence layer by hand (see
 their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
 `ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`,
-`ai-recon investigate`, `ai-recon intel`, and `ai-recon risk` are real,
-required parts of running Phase 3/4/5/6/7/8/9/10.
+`ai-recon investigate`, `ai-recon intel`, `ai-recon risk`,
+`ai-recon detection`, and `ai-recon alert` are real, required parts of
+running Phase 3/4/5/6/7/8/9/10/11.
 
 ## Further reading
 
@@ -563,3 +608,12 @@ required parts of running Phase 3/4/5/6/7/8/9/10.
 - [docs/security/risk-model-v1.md](docs/security/risk-model-v1.md) —
   the risk-scoring model's factors, weights, normalization, and
   reproducible worked examples
+- [docs/architecture/detection-engine.md](docs/architecture/detection-engine.md) —
+  Phase 11 detection rule engine: rule language/schema/validation/
+  compilation, threshold/sequence/aggregation evaluation, deduplication,
+  suppression, alert lifecycle, investigation/risk integration
+- [docs/detection/rule-authoring.md](docs/detection/rule-authoring.md) —
+  worked examples for every rule type plus the testing/deployment
+  workflow
+- [docs/detection/builtin-rules.md](docs/detection/builtin-rules.md) —
+  purpose, logic, and false-positive guidance for all 5 built-in rules
