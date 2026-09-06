@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------
+ * Design tokens — the ONE place severity/status/surface colors are
+ * defined. Every component reads these tokens (via Tailwind utilities
+ * below) rather than hard-coding a color, so severity stays visually
+ * consistent everywhere it appears (spec §5/§56).
+ * ------------------------------------------------------------------- */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Base surfaces — dark-first, restrained (spec §4) */
+  --color-bg: oklch(0.145 0.004 264);
+  --color-surface: oklch(0.185 0.004 264);
+  --color-surface-hover: oklch(0.22 0.006 264);
+  --color-surface-elevated: oklch(0.21 0.006 264);
+  --color-border: oklch(0.29 0.006 264);
+  --color-border-strong: oklch(0.36 0.008 264);
+
+  --color-text: oklch(0.95 0.003 264);
+  --color-text-muted: oklch(0.68 0.006 264);
+  --color-text-faint: oklch(0.48 0.008 264);
+
+  /* Accent — a single restrained accent, used sparingly (spec §4/§5) */
+  --color-accent: oklch(0.72 0.14 232);
+  --color-accent-strong: oklch(0.8 0.15 232);
+  --color-accent-muted: oklch(0.72 0.14 232 / 0.15);
+
+  /* Semantic status */
+  --color-success: oklch(0.72 0.15 155);
+  --color-success-muted: oklch(0.72 0.15 155 / 0.14);
+  --color-warning: oklch(0.79 0.15 80);
+  --color-warning-muted: oklch(0.79 0.15 80 / 0.14);
+  --color-danger: oklch(0.63 0.21 25);
+  --color-danger-muted: oklch(0.63 0.21 25 / 0.14);
+  --color-info: oklch(0.7 0.1 240);
+  --color-info-muted: oklch(0.7 0.1 240 / 0.14);
+
+  /* Severity scale — used identically everywhere severity is shown */
+  --color-severity-critical: oklch(0.6 0.22 20);
+  --color-severity-critical-muted: oklch(0.6 0.22 20 / 0.15);
+  --color-severity-high: oklch(0.68 0.19 45);
+  --color-severity-high-muted: oklch(0.68 0.19 45 / 0.15);
+  --color-severity-medium: oklch(0.78 0.15 85);
+  --color-severity-medium-muted: oklch(0.78 0.15 85 / 0.15);
+  --color-severity-low: oklch(0.72 0.11 230);
+  --color-severity-low-muted: oklch(0.72 0.11 230 / 0.15);
+  --color-severity-info: oklch(0.62 0.01 264);
+  --color-severity-info-muted: oklch(0.62 0.01 264 / 0.15);
+
+  /* Active / inactive */
+  --color-active: oklch(0.72 0.15 155);
+  --color-inactive: oklch(0.55 0.01 264);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-muted);
+    color: var(--color-text);
+  }
+
+  /* Visible focus states everywhere (spec §50) — never suppressed */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-strong);
+    border-radius: 999px;
+    border: 2px solid var(--color-bg);
+  }
+}
+
+@layer utilities {
+  .font-technical {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+}
