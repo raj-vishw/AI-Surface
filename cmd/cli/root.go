@@ -34,8 +34,12 @@ import (
 // engine linking findings/detection matches/alerts/intelligence/assets
 // into graphs and, where the evidence classifies into one, an attack
 // chain — never automatically labeled a confirmed attack; analyst
-// confirmation/dismissal only). Commands belonging to later phases
-// (report, monitor) must not be added here yet.
+// confirmation/dismissal only). Phase 13 adds `ai` (an evidence-grounded,
+// citation-validated investigation copilot reasoning only over this
+// platform's own structured evidence via read-only tools — no autonomous
+// action, disabled by default, usable entirely without any external
+// provider). Commands belonging to later phases (monitor) must not be
+// added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -68,6 +72,7 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewAlertCommand())
 	root.AddCommand(commands.NewCorrelationCommand())
 	root.AddCommand(commands.NewChainCommand())
+	root.AddCommand(commands.NewAICommand())
 
 	return root
 }

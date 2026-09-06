@@ -110,6 +110,11 @@ type HypothesisRepository interface {
 type NoteRepository interface {
 	AddNote(ctx context.Context, n investigation.Note) (investigation.Note, error)
 	ListNotes(ctx context.Context, investigationID uuid.UUID) ([]investigation.Note, error)
+	// ApproveNote records an analyst's explicit approval of an
+	// AI-generated note (phase13.md §45) — it only ever sets
+	// ApprovedBy/ApprovedAt, never Content, preserving Note's own
+	// immutable-content discipline (see Note's doc comment).
+	ApproveNote(ctx context.Context, id uuid.UUID, approvedBy string) (investigation.Note, error)
 }
 
 // ClusterListFilter narrows an incident-cluster listing.

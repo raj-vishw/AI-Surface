@@ -15,12 +15,23 @@ import (
 // UpdateNote operation at all. An analyst who wants to correct or extend
 // a note adds a new one; the original stays exactly as written, so the
 // investigation's history is never silently rewritten.
+//
+// AIGenerated/ApprovedBy/ApprovedAt are Phase 13 additions (phase13.md
+// §44/§45) — the one deliberate, narrow exception to the immutability
+// rule above: ApproveNote (see NoteRepository) may set ApprovedBy/
+// ApprovedAt after creation, but Content itself is still never rewritten.
+// An AI-generated note is never automatically marked approved — that is
+// always a distinct, explicit analyst action.
 type Note struct {
 	ID              uuid.UUID
 	InvestigationID uuid.UUID
 	AuthorID        string
 
 	Content string
+
+	AIGenerated bool
+	ApprovedBy  *string
+	ApprovedAt  *time.Time
 
 	CreatedAt time.Time
 }

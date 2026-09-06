@@ -293,6 +293,34 @@ correlation:
   historical_max_range: 24h # widest [--from, --to) range `ai-recon correlation evaluate` accepts
   max_candidates: 2000 # observations considered per evaluation before candidate selection truncates
 
+ai:
+  # Disabled by default (phase13.md §85) — an operator must explicitly
+  # enable this section for production use. The platform's core security
+  # functionality (detection/alerting/correlation/risk/investigation/
+  # intelligence/timeline) never depends on this section being enabled.
+  enabled: false
+  provider:
+    name: mock # "mock" (no external dependency) or "openai" (OpenAI-compatible)
+    model: default
+    endpoint: "" # required when name is "openai", e.g. https://api.openai.com/v1/chat/completions
+    api_key_env: "" # name of an environment variable holding the API key — never the key itself
+    max_tokens: 2000
+    temperature: 0.2
+  limits:
+    max_context_facts_per_type: 25
+    max_context_facts: 100
+    max_output_tokens: 2000
+  timeouts:
+    request: 30s
+    tool: 5s
+  retries:
+    max: 1
+    backoff: 500ms
+  rate_limit:
+    per_user_per_minute: 20
+    per_target_per_minute: 60
+    max_concurrent: 4
+
 logging:
   level: info
   format: json

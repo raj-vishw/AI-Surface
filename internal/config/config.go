@@ -24,6 +24,7 @@ type Config struct {
 	Intelligence   IntelligenceConfig  `yaml:"intelligence"`
 	DetectionRules RuleEngineConfig    `yaml:"detection_rules"`
 	Correlation    CorrelationConfig   `yaml:"correlation"`
+	AI             AIConfig            `yaml:"ai"`
 	Logging        LoggingConfig       `yaml:"logging"`
 	Security       SecurityConfig      `yaml:"security"`
 }
@@ -622,6 +623,62 @@ type CorrelationWorkersConfig struct {
 	MaxConcurrency int `yaml:"max_concurrency"`
 }
 
+// AIConfig configures Phase 13's AI-assisted investigation copilot
+// (internal/ai / internal/service/ai). Disabled by default (phase13.md
+// §85: "AI should be explicitly enabled for production use") — an
+// operator opts in explicitly, and even then defaults to the "mock"
+// provider that requires no external dependency (phase13.md §88's "the
+// application must remain usable without an external AI provider").
+type AIConfig struct {
+	Enabled bool `yaml:"enabled"`
+
+	Provider  AIProviderConfig  `yaml:"provider"`
+	Limits    AILimitsConfig    `yaml:"limits"`
+	Timeouts  AITimeoutsConfig  `yaml:"timeouts"`
+	Retries   AIRetriesConfig   `yaml:"retries"`
+	RateLimit AIRateLimitConfig `yaml:"rate_limit"`
+}
+
+// AIProviderConfig configures which internal/ai.Provider is used and how
+// (phase13.md §4). APIKeyEnv names an environment variable — the key
+// itself is never accepted here (phase13.md §5).
+type AIProviderConfig struct {
+	Name        string  `yaml:"name"`
+	Model       string  `yaml:"model"`
+	Endpoint    string  `yaml:"endpoint"`
+	APIKeyEnv   string  `yaml:"api_key_env"`
+	MaxTokens   int     `yaml:"max_tokens"`
+	Temperature float64 `yaml:"temperature"`
+}
+
+// AILimitsConfig bounds context size (phase13.md §13).
+type AILimitsConfig struct {
+	MaxFactsPerType int `yaml:"max_context_facts_per_type"`
+	MaxTotalFacts   int `yaml:"max_context_facts"`
+	MaxOutputTokens int `yaml:"max_output_tokens"`
+}
+
+// AITimeoutsConfig bounds request/tool durations (phase13.md §56).
+type AITimeoutsConfig struct {
+	Request time.Duration `yaml:"request"`
+	Tool    time.Duration `yaml:"tool"`
+}
+
+// AIRetriesConfig bounds provider retry behavior (phase13.md §57).
+type AIRetriesConfig struct {
+	Max     int           `yaml:"max"`
+	Backoff time.Duration `yaml:"backoff"`
+}
+
+// AIRateLimitConfig bounds AI request volume (phase13.md §55/§112) — a
+// process-local limiter (see internal/service/ai.RateLimitConfig's own
+// doc comment on why: no shared cache/queue infrastructure exists yet).
+type AIRateLimitConfig struct {
+	PerUserPerMinute   int `yaml:"per_user_per_minute"`
+	PerTargetPerMinute int `yaml:"per_target_per_minute"`
+	MaxConcurrent      int `yaml:"max_concurrent"`
+}
+
 // SecurityConfig enforces the platform's authorization/safety boundary
 // (see work.md §2). RequireAuthorization and DryRun are read by later
 // phases' scanning subsystems; Phase 1 only carries the settings through
@@ -1028,6 +1085,34 @@ func (c *Config) Validate() error {
 		}
 		if corr.MaxCandidates < 0 {
 			errs = append(errs, "correlation.max_candidates must not be negative")
+		}
+	}
+
+	if c.AI.Enabled {
+		aiCfg := c.AI
+		if strings.TrimSpace(aiCfg.Provider.Name) == "" {
+			errs = append(errs, "ai.provider.name must not be empty when ai.enabled is true")
+		}
+		if aiCfg.Provider.Name == "openai" && strings.TrimSpace(aiCfg.Provider.Endpoint) == "" {
+			errs = append(errs, "ai.provider.endpoint must not be empty when ai.provider.name is \"openai\"")
+		}
+		if aiCfg.Provider.MaxTokens < 0 {
+			errs = append(errs, "ai.provider.max_tokens must not be negative")
+		}
+		if aiCfg.Provider.Temperature < 0 || aiCfg.Provider.Temperature > 2 {
+			errs = append(errs, "ai.provider.temperature must be between 0 and 2")
+		}
+		if aiCfg.Limits.MaxFactsPerType < 0 || aiCfg.Limits.MaxTotalFacts < 0 || aiCfg.Limits.MaxOutputTokens < 0 {
+			errs = append(errs, "ai.limits values must not be negative")
+		}
+		if aiCfg.Timeouts.Request < 0 || aiCfg.Timeouts.Tool < 0 {
+			errs = append(errs, "ai.timeouts values must not be negative")
+		}
+		if aiCfg.Retries.Max < 0 || aiCfg.Retries.Backoff < 0 {
+			errs = append(errs, "ai.retries values must not be negative")
+		}
+		if aiCfg.RateLimit.PerUserPerMinute < 0 || aiCfg.RateLimit.PerTargetPerMinute < 0 || aiCfg.RateLimit.MaxConcurrent < 0 {
+			errs = append(errs, "ai.rate_limit values must not be negative")
 		}
 	}
 

@@ -720,21 +720,28 @@ func (r *PostgresRepository) ListHypothesisEvidence(ctx context.Context, hypothe
 
 // --- investigation_notes ---------------------------------------------------
 
-const noteColumns = `id, investigation_id, author_id, content, created_at`
+const noteColumns = `id, investigation_id, author_id, content, ai_generated, approved_by, approved_at, created_at`
 
 func scanNote(row pgx.Row) (investigation.Note, error) {
-	var n investigation.Note
-	err := row.Scan(&n.ID, &n.InvestigationID, &n.AuthorID, &n.Content, &n.CreatedAt)
-	return n, err
+	var (
+		n          investigation.Note
+		approvedAt pgtype.Timestamptz
+	)
+	err := row.Scan(&n.ID, &n.InvestigationID, &n.AuthorID, &n.Content, &n.AIGenerated, &n.ApprovedBy, &approvedAt, &n.CreatedAt)
+	if err != nil {
+		return investigation.Note{}, err
+	}
+	n.ApprovedAt = timePtr(approvedAt)
+	return n, nil
 }
 
 // AddNote implements NoteRepository.
 func (r *PostgresRepository) AddNote(ctx context.Context, n investigation.Note) (investigation.Note, error) {
 	row := r.db.QueryRow(ctx, `
-		INSERT INTO investigation_notes (investigation_id, author_id, content)
-		VALUES ($1, $2, $3)
+		INSERT INTO investigation_notes (investigation_id, author_id, content, ai_generated)
+		VALUES ($1, $2, $3, $4)
 		RETURNING `+noteColumns,
-		n.InvestigationID, n.AuthorID, n.Content,
+		n.InvestigationID, n.AuthorID, n.Content, n.AIGenerated,
 	)
 	result, err := scanNote(row)
 	if err != nil {
@@ -759,6 +766,21 @@ func (r *PostgresRepository) ListNotes(ctx context.Context, investigationID uuid
 		items = append(items, n)
 	}
 	return items, sqlerr.Translate(rows.Err(), "iterating notes")
+}
+
+// ApproveNote implements NoteRepository.
+func (r *PostgresRepository) ApproveNote(ctx context.Context, id uuid.UUID, approvedBy string) (investigation.Note, error) {
+	row := r.db.QueryRow(ctx, `
+		UPDATE investigation_notes SET approved_by = $2, approved_at = now()
+		WHERE id = $1 RETURNING `+noteColumns, id, approvedBy)
+	result, err := scanNote(row)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return investigation.Note{}, apperrors.NewNotFound("note not found", err)
+		}
+		return investigation.Note{}, sqlerr.Translate(err, "approving note")
+	}
+	return result, nil
 }
 
 // --- incident_clusters / incident_cluster_items ---------------------------

@@ -68,6 +68,17 @@ const (
 	// consolidation phase11.md's own two additions above already applied.
 	EventCorrelationAttached EventType = "correlation_attached"
 	EventAttackChainCreated  EventType = "attack_chain_created"
+
+	// EventAIAnalysisGenerated/EventAINoteCreated/EventAINoteApproved are
+	// Phase 13 additions — an AI task producing an analysis, a resulting
+	// note saved as a draft, and an analyst's explicit approval of it
+	// (phase13.md §53's AI audit trail: "AI response", "AI note created",
+	// "AI note approved"). Recorded here rather than a second timeline
+	// table — the same consolidation Phase 11/12's own additions above
+	// already applied.
+	EventAIAnalysisGenerated EventType = "ai_analysis_generated"
+	EventAINoteCreated       EventType = "ai_note_created"
+	EventAINoteApproved      EventType = "ai_note_approved"
 )
 
 var validEventTypes = map[EventType]bool{
@@ -82,6 +93,7 @@ var validEventTypes = map[EventType]bool{
 	EventRelationshipCreated: true, EventInvestigationReopened: true,
 	EventDetectionMatchCreated: true, EventAlertStatusChanged: true,
 	EventCorrelationAttached: true, EventAttackChainCreated: true,
+	EventAIAnalysisGenerated: true, EventAINoteCreated: true, EventAINoteApproved: true,
 }
 
 // Valid reports whether t is a recognized timeline event type.

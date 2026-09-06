@@ -596,12 +596,55 @@ axes, documented in `internal/correlation/scoring.go`. This platform
 implements no autonomous response, no offensive automation, and no
 automatic threat attribution.
 
+## AI Investigation Assistant
+
+`ai-recon ai` is an **analyst assistant, not an autonomous security
+operator** (disabled by default). It reasons only over evidence already
+persisted by Phases 2-12 — findings, alerts, detection matches,
+correlations, attack chains, intelligence, timeline, notes — through a
+narrow set of read-only tools, and every claim it makes is either directly
+cited to that evidence or explicitly labeled `Inferred`/`Unknown`. See
+[docs/architecture/ai-assistant.md](docs/architecture/ai-assistant.md),
+[docs/ai/safety.md](docs/ai/safety.md), and
+[docs/ai/investigation-guide.md](docs/ai/investigation-guide.md).
+
+```sh
+ai-recon ai status
+
+ai-recon ai summarize <investigation-id> --actor analyst1
+ai-recon ai analyze <investigation-id> --actor analyst1      # timeline
+ai-recon ai questions <investigation-id> --actor analyst1
+ai-recon ai report <investigation-id> --actor analyst1 --save-as-note
+
+ai-recon ai explain-alert <alert-id> --actor analyst1
+ai-recon ai explain-detection <detection-match-id> --actor analyst1
+ai-recon ai analyze-correlation <correlation-id> --actor analyst1
+ai-recon ai analyze-correlation <correlation-id> --actor analyst1 --chain
+
+# A bounded, session-scoped conversation.
+ai-recon ai session new --investigation <id> --actor analyst1
+ai-recon ai chat <session-id> "What evidence is missing?"
+
+# AI-generated notes are always unapproved until an analyst says otherwise.
+ai-recon ai note approve <note-id> --approver analyst1
+```
+
+Citations are validated against the exact evidence supplied — a
+fabricated reference is always removed, never presented as real. The
+platform is fully usable with the built-in `mock` provider and zero
+external dependency; an OpenAI-compatible provider is an explicit opt-in
+(`ai.provider.name: openai`), and every credential is read from an
+environment variable, never from configuration. Nothing in this phase
+changes an alert's severity, an investigation's status, a correlation's
+confirmation state, or a risk score — those remain exclusively analyst
+actions.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`, `ai`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
@@ -611,9 +654,9 @@ their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
 `ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`,
 `ai-recon investigate`, `ai-recon intel`, `ai-recon risk`,
-`ai-recon detection`, `ai-recon alert`, `ai-recon correlation`, and
-`ai-recon chain` are real, required parts of running Phase
-3/4/5/6/7/8/9/10/11/12.
+`ai-recon detection`, `ai-recon alert`, `ai-recon correlation`,
+`ai-recon chain`, and `ai-recon ai` are real, required parts of running
+Phase 3/4/5/6/7/8/9/10/11/12/13.
 
 ## Further reading
 
@@ -670,3 +713,12 @@ their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 - [docs/investigation/attack-chains.md](docs/investigation/attack-chains.md) —
   attack-chain model, stage classification, confidence weighting, gaps,
   analyst confirmation
+- [docs/architecture/ai-assistant.md](docs/architecture/ai-assistant.md) —
+  Phase 13 AI assistant: provider abstraction, context builder, tool
+  system, prompt architecture, citation/validation pipeline, sessions
+- [docs/ai/safety.md](docs/ai/safety.md) — prompt injection defense, trust
+  boundaries, secret handling, tool authorization, hallucination defense,
+  attribution policy
+- [docs/ai/investigation-guide.md](docs/ai/investigation-guide.md) —
+  worked examples for every AI task, sessions/chat, and provider
+  configuration

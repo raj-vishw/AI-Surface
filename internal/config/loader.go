@@ -139,6 +139,24 @@ const (
 	envCorrelationHistoricalMaxRange = "AI_RECON_CORRELATION_HISTORICAL_MAX_RANGE"
 	envCorrelationMaxCandidates      = "AI_RECON_CORRELATION_MAX_CANDIDATES"
 
+	envAIEnabled             = "AI_RECON_AI_ENABLED"
+	envAIProviderName        = "AI_RECON_AI_PROVIDER_NAME"
+	envAIProviderModel       = "AI_RECON_AI_PROVIDER_MODEL"
+	envAIProviderEndpoint    = "AI_RECON_AI_PROVIDER_ENDPOINT"
+	envAIProviderAPIKeyEnv   = "AI_RECON_AI_PROVIDER_API_KEY_ENV" //nolint:gosec // this is an env var NAME, not a credential value
+	envAIProviderMaxTokens   = "AI_RECON_AI_PROVIDER_MAX_TOKENS"  //nolint:gosec // false positive: "tokens" here means LLM output tokens, not a credential
+	envAIProviderTemp        = "AI_RECON_AI_PROVIDER_TEMPERATURE"
+	envAILimitsFactsPerType  = "AI_RECON_AI_LIMITS_MAX_CONTEXT_FACTS_PER_TYPE"
+	envAILimitsTotalFacts    = "AI_RECON_AI_LIMITS_MAX_CONTEXT_FACTS"
+	envAILimitsOutputTokens  = "AI_RECON_AI_LIMITS_MAX_OUTPUT_TOKENS" //nolint:gosec // false positive: "tokens" here means LLM output tokens, not a credential
+	envAITimeoutRequest      = "AI_RECON_AI_TIMEOUTS_REQUEST"
+	envAITimeoutTool         = "AI_RECON_AI_TIMEOUTS_TOOL"
+	envAIRetriesMax          = "AI_RECON_AI_RETRIES_MAX"
+	envAIRetriesBackoff      = "AI_RECON_AI_RETRIES_BACKOFF"
+	envAIRateLimitPerUser    = "AI_RECON_AI_RATE_LIMIT_PER_USER_PER_MINUTE"
+	envAIRateLimitPerTarget  = "AI_RECON_AI_RATE_LIMIT_PER_TARGET_PER_MINUTE"
+	envAIRateLimitConcurrent = "AI_RECON_AI_RATE_LIMIT_MAX_CONCURRENT"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -427,6 +445,26 @@ func defaultConfig() *Config {
 			HistoricalMaxRange: 24 * time.Hour,
 			MaxCandidates:      2000,
 		},
+		AI: AIConfig{
+			// Disabled by default (phase13.md §85) — an operator must
+			// explicitly enable this section for production use.
+			Enabled: false,
+			Provider: AIProviderConfig{
+				Name: "mock", Model: "default", MaxTokens: 2000, Temperature: 0.2,
+			},
+			Limits: AILimitsConfig{
+				MaxFactsPerType: 25, MaxTotalFacts: 100, MaxOutputTokens: 2000,
+			},
+			Timeouts: AITimeoutsConfig{
+				Request: 30 * time.Second, Tool: 5 * time.Second,
+			},
+			Retries: AIRetriesConfig{
+				Max: 1, Backoff: 500 * time.Millisecond,
+			},
+			RateLimit: AIRateLimitConfig{
+				PerUserPerMinute: 20, PerTargetPerMinute: 60, MaxConcurrent: 4,
+			},
+		},
 		Logging: LoggingConfig{
 			Level:  "info",
 			Format: "json",
@@ -681,6 +719,24 @@ func applyEnvOverrides(cfg *Config) error {
 	setInt(envCorrelationWorkersConcurrency, &cfg.Correlation.Workers.MaxConcurrency)
 	setDuration(envCorrelationHistoricalMaxRange, &cfg.Correlation.HistoricalMaxRange)
 	setInt(envCorrelationMaxCandidates, &cfg.Correlation.MaxCandidates)
+
+	setBool(envAIEnabled, &cfg.AI.Enabled)
+	setString(envAIProviderName, &cfg.AI.Provider.Name)
+	setString(envAIProviderModel, &cfg.AI.Provider.Model)
+	setString(envAIProviderEndpoint, &cfg.AI.Provider.Endpoint)
+	setString(envAIProviderAPIKeyEnv, &cfg.AI.Provider.APIKeyEnv)
+	setInt(envAIProviderMaxTokens, &cfg.AI.Provider.MaxTokens)
+	setFloat64(envAIProviderTemp, &cfg.AI.Provider.Temperature)
+	setInt(envAILimitsFactsPerType, &cfg.AI.Limits.MaxFactsPerType)
+	setInt(envAILimitsTotalFacts, &cfg.AI.Limits.MaxTotalFacts)
+	setInt(envAILimitsOutputTokens, &cfg.AI.Limits.MaxOutputTokens)
+	setDuration(envAITimeoutRequest, &cfg.AI.Timeouts.Request)
+	setDuration(envAITimeoutTool, &cfg.AI.Timeouts.Tool)
+	setInt(envAIRetriesMax, &cfg.AI.Retries.Max)
+	setDuration(envAIRetriesBackoff, &cfg.AI.Retries.Backoff)
+	setInt(envAIRateLimitPerUser, &cfg.AI.RateLimit.PerUserPerMinute)
+	setInt(envAIRateLimitPerTarget, &cfg.AI.RateLimit.PerTargetPerMinute)
+	setInt(envAIRateLimitConcurrent, &cfg.AI.RateLimit.MaxConcurrent)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)
