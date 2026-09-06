@@ -1,0 +1,55 @@
+# Production-environment overrides, layered on top of
+# configs/defaults/config.yaml (see internal/config.Load's four-layer
+# precedence: hard-coded defaults -> defaults/config.yaml ->
+# <environment>/config.yaml -> AI_RECON_* environment variables).
+#
+# This file intentionally does NOT set database/redis host, user, or any
+# password/API-key field — those come from AI_RECON_DATABASE_* /
+# AI_RECON_REDIS_* / *_API_KEY_ENV environment variables or your
+# deployment's secret manager (see docs/operations/production-readiness.md
+# and .env.example). Never add credentials to this file: it is committed
+# to version control.
+#
+# What this file changes from configs/defaults/config.yaml, and why:
+
+database:
+  ssl_mode: require # defaults.yaml's "disable" is a local-Postgres-only
+  # convenience; a production database connection must be encrypted in
+  # transit unless the operator's own network topology already guarantees
+  # it (e.g. a Unix socket or an already-encrypted service mesh) — see
+  # docs/operations/production-readiness.md's "Networking" section, which
+  # documents the sslmode values this platform's DatabaseConfig.Validate()
+  # already accepts (require/verify-ca/verify-full) and what each buys.
+
+logging:
+  level: info # never debug in production (phase15.md §33) — debug-level
+  # logging in this codebase's detection/discovery/AI paths can include
+  # verbose request/response detail not intended for long-term log
+  # retention. Raise to "warn" if info-level volume is a concern; never
+  # lower to "debug" via this file — use AI_RECON_LOG_LEVEL transiently on
+  # a single instance instead, and revert it.
+  format: json # required for production log aggregation (internal/logging's own default rationale)
+
+ai:
+  # ai.enabled is deliberately left unset here (inherits defaults.yaml's
+  # `false`) — Phase 13's own instruction is that AI must be an explicit,
+  # per-deployment opt-in, never turned on by an environment file (see
+  # docs/ai/safety.md). A production operator who wants AI assistance sets
+  # AI_RECON_AI_ENABLED=true (and the matching provider settings)
+  # themselves, not by this file's presence.
+  provider:
+    name: mock # placeholder acknowledging the same reasoning; overridden
+    # via AI_RECON_AI_PROVIDER_NAME/AI_RECON_AI_PROVIDER_API_KEY_ENV when
+    # an operator actually enables AI.
+
+intelligence:
+  external:
+    enabled: false # unchanged from defaults.yaml — external threat-feed
+    # enrichment remains an explicit opt-in in production exactly as it is
+    # in development; this entry exists only to make that decision visible
+    # in the production overlay rather than silent inheritance.
+
+security:
+  require_authorization: true # must never be false in production — see
+  # SECURITY.md and docs/security/production-hardening.md.
+  dry_run: false

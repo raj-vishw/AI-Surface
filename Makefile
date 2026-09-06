@@ -11,7 +11,8 @@ BIN_DIR      := bin
 COMPOSE_FILE := deployments/docker/docker-compose/dev.yml
 BIN          ?= server
 
-.PHONY: build build-all test test-unit test-integration vet fmt fmt-check lint \
+.PHONY: build build-all test test-unit test-integration test-race vet fmt fmt-check lint \
+        vuln-check secret-scan security-check \
         dev-up dev-down dev-logs dev-ps dev-wait docker-up docker-down \
         migrate migrate-up migrate-status migrate-version \
         run-server run-worker run-cli clean
@@ -40,6 +41,10 @@ test-unit: test
 test-integration:
 	go test -tags=integration ./...
 
+## Run the full test suite under the race detector (phase15.md §131/§158)
+test-race:
+	go test -race ./...
+
 vet:
 	go vet ./...
 
@@ -59,6 +64,23 @@ fmt-check:
 ## Run golangci-lint (must be installed: https://golangci-lint.run/welcome/install/)
 lint:
 	golangci-lint run ./...
+
+## Check Go module dependencies (incl. the standard library) for known
+## vulnerabilities (phase15.md §63; must be installed:
+## `go install golang.org/x/vuln/cmd/govulncheck@latest`)
+vuln-check:
+	govulncheck ./...
+
+## Scan the working tree for committed secrets (phase15.md §6; must be
+## installed: https://github.com/gitleaks/gitleaks#installing). See
+## .gitleaks.toml for the (narrow, test-fixture-only) allowlist.
+secret-scan:
+	gitleaks detect --source . --no-git --config .gitleaks.toml
+
+## Run every local security check this Makefile knows about (does not
+## replace the container-image scan CI runs separately for the Docker
+## build — see .github/workflows/ci.yml's security job).
+security-check: vuln-check secret-scan
 
 ## Start PostgreSQL, Redis, and the API server for local development
 dev-up:

@@ -4,16 +4,22 @@ A platform for discovering, fingerprinting, and performing authorized
 security assessments of AI/LLM systems. See `../doc_by_me/` for the full
 project specification, architecture, and phased roadmap.
 
-**Status: Phase 4 — network discovery engine.** Phase 1's platform
-foundation, Phase 2's asset/evidence/endpoint persistence layer, and
-Phase 3's HTTP discovery (`ai-recon scan`), now with a second real
-reconnaissance capability: `ai-recon network-scan` performs authorized TCP
-connect discovery against HOST/IP/CIDR targets, conservatively classifies
-open ports (including HTTP/AI-service *candidate* flagging — never a
-confirmed identification), and persists them through the same Phase 2
-persistence layer. Fingerprinting, vulnerability probing, DNS/subdomain
-discovery, raw/privileged scanning, distributed workers, the dashboard,
-authentication, and RBAC are not implemented yet.
+**Status: Phase 15 — production hardening (final planned phase).**
+Phases 1–14 (platform foundation; asset/evidence/endpoint persistence;
+HTTP/network/DNS/endpoint discovery; passive fingerprinting;
+finding/vulnerability detection; investigation & incident correlation;
+threat intelligence & risk; detection rule engine & alerting; advanced
+correlation & attack chains; the AI investigation assistant; and
+analytics/reporting/evidence/compliance) are all implemented, tested, and
+documented — see `CHANGELOG.md` for the full per-phase history. Phase 15
+audited and hardened the whole platform (SSRF protection, dependency/
+secret/toolchain vulnerabilities, production configuration guard rails,
+CI security scanning, security response headers) without adding new
+product functionality — see `docs/security/final-audit.md` for every
+finding and `docs/operations/production-readiness-report.md` for the
+resulting verdict. There is still no frontend, job queue, or
+authentication/RBAC layer — this remains a single-operator, CLI-driven
+tool by design; see `docs/security/threat-model.md`.
 
 ## 1. Prerequisites
 
@@ -90,6 +96,7 @@ go run ./cmd/cli health
 
 ```sh
 curl http://localhost:8080/health   # liveness: is the process running
+curl http://localhost:8080/live     # same liveness check (alias — see phase15.md §25)
 curl http://localhost:8080/ready    # readiness: are Postgres/Redis reachable (503 if not)
 go run ./cmd/cli health             # same readiness check, standalone (no server needed)
 ```
@@ -98,10 +105,12 @@ go run ./cmd/cli health             # same readiness check, standalone (no serve
 
 ```sh
 make test              # unit tests (alias: make test-unit)
-make test-integration  # requires `make dev-up` first — exercises real Postgres/Redis
+make test-race          # unit tests under the race detector (required before merging concurrent code)
+make test-integration   # requires `make dev-up` first — exercises real Postgres/Redis
 make vet
 make fmt-check          # gofmt -l, fails on unformatted files (used in CI)
 make lint               # golangci-lint
+make security-check     # govulncheck + gitleaks — see docs/security/production-hardening.md
 make build-all          # build every executable into bin/
 ```
 
@@ -684,7 +693,7 @@ a framework mapping this platform invents on its own.
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
-| `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
+| `cmd/server`  | HTTP API server (`/health`, `/live`, `/ready` — no other REST surface exists) |
 | `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`, `ai`, `analytics`, `report`, `evidence-package`, `control`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
@@ -699,6 +708,24 @@ their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon chain`, `ai-recon ai`, `ai-recon analytics`, `ai-recon report`,
 `ai-recon evidence-package`, and `ai-recon control` are real, required
 parts of running Phase 3/4/5/6/7/8/9/10/11/12/13/14.
+
+## Production readiness
+
+Phase 15 hardened this platform without changing its functional scope —
+see [docs/security/final-audit.md](docs/security/final-audit.md) for
+every finding (with evidence) and
+[docs/operations/production-readiness-report.md](docs/operations/production-readiness-report.md)
+for the resulting scorecard and verdict. Start with
+[docs/operations/production-readiness.md](docs/operations/production-readiness.md)
+and [docs/operations/deployment.md](docs/operations/deployment.md) before
+running this anywhere beyond local development.
+
+## License
+
+No license file exists in this repository yet — this is an explicit,
+undecided choice left to the project owner (see phase15.md §117), not an
+oversight. Do not assume any particular license applies until one is
+added.
 
 ## Further reading
 
@@ -775,3 +802,27 @@ parts of running Phase 3/4/5/6/7/8/9/10/11/12/13/14.
 - [docs/compliance/evidence.md](docs/compliance/evidence.md) — the
   generic control-evidence model, evidence freshness, and why no
   compliance framework or certification is claimed
+- [docs/security/threat-model.md](docs/security/threat-model.md) —
+  Phase 15 trust boundaries, threats, mitigations, and residual risk
+- [docs/security/production-hardening.md](docs/security/production-hardening.md) —
+  the concrete hardening checklist this platform's own code actually
+  implements, by area
+- [docs/security/final-audit.md](docs/security/final-audit.md) — every
+  Phase 15 audit finding, with evidence, remediation, and status
+- [docs/security/final-security-checklist.md](docs/security/final-security-checklist.md) —
+  a flat pass/fail security checklist
+- [docs/operations/production-readiness.md](docs/operations/production-readiness.md) —
+  environments, infrastructure, configuration, secrets, and upgrade/
+  rollback procedure
+- [docs/operations/deployment.md](docs/operations/deployment.md) — how to
+  actually deploy: database, migrations, reverse proxy/TLS, health checks
+- [docs/operations/disaster-recovery.md](docs/operations/disaster-recovery.md) —
+  failure scenarios, backup/restore, RTO/RPO targets
+- [docs/operations/runbook.md](docs/operations/runbook.md) — what to do
+  when something is actually down
+- [docs/operations/troubleshooting.md](docs/operations/troubleshooting.md) —
+  real errors this platform produces and what they mean
+- [docs/architecture/overview.md](docs/architecture/overview.md) — the
+  whole-system architecture and security-boundary diagrams
+- [CONTRIBUTING.md](CONTRIBUTING.md) — development setup, tests,
+  formatting, security requirements for contributions

@@ -1,0 +1,31 @@
+# gitleaks configuration (phase15.md §6/§102): scans for committed
+# secrets in CI. Extends gitleaks' own default rule set rather than
+# replacing it — this file only adds a narrow allowlist for this
+# repository's own, deliberately fake, secret-shaped strings.
+#
+# Every allowlisted path below is a **redaction-engine test fixture or its
+# documentation**, not a real credential: internal/ai.Redact and
+# internal/discovery/dns.SanitizeTXTValue are only provable correct by
+# feeding them strings that *look* like a secret, so these files
+# necessarily contain synthetic tokens (a fake API key, a fake cloud
+# access-key ID, a fake PEM block, etc. — deliberately absent from this
+# comment itself, since naming one verbatim here would trip the very
+# scanner this file configures) shaped to trip a real secret scanner's own
+# detection rules on purpose. Real project secrets live only in .env
+# (gitignored, never committed — see .env.example for the safe template)
+# or the deployment's own secret manager (see
+# docs/operations/production-readiness.md); nothing under configs/,
+# migrations/, or any non-test .go file is exempted here.
+title = "ai-recon-platform gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "known-fake secret-shaped strings used to test/document this platform's own redaction engine"
+paths = [
+  '''internal/ai/redaction_test\.go''',
+  '''internal/discovery/dns/txt_sanitize\.go''',
+  '''internal/service/reporting/reporting_test\.go''',
+  '''docs/architecture/dns-discovery\.md''',
+]

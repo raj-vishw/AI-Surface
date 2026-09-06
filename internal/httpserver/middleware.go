@@ -88,6 +88,43 @@ func loggingMiddleware(fallback *slog.Logger) func(http.Handler) http.Handler {
 	}
 }
 
+// securityHeadersMiddleware sets a baseline of defensive HTTP response
+// headers on every response (phase15.md §43). This server exposes only
+// /health, /live, and /ready — plain JSON, no HTML rendering, no cookies,
+// no cross-origin browser callers — so a strict, single fixed policy is
+// safe everywhere with no per-route exception:
+//
+//   - Content-Security-Policy: default-src 'none' — there is nothing on
+//     this server for a CSP to permit; every response is JSON, not a page
+//     that loads sub-resources.
+//   - X-Content-Type-Options: nosniff — stops a browser from trying to
+//     reinterpret a JSON response as HTML/script.
+//   - Referrer-Policy: no-referrer — nothing here should be echoed back to
+//     any link a client might follow afterward.
+//   - Permissions-Policy — explicitly denies every browser-mediated
+//     capability now standardized under this header.
+//   - X-Frame-Options: DENY — redundant with the CSP's frame-ancestors
+//     omission on modern browsers, kept for older ones.
+//
+// No CORS header is set (phase15.md §44): this platform has no
+// browser-facing frontend and no cookie-based session to protect or share,
+// so there is no cross-origin request this server needs to permit — the
+// default same-origin browser behavior (i.e. effectively no cross-origin
+// access at all, since nothing here ever sends
+// Access-Control-Allow-Origin) is the correct, safe posture, not an
+// oversight. See docs/security/production-hardening.md.
+func securityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h := w.Header()
+		h.Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+		h.Set("X-Content-Type-Options", "nosniff")
+		h.Set("Referrer-Policy", "no-referrer")
+		h.Set("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+		h.Set("X-Frame-Options", "DENY")
+		next.ServeHTTP(w, r)
+	})
+}
+
 // recoveryMiddleware converts a panic anywhere downstream into a 500
 // response instead of crashing the process, and logs the panic value. It
 // must wrap every other middleware so it can catch panics they raise too.

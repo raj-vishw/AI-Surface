@@ -1123,6 +1123,24 @@ func (c *Config) Validate() error {
 		errs = append(errs, fmt.Sprintf("logging.format %q must be one of json, text", c.Logging.Format))
 	}
 
+	// Production-only guard rails (phase15.md §3/§33/§107): a configuration
+	// that would be perfectly valid in development must still fail fast at
+	// startup if it carries an unsafe-for-production setting, rather than
+	// silently running with it. These check the same fields validated
+	// generically above, so they run after those checks would already have
+	// caught an outright invalid value.
+	if strings.EqualFold(c.Application.Environment, "production") {
+		if strings.EqualFold(c.Logging.Level, "debug") {
+			errs = append(errs, "logging.level must not be \"debug\" when application.environment is \"production\" (phase15.md §33)")
+		}
+		if !c.Security.RequireAuthorization {
+			errs = append(errs, "security.require_authorization must be true when application.environment is \"production\" (see SECURITY.md)")
+		}
+		if c.Database.SSLMode == "disable" {
+			errs = append(errs, "database.ssl_mode must not be \"disable\" when application.environment is \"production\" (see docs/operations/production-readiness.md)")
+		}
+	}
+
 	if len(errs) > 0 {
 		return fmt.Errorf("invalid configuration:\n  - %s", strings.Join(errs, "\n  - "))
 	}

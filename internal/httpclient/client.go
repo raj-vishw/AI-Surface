@@ -18,6 +18,7 @@ package httpclient
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
 	"net/url"
 	"time"
@@ -68,7 +69,17 @@ type Client struct {
 // connections according to opts.MaxIdleConnections /
 // opts.MaxConnectionsPerHost.
 func New(opts Options) *Client {
+	dialer := &net.Dialer{
+		Timeout: 30 * time.Second,
+		// Control runs on the resolved IP right before connect() —
+		// unconditional, not opt-in — refusing link-local/cloud-metadata
+		// addresses regardless of caller. See ssrf.go's doc comment for
+		// exactly what is and is not blocked and why.
+		Control: dialControl,
+	}
+
 	transport := &http.Transport{
+		DialContext:         dialer.DialContext,
 		MaxIdleConns:        opts.MaxIdleConnections,
 		MaxIdleConnsPerHost: opts.MaxConnectionsPerHost,
 		MaxConnsPerHost:     opts.MaxConnectionsPerHost,

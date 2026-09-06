@@ -7,7 +7,7 @@
 # Environment / secrets
 .env
 .env.*
-.env.example
+!.env.example
 
 # Go
 *.out
@@ -36,8 +36,6 @@ coverage/
 # Personal local overrides (never shared — see configs/defaults, configs/development)
 configs/local/
 docker-compose.override.yml
-docs/
-CHANGELOG.md
 
 # Logs
 *.log

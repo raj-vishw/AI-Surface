@@ -24,11 +24,17 @@ type Server struct {
 func New(cfg config.ServerConfig, logger *slog.Logger, dependencies ...health.Dependency) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", healthHandler)
+	// /live is an alias for /health (phase15.md §25's explicit "/live"
+	// liveness endpoint name) — both report "is the process alive", never
+	// checking dependencies; /ready is the separate dependency check.
+	mux.HandleFunc("GET /live", healthHandler)
 	mux.HandleFunc("GET /ready", readyHandler(logger, dependencies))
 
 	handler := recoveryMiddleware(logger)(
 		requestIDMiddleware(logger)(
-			loggingMiddleware(logger)(mux),
+			securityHeadersMiddleware(
+				loggingMiddleware(logger)(mux),
+			),
 		),
 	)
 

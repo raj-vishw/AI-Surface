@@ -1,0 +1,118 @@
+# Deployment
+
+## Prerequisites
+
+- PostgreSQL 16+ and Redis 7+ reachable from wherever `server`/`worker`/
+  `cli`/`migrate` run.
+- A copy of `.env` (see `.env.example`) or equivalent environment
+  variables / secret-manager injection providing at minimum
+  `AI_RECON_DATABASE_PASSWORD` and, if Redis auth is enabled,
+  `AI_RECON_REDIS_PASSWORD`.
+- `AI_RECON_APP_ENV=production` for a production deployment — this
+  activates `configs/production/config.yaml` and the production-only
+  startup guard rails in `Config.Validate()` (see
+  `docs/security/production-hardening.md`).
+
+## Configuration
+
+See `docs/operations/production-readiness.md`'s Configuration section for
+the four-layer precedence. In practice, a production deployment sets:
+
+```
+AI_RECON_APP_ENV=production
+AI_RECON_DATABASE_HOST=<your postgres host>
+AI_RECON_DATABASE_PASSWORD=<from secret manager>
+AI_RECON_DATABASE_SSL_MODE=require   # or verify-ca / verify-full
+AI_RECON_REDIS_ADDRESS=<your redis host>:6379
+AI_RECON_REDIS_PASSWORD=<from secret manager, if set>
+```
+
+Every other setting has a safe default via `configs/defaults/config.yaml`
++ `configs/production/config.yaml`.
+
+## Database
+
+1. Provision PostgreSQL 16+.
+2. Create a dedicated database and a least-privilege application user
+   (see `docs/security/production-hardening.md`'s Database section for
+   the specific grants this platform actually needs — it never runs DDL
+   at runtime outside `cmd/migrate`, so the application user does not
+   need schema-modification privileges).
+3. Point `AI_RECON_DATABASE_*` at it.
+
+## Migrations
+
+```
+go run ./cmd/migrate status   # see what's pending
+go run ./cmd/migrate up       # apply everything pending
+go run ./cmd/migrate version  # print the current version
+```
+
+Migrations are ordered, numbered (`migrations/000001_initial.sql` …
+`migrations/000014_create_reporting.sql`), and — as of Phase 15's audit —
+contain no `DROP TABLE`/`DROP COLUMN` anywhere in this platform's history;
+every phase has only added tables/columns/indexes. `cmd/migrate` tracks
+applied versions in its own table (see `internal/migrate`) so re-running
+`up` against an already-current database is a no-op, not an error.
+
+## Startup
+
+```
+go run ./cmd/server     # or the built `bin/server` binary
+go run ./cmd/worker     # or the built `bin/worker` binary
+```
+
+`cmd/server` logs `starting_server` with version/commit/environment, then
+`server_starting` once its listener is up. `cmd/worker` logs
+`starting_worker`, verifies PostgreSQL and Redis, then logs
+`worker_ready` — see `docs/operations/runbook.md`'s Known Limitations for
+what the worker does and does not do today (it has no job queue to
+consume yet).
+
+## Reverse proxy / TLS
+
+`cmd/server`'s own `http.Server` does not terminate TLS — it is designed
+to sit behind a TLS-terminating reverse proxy (nginx, Caddy, an AWS
+ALB/GCP load balancer, etc.), consistent with `internal/httpserver`
+having no certificate-loading code anywhere in it (confirmed by
+inspection). Point the proxy at `server.host:server.port`
+(`0.0.0.0:8080` by default) and terminate TLS in front of it — see
+`docs/security/production-hardening.md`'s HTTPS section for what HSTS/
+security-header responsibility belongs to the app (already set — see
+`internal/httpserver/middleware.go`'s `securityHeadersMiddleware`) versus
+the proxy (HSTS, since only the proxy knows whether the connection is
+actually TLS).
+
+## Workers
+
+`cmd/worker` has no job queue to consume yet (a standing, documented
+limitation since Phase 1 — see its own `worker_has_no_job_queue_yet` log
+line) — it currently only verifies PostgreSQL/Redis connectivity on a
+30-second interval and demonstrates graceful shutdown. Running it is
+optional today; it exists so the deployment shape (a separate worker
+process) is already in place for the phase that adds real job
+processing.
+
+## Health checks
+
+- `GET /health` and `GET /live` — process liveness (no dependency checks).
+- `GET /ready` — process liveness AND PostgreSQL/Redis reachability
+  (returns 503 if either is down). Point your orchestrator's liveness
+  probe at `/health` or `/live`, and its readiness probe at `/ready`.
+
+## Upgrades
+
+See `docs/operations/production-readiness.md`'s Upgrade procedure. In
+short: back up, stop, deploy, migrate, start, verify.
+
+## Rollback
+
+Redeploy the previous version's binaries/image and restart. Because every
+migration to date is additive-only (no dropped table/column), an older
+binary version running against a newer (migrated-forward) schema will
+simply not read the newest columns/tables — it does not break on unknown
+extra columns. Rolling the **schema** itself backward is not supported by
+`cmd/migrate` (no `down` migrations are defined — see
+`docs/operations/disaster-recovery.md`'s migration-rollback notes); if a
+new migration must be undone, restore from the pre-migration backup
+instead of attempting a manual reverse migration.
