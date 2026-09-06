@@ -639,12 +639,53 @@ changes an alert's severity, an investigation's status, a correlation's
 confirmation state, or a risk score — those remain exclusively analyst
 actions.
 
+## Security Analytics & Reporting
+
+`ai-recon analytics`, `ai-recon report`, `ai-recon evidence-package`, and
+`ai-recon control` turn Phase 2-13's own data into dashboards, trend
+analysis, and exportable reports — never a duplicate copy of any
+existing model. See
+[docs/architecture/ai-assistant.md](docs/architecture/ai-assistant.md)'s
+sibling docs for this phase:
+[docs/analytics/metrics.md](docs/analytics/metrics.md),
+[docs/analytics/dashboards.md](docs/analytics/dashboards.md),
+[docs/reporting/reports.md](docs/reporting/reports.md), and
+[docs/compliance/evidence.md](docs/compliance/evidence.md).
+
+```sh
+# Dashboards — read-only aggregates over existing data.
+ai-recon analytics overview --target example.com
+ai-recon analytics risk --target example.com --range 30d
+ai-recon analytics alerts --target example.com --range 7d
+ai-recon analytics posture --target example.com   # derived from risk data — not an objective security score
+
+# Reports — versioned, citation-validated, never overwriting an earlier version.
+ai-recon report create --target example.com --type executive --actor analyst1
+ai-recon report create --target example.com --type investigation --subject <investigation-id> --actor analyst1
+ai-recon report approve <report-id> --approver analyst1   # an explicit, distinct action — never automatic
+ai-recon report export <report-id> --format csv           # secrets redacted, spreadsheet-injection-safe
+
+# Evidence packages — scoped to one report's own cited evidence only.
+ai-recon evidence-package create --report <report-id> --actor analyst1
+ai-recon evidence-package manifest <package-id>            # item id, type, SHA-256 hash, timestamp
+
+# Generic control evidence — no compliance framework or certification claim.
+ai-recon control record --target example.com --control AC-2 --evidence-type finding --reference <id> --description "..."
+ai-recon control list --target example.com                 # controls with evidence; a gap is represented by absence
+```
+
+Analytics results are cached briefly, in-process, always keyed by
+target — a cache entry for one target can never be returned for another.
+This platform makes no compliance certification claims anywhere in this
+output; `control` evidence is a generic, analyst-populated ledger, never
+a framework mapping this platform invents on its own.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`, `ai`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`, `ai`, `analytics`, `report`, `evidence-package`, `control`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
@@ -655,8 +696,9 @@ their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`,
 `ai-recon investigate`, `ai-recon intel`, `ai-recon risk`,
 `ai-recon detection`, `ai-recon alert`, `ai-recon correlation`,
-`ai-recon chain`, and `ai-recon ai` are real, required parts of running
-Phase 3/4/5/6/7/8/9/10/11/12/13.
+`ai-recon chain`, `ai-recon ai`, `ai-recon analytics`, `ai-recon report`,
+`ai-recon evidence-package`, and `ai-recon control` are real, required
+parts of running Phase 3/4/5/6/7/8/9/10/11/12/13/14.
 
 ## Further reading
 
@@ -722,3 +764,14 @@ Phase 3/4/5/6/7/8/9/10/11/12/13.
 - [docs/ai/investigation-guide.md](docs/ai/investigation-guide.md) —
   worked examples for every AI task, sessions/chat, and provider
   configuration
+- [docs/analytics/metrics.md](docs/analytics/metrics.md) — Phase 14
+  metric definitions: calculation, source, filters, time semantics,
+  limitations for every dashboard number
+- [docs/analytics/dashboards.md](docs/analytics/dashboards.md) —
+  dashboard types/presets, filters, caching, drill-down, CLI adaptation
+- [docs/reporting/reports.md](docs/reporting/reports.md) — report types,
+  lifecycle, versioning, approval, export, citation validation, content
+  security
+- [docs/compliance/evidence.md](docs/compliance/evidence.md) — the
+  generic control-evidence model, evidence freshness, and why no
+  compliance framework or certification is claimed

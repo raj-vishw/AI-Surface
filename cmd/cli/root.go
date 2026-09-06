@@ -73,6 +73,10 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewCorrelationCommand())
 	root.AddCommand(commands.NewChainCommand())
 	root.AddCommand(commands.NewAICommand())
+	root.AddCommand(commands.NewAnalyticsCommand())
+	root.AddCommand(commands.NewReportCommand())
+	root.AddCommand(commands.NewEvidencePackageCommand())
+	root.AddCommand(commands.NewControlCommand())
 
 	return root
 }
