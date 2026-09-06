@@ -23,6 +23,7 @@ type Config struct {
 	Investigation  InvestigationConfig `yaml:"investigation"`
 	Intelligence   IntelligenceConfig  `yaml:"intelligence"`
 	DetectionRules RuleEngineConfig    `yaml:"detection_rules"`
+	Correlation    CorrelationConfig   `yaml:"correlation"`
 	Logging        LoggingConfig       `yaml:"logging"`
 	Security       SecurityConfig      `yaml:"security"`
 }
@@ -579,6 +580,48 @@ type RuleHistoricalConfig struct {
 	MaxRange time.Duration `yaml:"max_range"`
 }
 
+// CorrelationConfig configures Phase 12's correlation engine
+// (internal/correlation / internal/service/correlation). Safe, bounded
+// defaults throughout (phase12.md §110/§111) — never unlimited.
+type CorrelationConfig struct {
+	Enabled bool `yaml:"enabled"`
+
+	Temporal CorrelationTemporalConfig `yaml:"temporal"`
+	Graph    CorrelationGraphConfig    `yaml:"graph"`
+	Workers  CorrelationWorkersConfig  `yaml:"workers"`
+
+	// HistoricalMaxRange bounds one `ai-recon correlation evaluate`
+	// call's [--from, --to) range (phase12.md §64/§110) — mirrors
+	// RuleHistoricalConfig.MaxRange's identical purpose for Phase 11.
+	HistoricalMaxRange time.Duration `yaml:"historical_max_range"`
+	// MaxCandidates bounds how many observations one evaluation considers
+	// before candidate selection truncates (phase12.md §65).
+	MaxCandidates int `yaml:"max_candidates"`
+}
+
+// CorrelationTemporalConfig configures TemporalStrategy's proximity
+// window (phase12.md §12).
+type CorrelationTemporalConfig struct {
+	DefaultWindow time.Duration `yaml:"default_window"`
+}
+
+// CorrelationGraphConfig bounds one correlation's graph size/depth
+// (phase12.md §62/§63).
+type CorrelationGraphConfig struct {
+	MaxDepth int `yaml:"max_depth"`
+	MaxNodes int `yaml:"max_nodes"`
+	MaxEdges int `yaml:"max_edges"`
+}
+
+// CorrelationWorkersConfig bounds evaluation concurrency. This platform
+// has no job/worker queue yet (see cmd/worker's own doc comment) — this
+// value is read by ai-recon's CLI-driven evaluation for a future worker
+// pool but does not yet dispatch background jobs of its own (documented
+// as a Known Limitation, not fabricated infrastructure).
+type CorrelationWorkersConfig struct {
+	MaxConcurrency int `yaml:"max_concurrency"`
+}
+
 // SecurityConfig enforces the platform's authorization/safety boundary
 // (see work.md §2). RequireAuthorization and DryRun are read by later
 // phases' scanning subsystems; Phase 1 only carries the settings through
@@ -960,6 +1003,31 @@ func (c *Config) Validate() error {
 		}
 		if det.Historical.MaxRange < 0 {
 			errs = append(errs, "detection_rules.historical.max_range must not be negative")
+		}
+	}
+
+	if c.Correlation.Enabled {
+		corr := c.Correlation
+		if corr.Temporal.DefaultWindow < 0 {
+			errs = append(errs, "correlation.temporal.default_window must not be negative")
+		}
+		if corr.Graph.MaxDepth < 0 {
+			errs = append(errs, "correlation.graph.max_depth must not be negative")
+		}
+		if corr.Graph.MaxNodes < 0 {
+			errs = append(errs, "correlation.graph.max_nodes must not be negative")
+		}
+		if corr.Graph.MaxEdges < 0 {
+			errs = append(errs, "correlation.graph.max_edges must not be negative")
+		}
+		if corr.Workers.MaxConcurrency < 0 {
+			errs = append(errs, "correlation.workers.max_concurrency must not be negative")
+		}
+		if corr.HistoricalMaxRange < 0 {
+			errs = append(errs, "correlation.historical_max_range must not be negative")
+		}
+		if corr.MaxCandidates < 0 {
+			errs = append(errs, "correlation.max_candidates must not be negative")
 		}
 	}
 

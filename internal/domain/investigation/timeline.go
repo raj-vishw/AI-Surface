@@ -60,6 +60,14 @@ const (
 	// via this single append-only EventType vocabulary).
 	EventDetectionMatchCreated EventType = "detection_match_created"
 	EventAlertStatusChanged    EventType = "alert_status_changed"
+
+	// EventCorrelationAttached/EventAttackChainCreated are Phase 12
+	// additions — a correlation attached to this investigation, or an
+	// attack chain created for one of its correlations (phase12.md §35).
+	// Recorded here rather than a second timeline table, the same
+	// consolidation phase11.md's own two additions above already applied.
+	EventCorrelationAttached EventType = "correlation_attached"
+	EventAttackChainCreated  EventType = "attack_chain_created"
 )
 
 var validEventTypes = map[EventType]bool{
@@ -73,6 +81,7 @@ var validEventTypes = map[EventType]bool{
 	EventEvidenceAttached: true, EventHypothesisCreated: true, EventHypothesisUpdated: true,
 	EventRelationshipCreated: true, EventInvestigationReopened: true,
 	EventDetectionMatchCreated: true, EventAlertStatusChanged: true,
+	EventCorrelationAttached: true, EventAttackChainCreated: true,
 }
 
 // Valid reports whether t is a recognized timeline event type.

@@ -25,6 +25,7 @@ import (
 	"ai-recon-platform/internal/intelligence/providers"
 	"ai-recon-platform/internal/intelligence/risk"
 	assetrepo "ai-recon-platform/internal/repository/asset"
+	correlationrepo "ai-recon-platform/internal/repository/correlation"
 	endpointrepo "ai-recon-platform/internal/repository/endpoint"
 	findingrepo "ai-recon-platform/internal/repository/finding"
 	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
@@ -66,6 +67,11 @@ type Service struct {
 	// buildAssetRiskInput.
 	detectionMatches rulerepo.MatchRepository
 
+	// correlations is Phase 12's identically-shaped optional risk-model
+	// extension (phase12.md §34) — nil unless a caller opts in via
+	// WithCorrelations.
+	correlations correlationrepo.Repository
+
 	cfg    intelligence.Config
 	logger *slog.Logger
 }
@@ -76,6 +82,14 @@ type Service struct {
 // chaining.
 func (s *Service) WithDetectionMatches(m rulerepo.MatchRepository) *Service {
 	s.detectionMatches = m
+	return s
+}
+
+// WithCorrelations opts a Service into Phase 12's "correlation" risk
+// factor (phase12.md §34) — CLI wiring that has already built a Phase 12
+// repository may call this once after NewService. Returns s for chaining.
+func (s *Service) WithCorrelations(c correlationrepo.Repository) *Service {
+	s.correlations = c
 	return s
 }
 

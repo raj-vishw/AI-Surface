@@ -29,8 +29,13 @@ import (
 // `alert` (a deterministic, versioned, testable detection rule engine
 // evaluating this platform's own normalized findings/asset/endpoint/
 // fingerprint/intelligence observations — never raw external logs; no
-// autonomous response, no offensive automation). Commands belonging to
-// later phases (report, monitor) must not be added here yet.
+// autonomous response, no offensive automation). Phase 12 adds
+// `correlation` and `chain` (a deterministic, explainable correlation
+// engine linking findings/detection matches/alerts/intelligence/assets
+// into graphs and, where the evidence classifies into one, an attack
+// chain — never automatically labeled a confirmed attack; analyst
+// confirmation/dismissal only). Commands belonging to later phases
+// (report, monitor) must not be added here yet.
 func newRootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "ai-recon",
@@ -61,6 +66,8 @@ func newRootCommand() *cobra.Command {
 	root.AddCommand(commands.NewRiskCommand())
 	root.AddCommand(commands.NewDetectionCommand())
 	root.AddCommand(commands.NewAlertCommand())
+	root.AddCommand(commands.NewCorrelationCommand())
+	root.AddCommand(commands.NewChainCommand())
 
 	return root
 }

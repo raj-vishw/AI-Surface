@@ -93,4 +93,16 @@ type Input struct {
 	// 11's service supplies into this same Input (see
 	// internal/service/intelligence's optional detection-match wiring).
 	OpenDetectionMatchCount int
+
+	// OpenCorrelationCount is how many open (non-dismissed) Phase 12
+	// correlations currently reference this asset — a documented,
+	// additive risk factor (phase12.md §34) following the identical
+	// "one flat contribution plus a small, capped per-item increment"
+	// shape phase11.md §98 established for OpenDetectionMatchCount above.
+	// This never duplicates Phase 12's own correlation scoring
+	// (internal/correlation.Score answers a different question — how
+	// strong is this specific grouping's own evidence — from this
+	// asset-level risk factor, which only counts how many such groupings
+	// currently touch the asset at all).
+	OpenCorrelationCount int
 }

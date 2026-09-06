@@ -553,12 +553,55 @@ and a timeline event — no manual reconstruction needed. This platform
 implements no autonomous response and no offensive automation of any
 kind.
 
+## Advanced Correlation
+
+`ai-recon correlation` and `ai-recon chain` link this platform's
+individual signals — findings, Phase 11 detection matches/alerts, Phase
+10 intelligence, assets — into higher-level correlated activity and, when
+the evidence classifies into a recognizable sequence, an attack chain.
+See [docs/architecture/correlation-engine.md](docs/architecture/correlation-engine.md),
+[docs/detection/correlation-strategies.md](docs/detection/correlation-strategies.md),
+and [docs/investigation/attack-chains.md](docs/investigation/attack-chains.md).
+A correlation is never presented as a confirmed attack on its own —
+`confirmed`/`dismissed` are always an explicit analyst action.
+
+```sh
+# Evaluate a target's recent observations — deterministic, explainable.
+ai-recon correlation evaluate --target example.com --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
+
+ai-recon correlation list
+ai-recon correlation show <id>
+ai-recon correlation graph <id>       # nodes, edges, confidence, observed vs. inferred
+ai-recon correlation timeline <id>    # unified, chronologically-ordered evidence
+ai-recon correlation evidence <id>
+
+# Analyst judgment — never automatic.
+ai-recon correlation confirm <id> --actor analyst1
+ai-recon correlation dismiss <id> --actor analyst1 --reason "known automation"
+ai-recon correlation merge <survivor-id> <source-id...>
+ai-recon correlation split <id> --node <node-id> --actor analyst1
+ai-recon correlation investigate <id> --actor analyst1   # attach to a Phase 9 investigation
+
+# Attack chains — a narrative view, not proof of an attack.
+ai-recon chain list
+ai-recon chain show <id>
+ai-recon chain explain <id>
+```
+
+Six strategies (`asset`, `temporal`, `identity`, `network`, `detection`,
+`intelligence`) each produce explained, confidence-scored edges, marked
+`observed` or `inferred` — never collapsed into an unexplained "related:
+true". A correlation's `Score`/`Confidence`/`Severity` are three distinct
+axes, documented in `internal/correlation/scoring.go`. This platform
+implements no autonomous response, no offensive automation, and no
+automatic threat attribution.
+
 ## Executables
 
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/ready`)                        |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`) |
+| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
@@ -568,8 +611,9 @@ their `--help`); `ai-recon target authorize`, `ai-recon scan`,
 `ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
 `ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`,
 `ai-recon investigate`, `ai-recon intel`, `ai-recon risk`,
-`ai-recon detection`, and `ai-recon alert` are real, required parts of
-running Phase 3/4/5/6/7/8/9/10/11.
+`ai-recon detection`, `ai-recon alert`, `ai-recon correlation`, and
+`ai-recon chain` are real, required parts of running Phase
+3/4/5/6/7/8/9/10/11/12.
 
 ## Further reading
 
@@ -617,3 +661,12 @@ running Phase 3/4/5/6/7/8/9/10/11.
   workflow
 - [docs/detection/builtin-rules.md](docs/detection/builtin-rules.md) —
   purpose, logic, and false-positive guidance for all 5 built-in rules
+- [docs/architecture/correlation-engine.md](docs/architecture/correlation-engine.md) —
+  Phase 12 correlation engine: strategies, graph model, scoring/
+  confidence/severity, deduplication, merge/split, limits, performance
+- [docs/detection/correlation-strategies.md](docs/detection/correlation-strategies.md) —
+  purpose, matching logic, and false-positive guidance for all 6
+  built-in correlation strategies
+- [docs/investigation/attack-chains.md](docs/investigation/attack-chains.md) —
+  attack-chain model, stage classification, confidence weighting, gaps,
+  analyst confirmation

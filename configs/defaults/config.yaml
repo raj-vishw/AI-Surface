@@ -280,6 +280,19 @@ detection_rules:
   historical:
     max_range: 24h # widest [from, to) range `ai-recon detection evaluate` accepts without --backfill
 
+correlation:
+  enabled: true
+  temporal:
+    default_window: 15m
+  graph:
+    max_depth: 5
+    max_nodes: 500
+    max_edges: 1000
+  workers:
+    max_concurrency: 4
+  historical_max_range: 24h # widest [--from, --to) range `ai-recon correlation evaluate` accepts
+  max_candidates: 2000 # observations considered per evaluation before candidate selection truncates
+
 logging:
   level: info
   format: json

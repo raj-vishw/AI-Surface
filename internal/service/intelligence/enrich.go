@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	domainasset "ai-recon-platform/internal/domain/asset"
+	domaincorrelation "ai-recon-platform/internal/domain/correlation"
 	domainendpoint "ai-recon-platform/internal/domain/endpoint"
 	domainfinding "ai-recon-platform/internal/domain/finding"
 	domainintel "ai-recon-platform/internal/domain/intelligence"
@@ -17,6 +18,7 @@ import (
 	"ai-recon-platform/internal/intelligence"
 	"ai-recon-platform/internal/intelligence/providers"
 	"ai-recon-platform/internal/intelligence/risk"
+	correlationrepo "ai-recon-platform/internal/repository/correlation"
 	endpointrepo "ai-recon-platform/internal/repository/endpoint"
 	findingrepo "ai-recon-platform/internal/repository/finding"
 	intelrepo "ai-recon-platform/internal/repository/intelligence"
@@ -189,6 +191,22 @@ func (s *Service) buildAssetRiskInput(ctx context.Context, asset domainasset.Ass
 			s.logger.Error("intelligence_risk_detection_match_list_failed", "asset_id", asset.ID, "error", err)
 		} else {
 			input.OpenDetectionMatchCount = len(matchPage.Items)
+		}
+	}
+
+	// Phase 12 extension (phase12.md §34) — optional: only queried when a
+	// caller has wired a correlation repository via WithCorrelations.
+	// Correlations are target-scoped, not individually joined to an
+	// asset, the same honest granularity tradeoff documented above for
+	// detection matches.
+	if s.correlations != nil {
+		corrPage, err := s.correlations.ListCorrelations(ctx, correlationrepo.ListFilter{
+			TargetID: asset.TargetID, Status: domaincorrelation.StatusOpen, Pagination: pagination.Params{Limit: pagination.MaxLimit},
+		})
+		if err != nil {
+			s.logger.Error("intelligence_risk_correlation_list_failed", "asset_id", asset.ID, "error", err)
+		} else {
+			input.OpenCorrelationCount = len(corrPage.Items)
 		}
 	}
 

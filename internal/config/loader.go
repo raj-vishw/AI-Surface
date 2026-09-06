@@ -130,6 +130,15 @@ const (
 	envDetectionRulesSuppressionWindow  = "AI_RECON_DETECTION_RULES_SUPPRESSION_DEFAULT_WINDOW"
 	envDetectionRulesHistoricalMaxRange = "AI_RECON_DETECTION_RULES_HISTORICAL_MAX_RANGE"
 
+	envCorrelationEnabled            = "AI_RECON_CORRELATION_ENABLED"
+	envCorrelationTemporalWindow     = "AI_RECON_CORRELATION_TEMPORAL_DEFAULT_WINDOW"
+	envCorrelationGraphMaxDepth      = "AI_RECON_CORRELATION_GRAPH_MAX_DEPTH"
+	envCorrelationGraphMaxNodes      = "AI_RECON_CORRELATION_GRAPH_MAX_NODES"
+	envCorrelationGraphMaxEdges      = "AI_RECON_CORRELATION_GRAPH_MAX_EDGES"
+	envCorrelationWorkersConcurrency = "AI_RECON_CORRELATION_WORKERS_MAX_CONCURRENCY"
+	envCorrelationHistoricalMaxRange = "AI_RECON_CORRELATION_HISTORICAL_MAX_RANGE"
+	envCorrelationMaxCandidates      = "AI_RECON_CORRELATION_MAX_CANDIDATES"
+
 	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
 	envLoggingFormat = "AI_RECON_LOG_FORMAT"
 
@@ -402,6 +411,22 @@ func defaultConfig() *Config {
 				MaxRange: 24 * time.Hour,
 			},
 		},
+		Correlation: CorrelationConfig{
+			Enabled: true,
+			Temporal: CorrelationTemporalConfig{
+				DefaultWindow: 15 * time.Minute,
+			},
+			Graph: CorrelationGraphConfig{
+				MaxDepth: 5,
+				MaxNodes: 500,
+				MaxEdges: 1000,
+			},
+			Workers: CorrelationWorkersConfig{
+				MaxConcurrency: 4,
+			},
+			HistoricalMaxRange: 24 * time.Hour,
+			MaxCandidates:      2000,
+		},
 		Logging: LoggingConfig{
 			Level:  "info",
 			Format: "json",
@@ -647,6 +672,15 @@ func applyEnvOverrides(cfg *Config) error {
 	setDuration(envDetectionRulesClockSkew, &cfg.DetectionRules.Evaluation.ClockSkew)
 	setDuration(envDetectionRulesSuppressionWindow, &cfg.DetectionRules.SuppressionDefaultWindow)
 	setDuration(envDetectionRulesHistoricalMaxRange, &cfg.DetectionRules.Historical.MaxRange)
+
+	setBool(envCorrelationEnabled, &cfg.Correlation.Enabled)
+	setDuration(envCorrelationTemporalWindow, &cfg.Correlation.Temporal.DefaultWindow)
+	setInt(envCorrelationGraphMaxDepth, &cfg.Correlation.Graph.MaxDepth)
+	setInt(envCorrelationGraphMaxNodes, &cfg.Correlation.Graph.MaxNodes)
+	setInt(envCorrelationGraphMaxEdges, &cfg.Correlation.Graph.MaxEdges)
+	setInt(envCorrelationWorkersConcurrency, &cfg.Correlation.Workers.MaxConcurrency)
+	setDuration(envCorrelationHistoricalMaxRange, &cfg.Correlation.HistoricalMaxRange)
+	setInt(envCorrelationMaxCandidates, &cfg.Correlation.MaxCandidates)
 
 	setString(envLoggingLevel, &cfg.Logging.Level)
 	setString(envLoggingFormat, &cfg.Logging.Format)

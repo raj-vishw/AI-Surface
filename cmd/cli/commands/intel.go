@@ -19,6 +19,7 @@ import (
 	"ai-recon-platform/internal/intelligence/providers"
 	"ai-recon-platform/internal/intelligence/risk"
 	"ai-recon-platform/internal/logging"
+	correlationrepo "ai-recon-platform/internal/repository/correlation"
 	"ai-recon-platform/internal/repository/pagination"
 	rulerepo "ai-recon-platform/internal/repository/rule"
 	assetsvc "ai-recon-platform/internal/service/asset"
@@ -114,6 +115,11 @@ func buildIntelligenceService(cmd *cobra.Command) (*intelligencesvc.Service, *da
 	// Phase 11's tables exist. Never a second risk calculator — see
 	// internal/intelligence/risk.Weights.DetectionMatchOpen.
 	svc.WithDetectionMatches(rulerepo.NewPostgresRepository(db))
+	// Phase 12 extension (phase12.md §34) — optional, additive: risk
+	// calculations also consider open correlations when Phase 12's
+	// tables exist. Never a second risk calculator — see
+	// internal/intelligence/risk.Weights.CorrelationOpen.
+	svc.WithCorrelations(correlationrepo.NewPostgresRepository(db))
 	return svc, db, nil
 }
 

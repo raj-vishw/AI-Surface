@@ -80,6 +80,13 @@ type Weights struct {
 	DetectionMatchOpen             int
 	DetectionMatchRepeatedPerCount int
 	DetectionMatchRepeatedMax      int
+
+	// CorrelationOpen/CorrelationRepeatedPerCount/CorrelationRepeatedMax
+	// are Phase 12's identically-shaped extension for
+	// Input.OpenCorrelationCount (phase12.md §34).
+	CorrelationOpen             int
+	CorrelationRepeatedPerCount int
+	CorrelationRepeatedMax      int
 }
 
 // DefaultWeights returns the built-in v1 weighting (phase10.md §41's
@@ -117,5 +124,9 @@ func DefaultWeights() Weights {
 		DetectionMatchOpen:             10,
 		DetectionMatchRepeatedPerCount: 2,
 		DetectionMatchRepeatedMax:      10,
+
+		CorrelationOpen:             8,
+		CorrelationRepeatedPerCount: 2,
+		CorrelationRepeatedMax:      8,
 	}
 }

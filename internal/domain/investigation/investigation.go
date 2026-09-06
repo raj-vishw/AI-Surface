@@ -228,12 +228,18 @@ const (
 	// investigation's timeline/evidence.
 	EntityDetectionMatch EntityType = "detection_match"
 	EntityAlert          EntityType = "alert"
+	// EntityCorrelation/EntityAttackChain are Phase 12 additions — a
+	// correlation (or the attack chain summarizing it) attached to an
+	// investigation (phase12.md §35).
+	EntityCorrelation EntityType = "correlation"
+	EntityAttackChain EntityType = "attack_chain"
 )
 
 var validEntityTypes = map[EntityType]bool{
 	EntityFinding: true, EntityAsset: true, EntityEndpoint: true, EntityTechnology: true,
 	EntityScan: true, EntityTimelineEvent: true, EntityInvestigation: true,
 	EntityDetectionMatch: true, EntityAlert: true,
+	EntityCorrelation: true, EntityAttackChain: true,
 }
 
 // Valid reports whether t is a recognized entity type.

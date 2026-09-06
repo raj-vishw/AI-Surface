@@ -140,6 +140,20 @@ func (s *Scorer) Calculate(input Input) Result {
 		}
 	}
 
+	if input.OpenCorrelationCount > 0 {
+		pts := s.weights.CorrelationOpen
+		repeated := (input.OpenCorrelationCount - 1) * s.weights.CorrelationRepeatedPerCount
+		if s.weights.CorrelationRepeatedMax > 0 && repeated > s.weights.CorrelationRepeatedMax {
+			repeated = s.weights.CorrelationRepeatedMax
+		}
+		pts += repeated
+		if pts != 0 {
+			factors = append(factors, Factor{Name: "correlation", Points: pts,
+				Description: fmt.Sprintf("%d open Phase 12 correlation(s) reference this asset", input.OpenCorrelationCount)})
+			raw += pts
+		}
+	}
+
 	score := clamp(raw, 0, 100)
 	severity := SeverityForScore(score)
 	confidence := s.confidenceFor(input)
@@ -196,6 +210,9 @@ func (s *Scorer) confidenceFor(input Input) Confidence {
 		signals++
 	}
 	if input.OpenDetectionMatchCount > 0 {
+		signals++
+	}
+	if input.OpenCorrelationCount > 0 {
 		signals++
 	}
 	switch {
