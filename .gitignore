@@ -15,6 +15,11 @@ coverage.txt
 coverage.html
 vendor/
 
+# Test files — not committed to this repository (Go's own convention of
+# naming every test file "*_test.go" makes this an exact, unambiguous
+# pattern with no risk of catching non-test source).
+*_test.go
+
 # Test artifacts (coverage/profile output, caches; *.test/*.out covered above)
 *.cover
 coverage/
