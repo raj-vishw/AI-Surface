@@ -51,6 +51,13 @@ jobs:
   # see .gitleaks.toml for the one narrow, documented allowlist (this
   # repository's own redaction-engine test fixtures, which are
   # intentionally secret-shaped).
+  #
+  # Every tool here is installed directly (go install / each project's own
+  # official install script) rather than via a third-party marketplace
+  # Action — this avoids that Action's own version-pin/licensing/token
+  # requirements becoming a second thing that can break independently of
+  # the actual scan, and it's exactly what was verified locally before
+  # this workflow was written (see docs/security/final-audit.md).
   security:
     runs-on: ubuntu-latest
     steps:
@@ -66,20 +73,17 @@ jobs:
           go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
 
+      - name: Install gitleaks
+        run: go install github.com/zricethezav/gitleaks/v8@latest
+
       - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITLEAKS_CONFIG: .gitleaks.toml
-          GITLEAKS_NO_GIT: "true"
+        run: gitleaks detect --source . --no-git --config .gitleaks.toml
 
       - name: Build server image for scanning
-        run: |
-          docker build -f deployments/docker/Dockerfile.server -t ai-recon-server:ci .
+        run: docker build -f deployments/docker/Dockerfile.server -t ai-recon-server:ci .
+
+      - name: Install Trivy
+        run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Container image scan (Trivy)
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: ai-recon-server:ci
-          severity: CRITICAL,HIGH
-          exit-code: "1"
-          ignore-unfixed: true
+        run: trivy image --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed ai-recon-server:ci
