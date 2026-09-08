@@ -84,7 +84,7 @@ func (s *Service) AttachToInvestigation(ctx context.Context, correlationID uuid.
 			continue
 		}
 		if _, _, err := s.investigations.AttachEvidence(ctx, domaininvestigation.EvidenceRef{
-			InvestigationID: created.ID, SourceType: entityType, SourceID: n.ReferenceID, ObservedAt: n.Timestamp,
+			InvestigationID: created.ID, SourceType: entityType, SourceID: n.ReferenceID, ObservedAt: n.Timestamp, AddedBy: actorID,
 		}); err != nil {
 			s.logger.Error("investigation_evidence_attach_failed", "investigation_id", created.ID, "source_id", n.ReferenceID, "error", err)
 		}

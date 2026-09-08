@@ -11,29 +11,29 @@ import "strings"
 // always grounded in real Fact values regardless of which Provider (mock
 // or real) ultimately narrates them.
 type StructuredResult struct {
-	Summary string
+	Summary string `json:"summary"`
 
 	// Observed states only what the platform's own records directly show
 	// (phase13.md §16) — one line per statement, each ending with its
 	// supporting citation(s).
-	Observed []string
+	Observed []string `json:"observed"`
 	// Inferred states a relationship or interpretation this engine (or the
 	// correlation engine whose edges it read) derived, never asserted as
 	// fact (phase13.md §16).
-	Inferred []string
+	Inferred []string `json:"inferred"`
 	// Unknown lists what the available evidence does not establish —
 	// always present, never omitted merely because nothing came to mind
 	// (phase13.md §16's worked example: "Unknown: Whether the credentials
 	// were compromised.").
-	Unknown []string
+	Unknown []string `json:"unknown"`
 
-	EvidenceGaps []string
-	NextSteps    []string
-	Questions    []string
+	EvidenceGaps []string `json:"evidenceGaps"`
+	NextSteps    []string `json:"nextSteps"`
+	Questions    []string `json:"questions"`
 
 	// Citations is the deduplicated set of every citation token used
 	// anywhere above, in first-appearance order.
-	Citations []string
+	Citations []string `json:"citations"`
 }
 
 // addCitation appends token to r.Citations if not already present.

@@ -15,15 +15,15 @@ import (
 // rate, since no ground-truth confirmation exists (phase14.md §8's own
 // explicit instruction).
 type DetectionAnalytics struct {
-	MatchesOverTime []analyticsrepo.Bucket
-	ByRule          []analyticsrepo.NamedCount
-	BySeverity      []analyticsrepo.NamedCount
-	EnabledRules    int
-	DisabledRules   int
+	MatchesOverTime []analyticsrepo.Bucket     `json:"matchesOverTime"`
+	ByRule          []analyticsrepo.NamedCount `json:"byRule"`
+	BySeverity      []analyticsrepo.NamedCount `json:"bySeverity"`
+	EnabledRules    int                        `json:"enabledRules"`
+	DisabledRules   int                        `json:"disabledRules"`
 	// NoisyRules are the rules with the most matches in range, sorted
 	// descending — an analyst signal, not an automatic "bad rule"
 	// classification (phase14.md §30).
-	NoisyRules []RuleRate
+	NoisyRules []RuleRate `json:"noisyRules"`
 }
 
 // RuleRate is one rule's own match/alert/dismissal counters and derived
@@ -31,12 +31,12 @@ type DetectionAnalytics struct {
 // "dismissal rate" — see docs/analytics/metrics.md for the exact
 // formulas).
 type RuleRate struct {
-	Rule            string
-	Matches         int
-	Alerts          int
-	Dismissed       int
-	AlertConversion float64 // Alerts / Matches, 0 if Matches == 0
-	DismissalRate   float64 // Dismissed / Alerts, 0 if Alerts == 0
+	Rule            string  `json:"rule"`
+	Matches         int     `json:"matches"`
+	Alerts          int     `json:"alerts"`
+	Dismissed       int     `json:"dismissed"`
+	AlertConversion float64 `json:"alertConversion"` // Alerts / Matches, 0 if Matches == 0
+	DismissalRate   float64 `json:"dismissalRate"`   // Dismissed / Alerts, 0 if Alerts == 0
 }
 
 // Detections implements phase14.md §8.

@@ -111,14 +111,14 @@ func (s *Service) PromoteToInvestigation(ctx context.Context, alertID uuid.UUID,
 			continue
 		}
 		_, _, err := s.investigations.AttachEvidence(ctx, domaininvestigation.EvidenceRef{
-			InvestigationID: created.ID, SourceType: entityType, SourceID: ev.SourceID, ObservedAt: ev.ObservedAt,
+			InvestigationID: created.ID, SourceType: entityType, SourceID: ev.SourceID, ObservedAt: ev.ObservedAt, AddedBy: actorID,
 		})
 		if err != nil {
 			s.logger.Error("investigation_evidence_attach_failed", "investigation_id", created.ID, "source_id", ev.SourceID, "error", err)
 		}
 	}
 	_, _, err = s.investigations.AttachEvidence(ctx, domaininvestigation.EvidenceRef{
-		InvestigationID: created.ID, SourceType: domaininvestigation.EntityDetectionMatch, SourceID: match.ID, ObservedAt: match.FirstObservedAt,
+		InvestigationID: created.ID, SourceType: domaininvestigation.EntityDetectionMatch, SourceID: match.ID, ObservedAt: match.FirstObservedAt, AddedBy: actorID,
 	})
 	if err != nil {
 		s.logger.Error("investigation_evidence_attach_failed", "investigation_id", created.ID, "source_id", match.ID, "error", err)

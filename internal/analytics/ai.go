@@ -15,14 +15,14 @@ import (
 // this struct, only counts and identifiers already safe to display
 // (task type, provider, tool name).
 type AIAnalytics struct {
-	RequestsOverTime []analyticsrepo.Bucket
-	ByTaskType       []analyticsrepo.NamedCount
-	ByProvider       []analyticsrepo.NamedCount
-	AverageLatencyMS float64
-	InputTokens      int64
-	OutputTokens     int64
-	Failures         int
-	ToolCallsByTool  []analyticsrepo.NamedCount
+	RequestsOverTime []analyticsrepo.Bucket     `json:"requestsOverTime"`
+	ByTaskType       []analyticsrepo.NamedCount `json:"byTaskType"`
+	ByProvider       []analyticsrepo.NamedCount `json:"byProvider"`
+	AverageLatencyMS float64                    `json:"averageLatencyMs"`
+	InputTokens      int64                      `json:"inputTokens"`
+	OutputTokens     int64                      `json:"outputTokens"`
+	Failures         int                        `json:"failures"`
+	ToolCallsByTool  []analyticsrepo.NamedCount `json:"toolCallsByTool"`
 }
 
 // AI implements phase14.md §17.

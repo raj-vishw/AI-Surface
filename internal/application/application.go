@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"ai-recon-platform/internal/api"
 	"ai-recon-platform/internal/config"
 	"ai-recon-platform/internal/database"
 	"ai-recon-platform/internal/health"
@@ -32,6 +33,7 @@ type Application struct {
 	DB         *database.Pool
 	Redis      *redis.Client
 	HTTPClient *httpclient.Client
+	Services   *Services
 	Server     *httpserver.Server
 }
 
@@ -53,9 +55,21 @@ func New(ctx context.Context, cfg *config.Config, logger *slog.Logger) (*Applica
 
 	httpClient := httpclient.NewFromConfig(cfg.HTTPClient)
 
+	services, err := buildServices(db, cfg, logger)
+	if err != nil {
+		db.Close()
+		if closeErr := redisClient.Close(); closeErr != nil {
+			logger.Warn("redis_close_error", "error", closeErr)
+		}
+		return nil, fmt.Errorf("wiring services: %w", err)
+	}
+
 	server := httpserver.New(cfg.Server, logger,
-		health.Dependency{Name: "database", Checker: db},
-		health.Dependency{Name: "redis", Checker: redisClient},
+		[]health.Dependency{
+			{Name: "database", Checker: db},
+			{Name: "redis", Checker: redisClient},
+		},
+		httpserver.Options{RegisterRoutes: api.NewRouter(services.APIDeps(), logger)},
 	)
 
 	return &Application{
@@ -64,6 +78,7 @@ func New(ctx context.Context, cfg *config.Config, logger *slog.Logger) (*Applica
 		DB:         db,
 		Redis:      redisClient,
 		HTTPClient: httpClient,
+		Services:   services,
 		Server:     server,
 	}, nil
 }

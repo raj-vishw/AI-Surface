@@ -9,7 +9,7 @@ import type { TechnologySummary } from "@/types/fingerprint";
 
 export async function listTechnologies(targetId: string): Promise<TechnologySummary[]> {
   if (USE_MOCKS) {
-    const fps = mockFingerprints.filter((f) => f.targetId === targetId && f.status !== "removed");
+    const fps = mockFingerprints.filter((f) => f.targetId === targetId && f.status === "ACTIVE");
     const byTech = new Map<string, TechnologySummary>();
     for (const fp of fps) {
       const existing = byTech.get(fp.technology);

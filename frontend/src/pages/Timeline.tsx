@@ -69,7 +69,6 @@ export default function Timeline() {
             </ol>
             {data && (
               <Pagination
-                total={data.total}
                 shown={data.items.length}
                 hasMore={data.hasMore}
                 hasPrev={pagination.hasPrev}

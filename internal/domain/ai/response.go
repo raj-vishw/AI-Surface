@@ -42,6 +42,17 @@ type Response struct {
 	// (phase13.md §101).
 	ResponseHash string
 
+	// Structured carries the same Observed/Inferred/Unknown/EvidenceGaps/
+	// NextSteps/Questions/Citations breakdown internal/ai.StructuredResult
+	// builds for every task (see internal/ai/investigator.go) — persisted
+	// alongside the rendered Content so a later reader (the REST API, a
+	// future UI) can render the section-by-section Trust UI directly
+	// rather than re-deriving it from prose. A generic map, the same
+	// "domain package never imports the engine package" boundary
+	// Finding.Metadata/Asset.Metadata already establish — this package
+	// has no dependency on internal/ai's StructuredResult type.
+	Structured map[string]any
+
 	InputTokens  int
 	OutputTokens int
 	LatencyMS    int64

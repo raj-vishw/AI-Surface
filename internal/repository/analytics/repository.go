@@ -34,27 +34,41 @@ type TimeRange struct {
 }
 
 // Bucket is one time-series data point — a count of some event type
-// falling within [BucketStart, next bucket).
+// falling within [BucketStart, next bucket). JSON tags exist purely so
+// internal/api can serialize these directly without a duplicate DTO
+// (added alongside internal/api — never marshaled anywhere before it).
 type Bucket struct {
-	BucketStart time.Time
-	Count       int
+	BucketStart time.Time `json:"bucketStart"`
+	Count       int       `json:"count"`
 }
 
 // NamedCount is a generic (label, count) pair — used for every
 // "breakdown by X" query (severity, status, category, rule, provider,
 // model, tool, stage, indicator type, ...).
 type NamedCount struct {
-	Name  string
-	Count int
+	Name  string `json:"name"`
+	Count int    `json:"count"`
 }
 
 // RiskBucket is one time-bucketed risk-trend data point (phase14.md §6).
 type RiskBucket struct {
-	BucketStart   time.Time
-	AverageScore  float64
-	MaxScore      int
-	CriticalCount int
-	HighCount     int
+	BucketStart   time.Time `json:"bucketStart"`
+	AverageScore  float64   `json:"averageScore"`
+	MaxScore      int       `json:"maxScore"`
+	CriticalCount int       `json:"criticalCount"`
+	HighCount     int       `json:"highCount"`
+}
+
+// RiskEntity is one scored entity's latest risk score — the row shape
+// behind a "highest-risk assets" listing. Added for internal/api's Risk
+// page (a REST-API-only need; no CLI command lists this) rather than
+// requiring N+1 GetLatestRiskScore calls per asset.
+type RiskEntity struct {
+	EntityType   string    `json:"entityType"`
+	EntityID     uuid.UUID `json:"entityId"`
+	Score        int       `json:"score"`
+	Severity     string    `json:"severity"`
+	CalculatedAt time.Time `json:"calculatedAt"`
 }
 
 // Repository is every aggregate query Phase 14's analytics layer needs.
@@ -77,6 +91,10 @@ type Repository interface {
 	// entity_id) — the input internal/analytics.SecurityPosture derives
 	// its score from (phase14.md §5).
 	LatestRiskAverage(ctx context.Context, targetID uuid.UUID) (average float64, scoredEntities int, err error)
+	// TopRiskyEntities returns the highest-scored latest risk score per
+	// entity, optionally narrowed to one entityType ("" means any),
+	// ordered by score descending, bounded by limit.
+	TopRiskyEntities(ctx context.Context, targetID uuid.UUID, entityType string, limit int) ([]RiskEntity, error)
 
 	// --- alerts ---
 	AlertsOverTime(ctx context.Context, targetID uuid.UUID, r TimeRange, interval string) ([]Bucket, error)

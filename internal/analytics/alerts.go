@@ -10,10 +10,10 @@ import (
 
 // AlertAnalytics implements phase14.md §7.
 type AlertAnalytics struct {
-	OverTime   []analyticsrepo.Bucket
-	BySeverity []analyticsrepo.NamedCount
-	ByStatus   []analyticsrepo.NamedCount
-	ByRule     []analyticsrepo.NamedCount
+	OverTime   []analyticsrepo.Bucket     `json:"overTime"`
+	BySeverity []analyticsrepo.NamedCount `json:"bySeverity"`
+	ByStatus   []analyticsrepo.NamedCount `json:"byStatus"`
+	ByRule     []analyticsrepo.NamedCount `json:"byRule"`
 }
 
 // Alerts implements phase14.md §7. Filters are not yet applied to the

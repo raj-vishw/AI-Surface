@@ -1,5 +1,6 @@
-/** Mirrors internal/domain/intelligence (record/vulnerability/risk). */
+import type { Severity } from "@/lib/severity";
 
+/** Mirrors internal/domain/intelligence (record/vulnerability/risk). */
 export type IndicatorType =
   | "domain"
   | "subdomain"
@@ -60,21 +61,27 @@ export interface VulnerabilityMatch {
   matchedAt: string;
 }
 
-/** Mirrors internal/intelligence/risk — a risk score for one scored
- * entity (asset/finding/investigation), never a raw probability. */
+/** Mirrors internal/domain/intelligence.RiskScore exactly. Corrected
+ * after backend inspection during API wiring: the real field is
+ * `severity` (the same 5-level scale as findings/alerts/investigations),
+ * not an invented 4-level "criticality" — see
+ * internal/domain/intelligence/risk.go's RiskScore struct. */
 export interface RiskScore {
   id: string;
   targetId: string;
   entityType: "asset" | "finding" | "investigation";
   entityId: string;
   score: number; // 0-100, higher = riskier
-  criticality: "low" | "normal" | "high" | "critical";
+  severity: Severity;
+  confidence: string;
+  modelVersion: string;
   factors: RiskFactor[];
+  explanation: string;
   calculatedAt: string;
 }
 
 export interface RiskFactor {
   name: string;
-  contribution: number;
-  explanation: string;
+  points: number;
+  description: string;
 }

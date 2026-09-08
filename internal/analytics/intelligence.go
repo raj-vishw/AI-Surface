@@ -14,11 +14,11 @@ import (
 // Record.SourceType) — ByProvider surfaces that distinction directly
 // rather than this layer inventing a second internal/external label.
 type IntelligenceAnalytics struct {
-	Total           int
-	ByIndicatorType []analyticsrepo.NamedCount
-	ByProvider      []analyticsrepo.NamedCount
-	ByConfidence    []analyticsrepo.NamedCount
-	Expired         int
+	Total           int                        `json:"total"`
+	ByIndicatorType []analyticsrepo.NamedCount `json:"byIndicatorType"`
+	ByProvider      []analyticsrepo.NamedCount `json:"byProvider"`
+	ByConfidence    []analyticsrepo.NamedCount `json:"byConfidence"`
+	Expired         int                        `json:"expired"`
 }
 
 // Intelligence implements phase14.md §16.

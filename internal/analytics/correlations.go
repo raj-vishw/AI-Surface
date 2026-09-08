@@ -10,11 +10,11 @@ import (
 
 // CorrelationAnalytics implements phase14.md §12.
 type CorrelationAnalytics struct {
-	OverTime     []analyticsrepo.Bucket
-	BySeverity   []analyticsrepo.NamedCount
-	ByConfidence []analyticsrepo.NamedCount
-	ByStatus     []analyticsrepo.NamedCount
-	ByStrategy   []analyticsrepo.NamedCount
+	OverTime     []analyticsrepo.Bucket     `json:"overTime"`
+	BySeverity   []analyticsrepo.NamedCount `json:"bySeverity"`
+	ByConfidence []analyticsrepo.NamedCount `json:"byConfidence"`
+	ByStatus     []analyticsrepo.NamedCount `json:"byStatus"`
+	ByStrategy   []analyticsrepo.NamedCount `json:"byStrategy"`
 }
 
 // Correlations implements phase14.md §12.
@@ -47,10 +47,10 @@ func (s *Service) Correlations(ctx context.Context, targetID uuid.UUID, r TimeRa
 // platform's 9-stage vocabulary, not a judgment about the underlying
 // activity.
 type AttackChainAnalytics struct {
-	OverTime     []analyticsrepo.Bucket
-	BySeverity   []analyticsrepo.NamedCount
-	ByConfidence []analyticsrepo.NamedCount
-	CommonStages []analyticsrepo.NamedCount
+	OverTime     []analyticsrepo.Bucket     `json:"overTime"`
+	BySeverity   []analyticsrepo.NamedCount `json:"bySeverity"`
+	ByConfidence []analyticsrepo.NamedCount `json:"byConfidence"`
+	CommonStages []analyticsrepo.NamedCount `json:"commonStages"`
 }
 
 // AttackChains implements phase14.md §13.

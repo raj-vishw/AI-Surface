@@ -13,6 +13,7 @@ import (
 	"ai-recon-platform/internal/domain/reporting"
 	apperrors "ai-recon-platform/internal/errors"
 	"ai-recon-platform/internal/repository/pagination"
+	"ai-recon-platform/internal/repository/sqlerr"
 )
 
 // PostgresRepository implements every interface in this package.
@@ -186,7 +187,7 @@ func (r *PostgresRepository) ListReports(ctx context.Context, filter ReportListF
 		page.NextCursor = pagination.Cursor{CreatedAt: last.CreatedAt, ID: last.ID}.Encode()
 	}
 	if rows.Err() != nil {
-		return pagination.Page[reporting.Report]{}, apperrors.NewDatabase("iterating reports", rows.Err())
+		return pagination.Page[reporting.Report]{}, sqlerr.Translate(rows.Err(), "iterating reports")
 	}
 	return page, nil
 }
@@ -328,7 +329,7 @@ func (r *PostgresRepository) ListPackages(ctx context.Context, filter PackageLis
 		page.NextCursor = pagination.Cursor{CreatedAt: last.CreatedAt, ID: last.ID}.Encode()
 	}
 	if rows.Err() != nil {
-		return pagination.Page[reporting.Package]{}, apperrors.NewDatabase("iterating evidence packages", rows.Err())
+		return pagination.Page[reporting.Package]{}, sqlerr.Translate(rows.Err(), "iterating evidence packages")
 	}
 	return page, nil
 }
@@ -377,7 +378,7 @@ func (r *PostgresRepository) ListItemsByPackage(ctx context.Context, packageID u
 		}
 		out = append(out, i)
 	}
-	return out, apperrors.NewDatabase("iterating evidence items", rows.Err())
+	return out, sqlerr.Translate(rows.Err(), "iterating evidence items")
 }
 
 // ---------------------------------------------------------------------
@@ -453,7 +454,7 @@ func (r *PostgresRepository) ListControlEvidence(ctx context.Context, filter Con
 		page.NextCursor = pagination.Cursor{CreatedAt: last.CreatedAt, ID: last.ID}.Encode()
 	}
 	if rows.Err() != nil {
-		return pagination.Page[reporting.ControlEvidence]{}, apperrors.NewDatabase("iterating control evidence", rows.Err())
+		return pagination.Page[reporting.ControlEvidence]{}, sqlerr.Translate(rows.Err(), "iterating control evidence")
 	}
 	return page, nil
 }
@@ -473,5 +474,5 @@ func (r *PostgresRepository) DistinctControls(ctx context.Context, targetID uuid
 		}
 		out = append(out, id)
 	}
-	return out, apperrors.NewDatabase("iterating distinct controls", rows.Err())
+	return out, sqlerr.Translate(rows.Err(), "iterating distinct controls")
 }

@@ -77,7 +77,6 @@ export default function AuditLog() {
           </Table>
           {data && (
             <Pagination
-              total={data.total}
               shown={data.items.length}
               hasMore={data.hasMore}
               hasPrev={pagination.hasPrev}

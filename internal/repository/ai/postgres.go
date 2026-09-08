@@ -14,6 +14,7 @@ import (
 	domainai "ai-recon-platform/internal/domain/ai"
 	apperrors "ai-recon-platform/internal/errors"
 	"ai-recon-platform/internal/repository/pagination"
+	"ai-recon-platform/internal/repository/sqlerr"
 )
 
 // PostgresRepository implements every interface in this package,
@@ -156,7 +157,7 @@ func (r *PostgresRepository) ListSessions(ctx context.Context, filter SessionLis
 		page.NextCursor = pagination.Cursor{CreatedAt: last.CreatedAt, ID: last.ID}.Encode()
 	}
 	if rows.Err() != nil {
-		return pagination.Page[domainai.Session]{}, apperrors.NewDatabase("iterating AI sessions", rows.Err())
+		return pagination.Page[domainai.Session]{}, sqlerr.Translate(rows.Err(), "iterating AI sessions")
 	}
 	return page, nil
 }
@@ -227,7 +228,7 @@ func (r *PostgresRepository) ListMessages(ctx context.Context, sessionID uuid.UU
 		out = append(out, m)
 	}
 	if rows.Err() != nil {
-		return nil, apperrors.NewDatabase("iterating AI messages", rows.Err())
+		return nil, sqlerr.Translate(rows.Err(), "iterating AI messages")
 	}
 	return out, nil
 }
@@ -341,7 +342,7 @@ func (r *PostgresRepository) ListRequests(ctx context.Context, filter RequestLis
 		page.NextCursor = pagination.Cursor{CreatedAt: last.CreatedAt, ID: last.ID}.Encode()
 	}
 	if rows.Err() != nil {
-		return pagination.Page[domainai.Request]{}, apperrors.NewDatabase("iterating AI requests", rows.Err())
+		return pagination.Page[domainai.Request]{}, sqlerr.Translate(rows.Err(), "iterating AI requests")
 	}
 	return page, nil
 }
@@ -350,21 +351,27 @@ func (r *PostgresRepository) ListRequests(ctx context.Context, filter RequestLis
 // ai_responses
 // ---------------------------------------------------------------------
 
-const responseColumns = `id, request_id, content, model, provider, prompt_version, confidence, citations, response_hash, input_tokens, output_tokens, latency_ms, created_at`
+const responseColumns = `id, request_id, content, model, provider, prompt_version, confidence, citations, response_hash, input_tokens, output_tokens, latency_ms, created_at, structured_result`
 
 func scanResponse(row pgx.Row) (domainai.Response, error) {
 	var (
-		resp          domainai.Response
-		citationsJSON []byte
+		resp           domainai.Response
+		citationsJSON  []byte
+		structuredJSON []byte
 	)
 	err := row.Scan(&resp.ID, &resp.RequestID, &resp.Content, &resp.Model, &resp.Provider, &resp.PromptVersion,
-		&resp.Confidence, &citationsJSON, &resp.ResponseHash, &resp.InputTokens, &resp.OutputTokens, &resp.LatencyMS, &resp.CreatedAt)
+		&resp.Confidence, &citationsJSON, &resp.ResponseHash, &resp.InputTokens, &resp.OutputTokens, &resp.LatencyMS, &resp.CreatedAt, &structuredJSON)
 	if err != nil {
 		return domainai.Response{}, err
 	}
 	if len(citationsJSON) > 0 {
 		if err := json.Unmarshal(citationsJSON, &resp.Citations); err != nil {
 			return domainai.Response{}, fmt.Errorf("decoding citations: %w", err)
+		}
+	}
+	if len(structuredJSON) > 0 {
+		if err := json.Unmarshal(structuredJSON, &resp.Structured); err != nil {
+			return domainai.Response{}, fmt.Errorf("decoding structured_result: %w", err)
 		}
 	}
 	return resp, nil
@@ -376,12 +383,16 @@ func (r *PostgresRepository) CreateResponse(ctx context.Context, resp domainai.R
 	if err != nil {
 		return domainai.Response{}, fmt.Errorf("encoding citations: %w", err)
 	}
+	structuredJSON, err := json.Marshal(resp.Structured)
+	if err != nil {
+		return domainai.Response{}, fmt.Errorf("encoding structured_result: %w", err)
+	}
 	row := r.db.QueryRow(ctx, `
-		INSERT INTO ai_responses (request_id, content, model, provider, prompt_version, confidence, citations, response_hash, input_tokens, output_tokens, latency_ms)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		INSERT INTO ai_responses (request_id, content, model, provider, prompt_version, confidence, citations, response_hash, input_tokens, output_tokens, latency_ms, structured_result)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 		RETURNING `+responseColumns,
 		resp.RequestID, resp.Content, resp.Model, resp.Provider, resp.PromptVersion, resp.Confidence,
-		citationsJSON, resp.ResponseHash, resp.InputTokens, resp.OutputTokens, resp.LatencyMS)
+		citationsJSON, resp.ResponseHash, resp.InputTokens, resp.OutputTokens, resp.LatencyMS, structuredJSON)
 	result, err := scanResponse(row)
 	if err != nil {
 		return domainai.Response{}, apperrors.NewDatabase("creating AI response", err)
@@ -509,7 +520,7 @@ func (r *PostgresRepository) ListToolCalls(ctx context.Context, filter ToolCallL
 		page.NextCursor = pagination.Cursor{CreatedAt: last.CreatedAt, ID: last.ID}.Encode()
 	}
 	if rows.Err() != nil {
-		return pagination.Page[domainai.ToolCall]{}, apperrors.NewDatabase("iterating AI tool calls", rows.Err())
+		return pagination.Page[domainai.ToolCall]{}, sqlerr.Translate(rows.Err(), "iterating AI tool calls")
 	}
 	return page, nil
 }

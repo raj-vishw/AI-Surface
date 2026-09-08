@@ -10,11 +10,11 @@ import (
 
 // AssetAnalytics implements phase14.md §10.
 type AssetAnalytics struct {
-	Total        int
-	ByType       []analyticsrepo.NamedCount
-	ByStatus     []analyticsrepo.NamedCount
-	RiskCritical int
-	RiskHigh     int
+	Total        int                        `json:"total"`
+	ByType       []analyticsrepo.NamedCount `json:"byType"`
+	ByStatus     []analyticsrepo.NamedCount `json:"byStatus"`
+	RiskCritical int                        `json:"riskCritical"`
+	RiskHigh     int                        `json:"riskHigh"`
 }
 
 // Assets implements phase14.md §10.
@@ -42,9 +42,9 @@ func (s *Service) Assets(ctx context.Context, targetID uuid.UUID) (AssetAnalytic
 // own FirstSeen/Status tracking rather than a new snapshot mechanism
 // (phase14.md §75).
 type AttackSurfaceTrend struct {
-	NewAssets     []analyticsrepo.Bucket
-	RemovedAssets int
-	ByType        []analyticsrepo.NamedCount
+	NewAssets     []analyticsrepo.Bucket     `json:"newAssets"`
+	RemovedAssets int                        `json:"removedAssets"`
+	ByType        []analyticsrepo.NamedCount `json:"byType"`
 }
 
 // AttackSurface implements phase14.md §11/§26.

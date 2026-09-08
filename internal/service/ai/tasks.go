@@ -2,6 +2,7 @@ package ai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -12,6 +13,25 @@ import (
 	domaininvestigation "ai-recon-platform/internal/domain/investigation"
 	apperrors "ai-recon-platform/internal/errors"
 )
+
+// structuredToMap converts an internal/ai.StructuredResult to the generic
+// map[string]any domainai.Response.Structured stores — a plain JSON
+// roundtrip, since domain/ai must never import the engine package
+// (the same boundary every other domain package in this project keeps).
+// A conversion failure (which should never happen for this fixed,
+// JSON-serializable shape) degrades to an empty map rather than losing
+// the whole audit write.
+func structuredToMap(s ai.StructuredResult) map[string]any {
+	raw, err := json.Marshal(s)
+	if err != nil {
+		return map[string]any{}
+	}
+	var m map[string]any
+	if err := json.Unmarshal(raw, &m); err != nil {
+		return map[string]any{}
+	}
+	return m
+}
 
 // TaskRequest is one caller's ask — enough to build a Context, run
 // Assistant, and persist the full audit trail.
@@ -79,6 +99,7 @@ func (s *Service) persistTaskAudit(ctx context.Context, req TaskRequest, result 
 		PromptVersion: result.PromptVersion, Confidence: toDomainConfidence(result.Confidence),
 		Citations: result.Citations, ResponseHash: result.ResponseHash,
 		InputTokens: result.InputTokens, OutputTokens: result.OutputTokens, LatencyMS: result.Latency.Milliseconds(),
+		Structured: structuredToMap(result.Structured),
 	}
 	if _, err := s.responses.CreateResponse(ctx, domainResp); err != nil {
 		s.logger.Error("ai_response_audit_failed", "task", result.TaskType, "error", err)

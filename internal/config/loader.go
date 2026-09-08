@@ -25,6 +25,7 @@ const (
 	envServerWriteTimeout      = "AI_RECON_SERVER_WRITE_TIMEOUT"
 	envServerIdleTimeout       = "AI_RECON_SERVER_IDLE_TIMEOUT"
 	envServerShutdownTimeout   = "AI_RECON_SERVER_SHUTDOWN_TIMEOUT"
+	envServerAllowedOrigins    = "AI_RECON_SERVER_ALLOWED_ORIGINS"
 
 	envDatabaseHost               = "AI_RECON_DATABASE_HOST"
 	envDatabasePort               = "AI_RECON_DATABASE_PORT"
@@ -548,6 +549,22 @@ func applyEnvOverrides(cfg *Config) error {
 			*dst = v
 		}
 	}
+	setStringSlice := func(key string, dst *[]string) {
+		if v, ok := os.LookupEnv(key); ok {
+			if strings.TrimSpace(v) == "" {
+				*dst = nil
+				return
+			}
+			parts := strings.Split(v, ",")
+			out := make([]string, 0, len(parts))
+			for _, p := range parts {
+				if trimmed := strings.TrimSpace(p); trimmed != "" {
+					out = append(out, trimmed)
+				}
+			}
+			*dst = out
+		}
+	}
 	setInt := func(key string, dst *int) {
 		if v, ok := os.LookupEnv(key); ok {
 			n, err := strconv.Atoi(v)
@@ -616,6 +633,7 @@ func applyEnvOverrides(cfg *Config) error {
 	setDuration(envServerWriteTimeout, &cfg.Server.WriteTimeout)
 	setDuration(envServerIdleTimeout, &cfg.Server.IdleTimeout)
 	setDuration(envServerShutdownTimeout, &cfg.Server.ShutdownTimeout)
+	setStringSlice(envServerAllowedOrigins, &cfg.Server.AllowedOrigins)
 
 	setString(envDatabaseHost, &cfg.Database.Host)
 	setInt(envDatabasePort, &cfg.Database.Port)

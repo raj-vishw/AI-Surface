@@ -83,7 +83,6 @@ export default function InvestigationsList() {
             </TableBody>
           </Table>
           <Pagination
-            total={data.total}
             shown={data.items.length}
             hasMore={data.hasMore}
             hasPrev={pagination.hasPrev}

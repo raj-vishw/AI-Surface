@@ -12,15 +12,15 @@ import (
 // one landing page (phase14.md §3: "the backend should provide
 // appropriate aggregates").
 type Overview struct {
-	TotalAssets          int
-	MonitoredAssets      int // assets with status ACTIVE
-	OpenFindings         int
-	OpenAlerts           int
-	ActiveInvestigations int
-	CriticalRiskAssets   int
-	HighRiskAssets       int
-	OpenCorrelations     int
-	IntelligenceRecords  int
+	TotalAssets          int `json:"totalAssets"`
+	MonitoredAssets      int `json:"monitoredAssets"` // assets with status ACTIVE
+	OpenFindings         int `json:"openFindings"`
+	OpenAlerts           int `json:"openAlerts"`
+	ActiveInvestigations int `json:"activeInvestigations"`
+	CriticalRiskAssets   int `json:"criticalRiskAssets"`
+	HighRiskAssets       int `json:"highRiskAssets"`
+	OpenCorrelations     int `json:"openCorrelations"`
+	IntelligenceRecords  int `json:"intelligenceRecords"`
 }
 
 // Overview implements phase14.md §4's executive dashboard summary.

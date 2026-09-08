@@ -21,13 +21,20 @@ const (
 )
 
 // Translate converts err into an *errors.Error appropriate for action
-// (a short description used in the message, e.g. "creating asset").
-// Constraint violations become CategoryConflict/CategoryValidation so
-// callers can distinguish "you asked for something that already exists /
-// references something missing" from a genuine infrastructure failure;
+// (a short description used in the message, e.g. "creating asset"). A nil
+// err returns nil — every repository method ends a rows.Err() check with
+// `return items, sqlerr.Translate(rows.Err(), "iterating ...")` on its
+// success path, so Translate must be a no-op on nil or every one of those
+// callers would always return a non-nil error, even having found nothing
+// wrong. Constraint violations become CategoryConflict/CategoryValidation
+// so callers can distinguish "you asked for something that already exists
+// / references something missing" from a genuine infrastructure failure;
 // everything else becomes CategoryDatabase, whose message and cause are
 // never exposed to clients (see errors.Error.ClientMessage).
 func Translate(err error, action string) error {
+	if err == nil {
+		return nil
+	}
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		switch pgErr.Code {

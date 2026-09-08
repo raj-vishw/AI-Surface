@@ -1,7 +1,9 @@
 // Package httpserver assembles the platform's HTTP API server: routing,
 // middleware (request ID, structured logging, panic recovery), and the
-// /health and /ready endpoints. Later phases add REST resource handlers
-// under api/rest without changing this package's shape.
+// /health and /ready endpoints. internal/api registers its REST resource
+// handlers onto the same mux via the RegisterRoutes option — this
+// package's own shape (middleware stack, health endpoints) is unchanged
+// by that addition.
 package httpserver
 
 import (
@@ -19,9 +21,18 @@ type Server struct {
 	httpServer *http.Server
 }
 
+// Options configures New beyond the required config/logger/dependencies.
+type Options struct {
+	// RegisterRoutes, if non-nil, is called with the server's mux before
+	// any middleware is attached — internal/api uses this to add its REST
+	// resource routes alongside /health, /live, and /ready without this
+	// package needing to know anything about them.
+	RegisterRoutes func(*http.ServeMux)
+}
+
 // New builds a Server ready to run via ListenAndServe. dependencies are
 // polled by /ready on every request via internal/health.
-func New(cfg config.ServerConfig, logger *slog.Logger, dependencies ...health.Dependency) *Server {
+func New(cfg config.ServerConfig, logger *slog.Logger, dependencies []health.Dependency, opts Options) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", healthHandler)
 	// /live is an alias for /health (phase15.md §25's explicit "/live"
@@ -30,10 +41,16 @@ func New(cfg config.ServerConfig, logger *slog.Logger, dependencies ...health.De
 	mux.HandleFunc("GET /live", healthHandler)
 	mux.HandleFunc("GET /ready", readyHandler(logger, dependencies))
 
+	if opts.RegisterRoutes != nil {
+		opts.RegisterRoutes(mux)
+	}
+
 	handler := recoveryMiddleware(logger)(
 		requestIDMiddleware(logger)(
 			securityHeadersMiddleware(
-				loggingMiddleware(logger)(mux),
+				corsMiddleware(cfg.AllowedOrigins)(
+					loggingMiddleware(logger)(mux),
+				),
 			),
 		),
 	)

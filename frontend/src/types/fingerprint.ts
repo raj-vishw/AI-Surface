@@ -23,7 +23,11 @@ export type FingerprintCategory =
   | "library"
   | "infrastructure";
 
-export type FingerprintStatus = "added" | "confirmed" | "changed" | "removed";
+/** Corrected after backend inspection during API wiring: the real
+ * internal/domain/fingerprint.Status enum is only ACTIVE/INACTIVE — an
+ * earlier added/confirmed/changed/removed lifecycle was invented before
+ * this API existed and didn't match. */
+export type FingerprintStatus = "ACTIVE" | "INACTIVE";
 
 export interface Fingerprint {
   id: string;

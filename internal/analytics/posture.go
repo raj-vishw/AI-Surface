@@ -45,10 +45,10 @@ import (
 // little collected evidence can show a misleadingly high score. Always
 // review ScoredEntities alongside Score before drawing any conclusion.
 type SecurityPosture struct {
-	Score          float64
-	ScoredEntities int
-	CriticalCount  int
-	HighCount      int
+	Score          float64 `json:"score"`
+	ScoredEntities int     `json:"scoredEntities"`
+	CriticalCount  int     `json:"criticalCount"`
+	HighCount      int     `json:"highCount"`
 }
 
 // Posture implements phase14.md §5.

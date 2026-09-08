@@ -45,6 +45,13 @@ type ServerConfig struct {
 	WriteTimeout      time.Duration `yaml:"write_timeout"`
 	IdleTimeout       time.Duration `yaml:"idle_timeout"`
 	ShutdownTimeout   time.Duration `yaml:"shutdown_timeout"`
+	// AllowedOrigins lists the exact origins (scheme+host+port, e.g.
+	// "http://localhost:5173") the REST API's CORS middleware permits.
+	// Empty means no cross-origin browser caller is permitted at all —
+	// the safe default (phase15.md §44: never "*" for an authenticated-
+	// shaped API; explicit allowed origins only). Set this to the
+	// frontend's own origin to let it call the API cross-origin.
+	AllowedOrigins []string `yaml:"allowed_origins"`
 }
 
 // Addr returns the host:port the server should listen on.

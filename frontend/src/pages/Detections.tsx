@@ -21,7 +21,7 @@ export default function Detections() {
         <Tabs defaultValue="rules">
           <TabsList>
             <TabsTrigger value="rules">Rules {rules ? `(${rules.length})` : ""}</TabsTrigger>
-            <TabsTrigger value="matches">Matches {matches ? `(${matches.total})` : ""}</TabsTrigger>
+            <TabsTrigger value="matches">Matches {matches ? `(${matches.items.length}${matches.hasMore ? "+" : ""})` : ""}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="rules">
@@ -38,7 +38,6 @@ export default function Detections() {
                       <TableHead>Type</TableHead>
                       <TableHead>Severity</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Version</TableHead>
                       <TableHead>Updated</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -52,7 +51,6 @@ export default function Detections() {
                         <TableCell>{r.ruleType}</TableCell>
                         <TableCell><SeverityBadge severity={r.severity} /></TableCell>
                         <TableCell><StatusBadge status={r.status} /></TableCell>
-                        <TableCell className="font-technical">v{r.version}</TableCell>
                         <TableCell className="text-[color:var(--color-text-muted)]">{formatRelativeTime(r.updatedAt)}</TableCell>
                       </TableRow>
                     ))}

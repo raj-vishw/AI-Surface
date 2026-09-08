@@ -15,13 +15,13 @@ import (
 // §15's incident analytics: there is no second, parallel "incidents"
 // table to aggregate separately.
 type InvestigationAnalytics struct {
-	OpenedOverTime      []analyticsrepo.Bucket
-	ClosedOverTime      []analyticsrepo.Bucket
-	BySeverity          []analyticsrepo.NamedCount
-	ByStatus            []analyticsrepo.NamedCount
-	Active              int
-	MeanDurationSeconds float64
-	ClosedCount         int
+	OpenedOverTime      []analyticsrepo.Bucket     `json:"openedOverTime"`
+	ClosedOverTime      []analyticsrepo.Bucket     `json:"closedOverTime"`
+	BySeverity          []analyticsrepo.NamedCount `json:"bySeverity"`
+	ByStatus            []analyticsrepo.NamedCount `json:"byStatus"`
+	Active              int                        `json:"active"`
+	MeanDurationSeconds float64                    `json:"meanDurationSeconds"`
+	ClosedCount         int                        `json:"closedCount"`
 }
 
 // Investigations implements phase14.md §14/§15.

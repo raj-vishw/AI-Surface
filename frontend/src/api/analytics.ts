@@ -83,8 +83,8 @@ export async function getOverview(targetId: string): Promise<Overview> {
       openFindings: findings.filter((f) => f.status === "open" || f.status === "reopened").length,
       openAlerts: alerts.filter((a) => a.status === "open" || a.status === "investigating").length,
       activeInvestigations: investigations.filter((i) => !["closed", "resolved"].includes(i.status)).length,
-      criticalRiskAssets: risk.filter((r) => r.criticality === "critical").length,
-      highRiskAssets: risk.filter((r) => r.criticality === "high").length,
+      criticalRiskAssets: risk.filter((r) => r.severity === "critical").length,
+      highRiskAssets: risk.filter((r) => r.severity === "high").length,
       openCorrelations: correlations.filter((c) => c.status === "candidate" || c.status === "confirmed").length,
       intelligenceRecords: intel.length,
     };
@@ -106,11 +106,11 @@ export async function getRiskAnalytics(targetId: string, range: RangePreset = "3
         bucketStart: d.toISOString().slice(0, 10),
         averageScore: Math.round(Math.max(0, Math.min(100, avg - 10 + jitter))),
         maxScore: Math.min(100, Math.round(avg + 20)),
-        criticalCount: risk.filter((r) => r.criticality === "critical").length,
-        highCount: risk.filter((r) => r.criticality === "high").length,
+        criticalCount: risk.filter((r) => r.severity === "critical").length,
+        highCount: risk.filter((r) => r.severity === "high").length,
       };
     });
-    const distribution = countBy(risk, (r) => r.criticality);
+    const distribution = countBy(risk, (r) => r.severity);
     return mockDelay({ trend, distribution });
   }
   return apiRequest<RiskAnalytics>("/api/v1/analytics/risk", { searchParams: { target_id: targetId, range } });
@@ -181,8 +181,8 @@ export async function getAssetAnalytics(targetId: string): Promise<AssetAnalytic
       total: assets.length,
       byType: countBy(assets, (a) => a.type),
       byStatus: countBy(assets, (a) => a.status),
-      riskCritical: risk.filter((r) => r.criticality === "critical").length,
-      riskHigh: risk.filter((r) => r.criticality === "high").length,
+      riskCritical: risk.filter((r) => r.severity === "critical").length,
+      riskHigh: risk.filter((r) => r.severity === "high").length,
     });
   }
   return apiRequest<AssetAnalytics>("/api/v1/analytics/assets", { searchParams: { target_id: targetId } });
@@ -274,8 +274,8 @@ export async function getSecurityPosture(targetId: string): Promise<SecurityPost
     return mockDelay({
       score: Math.round(100 - avg),
       scoredEntities: risk.length,
-      criticalCount: risk.filter((r) => r.criticality === "critical").length,
-      highCount: risk.filter((r) => r.criticality === "high").length,
+      criticalCount: risk.filter((r) => r.severity === "critical").length,
+      highCount: risk.filter((r) => r.severity === "high").length,
     });
   }
   return apiRequest<SecurityPosture>("/api/v1/analytics/posture", { searchParams: { target_id: targetId } });

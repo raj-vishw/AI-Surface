@@ -8,6 +8,7 @@ import (
 
 	"ai-recon-platform/internal/database"
 	apperrors "ai-recon-platform/internal/errors"
+	"ai-recon-platform/internal/repository/sqlerr"
 )
 
 // PostgresRepository implements Repository — every method is a read-only
@@ -50,7 +51,7 @@ func (r *PostgresRepository) queryBuckets(ctx context.Context, sql string, args 
 		}
 		out = append(out, b)
 	}
-	return out, apperrors.NewDatabase("iterating analytics buckets", rows.Err())
+	return out, sqlerr.Translate(rows.Err(), "iterating analytics buckets")
 }
 
 func (r *PostgresRepository) queryNamedCounts(ctx context.Context, sql string, args ...any) ([]NamedCount, error) {
@@ -67,7 +68,7 @@ func (r *PostgresRepository) queryNamedCounts(ctx context.Context, sql string, a
 		}
 		out = append(out, n)
 	}
-	return out, apperrors.NewDatabase("iterating analytics breakdown", rows.Err())
+	return out, sqlerr.Translate(rows.Err(), "iterating analytics breakdown")
 }
 
 func (r *PostgresRepository) queryCount(ctx context.Context, sql string, args ...any) (int, error) {
@@ -140,7 +141,7 @@ func (r *PostgresRepository) CountCriticalHighRiskAssets(ctx context.Context, ta
 			high = count
 		}
 	}
-	return critical, high, apperrors.NewDatabase("iterating risk severities", rows.Err())
+	return critical, high, sqlerr.Translate(rows.Err(), "iterating risk severities")
 }
 
 // CountOpenCorrelations implements Repository.
@@ -183,7 +184,7 @@ func (r *PostgresRepository) RiskTrend(ctx context.Context, targetID uuid.UUID, 
 		}
 		out = append(out, b)
 	}
-	return out, apperrors.NewDatabase("iterating risk trend", rows.Err())
+	return out, sqlerr.Translate(rows.Err(), "iterating risk trend")
 }
 
 // LatestRiskAverage implements Repository.
@@ -213,6 +214,37 @@ func (r *PostgresRepository) LatestRiskDistribution(ctx context.Context, targetI
 			FROM risk_scores WHERE target_id = $1
 			ORDER BY entity_type, entity_id, calculated_at DESC
 		) latest GROUP BY severity ORDER BY severity`, targetID)
+}
+
+// TopRiskyEntities implements Repository.
+func (r *PostgresRepository) TopRiskyEntities(ctx context.Context, targetID uuid.UUID, entityType string, limit int) ([]RiskEntity, error) {
+	if limit <= 0 || limit > 500 {
+		limit = 50
+	}
+	query := `
+		SELECT entity_type, entity_id, score, severity, calculated_at FROM (
+			SELECT DISTINCT ON (entity_type, entity_id) entity_type, entity_id, score, severity, calculated_at
+			FROM risk_scores WHERE target_id = $1 AND ($2 = '' OR entity_type = $2)
+			ORDER BY entity_type, entity_id, calculated_at DESC
+		) latest ORDER BY score DESC LIMIT $3`
+	rows, err := r.db.Query(ctx, query, targetID, entityType, limit)
+	if err != nil {
+		return nil, apperrors.NewDatabase("listing top risky entities", err)
+	}
+	defer rows.Close()
+
+	var out []RiskEntity
+	for rows.Next() {
+		var e RiskEntity
+		if err := rows.Scan(&e.EntityType, &e.EntityID, &e.Score, &e.Severity, &e.CalculatedAt); err != nil {
+			return nil, apperrors.NewDatabase("scanning top risky entity", err)
+		}
+		out = append(out, e)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, apperrors.NewDatabase("iterating top risky entities", err)
+	}
+	return out, nil
 }
 
 // ---------------------------------------------------------------------
@@ -310,7 +342,7 @@ func (r *PostgresRepository) RuleStatusCounts(ctx context.Context, targetID uuid
 			disabled += count
 		}
 	}
-	return enabled, disabled, apperrors.NewDatabase("iterating rule statuses", rows.Err())
+	return enabled, disabled, sqlerr.Translate(rows.Err(), "iterating rule statuses")
 }
 
 // RuleAlertConversion implements Repository. "Dismissed" counts alerts
@@ -341,7 +373,7 @@ func (r *PostgresRepository) RuleAlertConversion(ctx context.Context, targetID u
 		}
 		out[name] = c
 	}
-	return out, apperrors.NewDatabase("iterating rule alert conversion", rows.Err())
+	return out, sqlerr.Translate(rows.Err(), "iterating rule alert conversion")
 }
 
 // ---------------------------------------------------------------------

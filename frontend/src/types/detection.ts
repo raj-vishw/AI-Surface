@@ -6,15 +6,22 @@ export type RuleStatus = "draft" | "enabled" | "disabled" | "deprecated";
 
 export type RuleType = "threshold" | "sequence" | "aggregation" | "simple";
 
+/** internal/domain/rule.Confidence is a string enum, not a 0-1 float
+ * (unlike asset/finding Confidence) — corrected after backend
+ * inspection during API wiring. */
+export type RuleConfidence = "very_low" | "low" | "medium" | "high" | "very_high";
+
+/** No `version` field: internal/domain/rule.Rule doesn't carry a
+ * current-version number itself (tracked separately via rule.Version
+ * rows) — corrected after backend inspection during API wiring. */
 export interface Rule {
   id: string;
   targetId: string;
   name: string;
   description: string;
-  version: number;
   status: RuleStatus;
   severity: Severity;
-  confidence: number;
+  confidence: RuleConfidence;
   ruleType: RuleType;
   category: string;
   tags: string[];
@@ -52,7 +59,7 @@ export interface Alert {
   title: string;
   description: string;
   severity: Severity;
-  confidence: number;
+  confidence: RuleConfidence;
   status: AlertStatus;
   investigationId: string | null;
   ruleName?: string;

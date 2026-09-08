@@ -147,7 +147,19 @@ func (s *Service) createVersion(ctx context.Context, ruleID uuid.UUID, def rulee
 	}
 
 	v := domainrule.Version{
-		RuleID: ruleID, Definition: string(encoded), DefinitionHash: compiled.Hash,
+		// Version is a placeholder here, not a real value this call
+		// controls: PostgresRepository.CreateVersion computes the real
+		// next version number server-side
+		// (COALESCE(MAX(version),0)+1 — see internal/repository/rule/
+		// postgres.go) so two concurrent version creations for the same
+		// rule can never race on a client-computed number. Set to 1
+		// purely so Version.Validate() below (which correctly requires
+		// >= 1 for an already-persisted Version) doesn't reject this
+		// pre-insert value — the field this constructs is discarded by
+		// the INSERT's own RETURNING clause regardless of what it is set
+		// to here.
+		Version: 1,
+		RuleID:  ruleID, Definition: string(encoded), DefinitionHash: compiled.Hash,
 		Enabled: true, EventSchemaVersion: def.SchemaVersion, CreatedBy: createdBy, ChangeDescription: changeDescription,
 	}
 	if v.EventSchemaVersion < 1 {

@@ -10,12 +10,12 @@ import (
 
 // FindingAnalytics implements phase14.md §9.
 type FindingAnalytics struct {
-	BySeverity     []analyticsrepo.NamedCount
-	ByCategory     []analyticsrepo.NamedCount
-	OverTime       []analyticsrepo.Bucket
-	Open           int
-	Resolved       int
-	AffectedAssets []analyticsrepo.NamedCount // top N assets by finding count in range
+	BySeverity     []analyticsrepo.NamedCount `json:"bySeverity"`
+	ByCategory     []analyticsrepo.NamedCount `json:"byCategory"`
+	OverTime       []analyticsrepo.Bucket     `json:"overTime"`
+	Open           int                        `json:"open"`
+	Resolved       int                        `json:"resolved"`
+	AffectedAssets []analyticsrepo.NamedCount `json:"affectedAssets"` // top N assets by finding count in range
 }
 
 // Findings implements phase14.md §9.

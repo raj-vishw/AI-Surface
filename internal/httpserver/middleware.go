@@ -88,11 +88,42 @@ func loggingMiddleware(fallback *slog.Logger) func(http.Handler) http.Handler {
 	}
 }
 
+// corsMiddleware implements explicit-allowlist CORS (phase15.md §44 —
+// never Access-Control-Allow-Origin: "*"): allowedOrigins is normally the
+// deployed frontend's own origin(s) (config: server.allowed_origins /
+// AI_RECON_SERVER_ALLOWED_ORIGINS). An empty list (the safe default)
+// means no cross-origin browser caller is permitted at all — this
+// middleware then does nothing, and a browser's own same-origin policy
+// blocks everything, exactly as if this middleware didn't exist.
+func corsMiddleware(allowedOrigins []string) func(http.Handler) http.Handler {
+	allowed := make(map[string]bool, len(allowedOrigins))
+	for _, o := range allowedOrigins {
+		allowed[o] = true
+	}
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			if origin != "" && allowed[origin] {
+				h := w.Header()
+				h.Set("Access-Control-Allow-Origin", origin)
+				h.Set("Vary", "Origin")
+				h.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+				h.Set("Access-Control-Allow-Headers", "Content-Type")
+				h.Set("Access-Control-Max-Age", "600")
+			}
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // securityHeadersMiddleware sets a baseline of defensive HTTP response
-// headers on every response (phase15.md §43). This server exposes only
-// /health, /live, and /ready — plain JSON, no HTML rendering, no cookies,
-// no cross-origin browser callers — so a strict, single fixed policy is
-// safe everywhere with no per-route exception:
+// headers on every response (phase15.md §43) — plain JSON everywhere, no
+// HTML rendering, so a strict, single fixed policy is safe with no
+// per-route exception:
 //
 //   - Content-Security-Policy: default-src 'none' — there is nothing on
 //     this server for a CSP to permit; every response is JSON, not a page
@@ -106,13 +137,12 @@ func loggingMiddleware(fallback *slog.Logger) func(http.Handler) http.Handler {
 //   - X-Frame-Options: DENY — redundant with the CSP's frame-ancestors
 //     omission on modern browsers, kept for older ones.
 //
-// No CORS header is set (phase15.md §44): this platform has no
-// browser-facing frontend and no cookie-based session to protect or share,
-// so there is no cross-origin request this server needs to permit — the
-// default same-origin browser behavior (i.e. effectively no cross-origin
-// access at all, since nothing here ever sends
-// Access-Control-Allow-Origin) is the correct, safe posture, not an
-// oversight. See docs/security/production-hardening.md.
+// CORS is handled separately by corsMiddleware, an explicit allowlist
+// (server.allowed_origins) rather than a header set unconditionally here
+// — a frontend now exists (see ../../frontend) and needs cross-origin
+// access to this API in local development and in any deployment where
+// they aren't served from the same origin; "*" is never used
+// (phase15.md §44). See docs/security/production-hardening.md.
 func securityHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()

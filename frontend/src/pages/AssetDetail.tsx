@@ -87,7 +87,7 @@ export default function AssetDetail() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge>{Math.round(fp.confidence * 100)}% confidence</Badge>
-                          <StatusBadge status={fp.status === "confirmed" ? "active" : fp.status} />
+                          <StatusBadge status={fp.status.toLowerCase()} />
                         </div>
                       </CardContent>
                     </Card>
