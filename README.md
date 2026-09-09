@@ -4,23 +4,6 @@ A platform for discovering, fingerprinting, and performing authorized
 security assessments of AI/LLM systems. See `../doc_by_me/` for the full
 project specification, architecture, and phased roadmap.
 
-**Status: Phase 15 — production hardening (final planned phase).**
-Phases 1–14 (platform foundation; asset/evidence/endpoint persistence;
-HTTP/network/DNS/endpoint discovery; passive fingerprinting;
-finding/vulnerability detection; investigation & incident correlation;
-threat intelligence & risk; detection rule engine & alerting; advanced
-correlation & attack chains; the AI investigation assistant; and
-analytics/reporting/evidence/compliance) are all implemented, tested, and
-documented — see `CHANGELOG.md` for the full per-phase history. Phase 15
-audited and hardened the whole platform (SSRF protection, dependency/
-secret/toolchain vulnerabilities, production configuration guard rails,
-CI security scanning, security response headers) without adding new
-product functionality — see `docs/security/final-audit.md` for every
-finding and `docs/operations/production-readiness-report.md` for the
-resulting verdict. There is still no frontend, job queue, or
-authentication/RBAC layer — this remains a single-operator, CLI-driven
-tool by design; see `docs/security/threat-model.md`.
-
 ## 1. Prerequisites
 
 - Go 1.26+
