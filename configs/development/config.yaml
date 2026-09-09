@@ -11,15 +11,6 @@
 # come from AI_RECON_DATABASE_PASSWORD / AI_RECON_REDIS_PASSWORD via your
 # shell or .env file. See .env.example.
 
-server:
-  # Lets the Vite dev server (frontend/, default port 5173) call this
-  # REST API cross-origin — see internal/api and docs/operations/
-  # deployment.md's "Connecting the frontend" section. Never "*"; add
-  # your deployed frontend's real origin here (or via
-  # AI_RECON_SERVER_ALLOWED_ORIGINS) for a non-local deployment.
-  allowed_origins:
-    - http://localhost:5173
-
 database:
   host: localhost
   user: airecon

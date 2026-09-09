@@ -1,8 +1,8 @@
 // Package migrate implements a minimal, dependency-free SQL migration
 // runner. Migrations are plain .sql files named "<sequence>_<description>.sql"
 // (e.g. "000001_initial.sql") living in the repository's top-level
-// migrations/ directory, embedded there (see migrations.FS) so `cmd/migrate`
-// and `cmd/server` never depend on a filesystem path at runtime.
+// migrations/ directory, embedded there (see migrations.FS) so
+// `cmd/migrate` never depends on a filesystem path at runtime.
 //
 // Phase 1 intentionally ships only the migration bookkeeping table itself
 // (schema_migrations) — no product tables exist yet. Later phases add their

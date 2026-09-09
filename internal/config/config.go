@@ -5,7 +5,6 @@ package config
 import (
 	"fmt"
 	"net"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -13,7 +12,6 @@ import (
 // Config is the fully-resolved application configuration.
 type Config struct {
 	Application    ApplicationConfig   `yaml:"application"`
-	Server         ServerConfig        `yaml:"server"`
 	Database       DatabaseConfig      `yaml:"database"`
 	Redis          RedisConfig         `yaml:"redis"`
 	HTTPClient     HTTPClientConfig    `yaml:"http_client"`
@@ -34,29 +32,6 @@ type ApplicationConfig struct {
 	Name        string `yaml:"name"`
 	Environment string `yaml:"environment"`
 	Version     string `yaml:"version"`
-}
-
-// ServerConfig configures the HTTP API server.
-type ServerConfig struct {
-	Host              string        `yaml:"host"`
-	Port              int           `yaml:"port"`
-	ReadHeaderTimeout time.Duration `yaml:"read_header_timeout"`
-	ReadTimeout       time.Duration `yaml:"read_timeout"`
-	WriteTimeout      time.Duration `yaml:"write_timeout"`
-	IdleTimeout       time.Duration `yaml:"idle_timeout"`
-	ShutdownTimeout   time.Duration `yaml:"shutdown_timeout"`
-	// AllowedOrigins lists the exact origins (scheme+host+port, e.g.
-	// "http://localhost:5173") the REST API's CORS middleware permits.
-	// Empty means no cross-origin browser caller is permitted at all —
-	// the safe default (phase15.md §44: never "*" for an authenticated-
-	// shaped API; explicit allowed origins only). Set this to the
-	// frontend's own origin to let it call the API cross-origin.
-	AllowedOrigins []string `yaml:"allowed_origins"`
-}
-
-// Addr returns the host:port the server should listen on.
-func (s ServerConfig) Addr() string {
-	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 }
 
 // DatabaseConfig configures the PostgreSQL connection and pool.
@@ -738,28 +713,6 @@ func (c *Config) Validate() error {
 	}
 	if !validEnvironments[strings.ToLower(c.Application.Environment)] {
 		errs = append(errs, fmt.Sprintf("application.environment %q must be one of development, staging, production, test", c.Application.Environment))
-	}
-
-	if c.Server.Port < 1 || c.Server.Port > 65535 {
-		errs = append(errs, fmt.Sprintf("server.port must be between 1 and 65535, got %d", c.Server.Port))
-	}
-	if strings.TrimSpace(c.Server.Host) == "" {
-		errs = append(errs, "server.host must not be empty")
-	}
-	if c.Server.ReadHeaderTimeout <= 0 {
-		errs = append(errs, "server.read_header_timeout must be positive")
-	}
-	if c.Server.ReadTimeout <= 0 {
-		errs = append(errs, "server.read_timeout must be positive")
-	}
-	if c.Server.WriteTimeout <= 0 {
-		errs = append(errs, "server.write_timeout must be positive")
-	}
-	if c.Server.IdleTimeout <= 0 {
-		errs = append(errs, "server.idle_timeout must be positive")
-	}
-	if c.Server.ShutdownTimeout <= 0 {
-		errs = append(errs, "server.shutdown_timeout must be positive")
 	}
 
 	if strings.TrimSpace(c.Database.Host) == "" {

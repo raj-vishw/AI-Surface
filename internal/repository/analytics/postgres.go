@@ -43,7 +43,15 @@ func (r *PostgresRepository) queryBuckets(ctx context.Context, sql string, args 
 		return nil, apperrors.NewDatabase("querying analytics time series", err)
 	}
 	defer rows.Close()
-	var out []Bucket
+	// Pre-allocated non-nil, not `var out []Bucket` — a target with no
+	// matching rows (e.g. a brand-new target with zero assets) must
+	// still marshal to JSON `[]`, never `null`. A nil slice here
+	// previously reached the frontend as byType/byStatus/etc: null,
+	// which every consumer expects to safely .slice()/.map() and
+	// crashed on (see AttackSurfaceOverview.tsx) — this mirrors the
+	// `make([]T, 0, ...)` convention every internal/api/*.go list
+	// handler already follows for exactly the same reason.
+	out := make([]Bucket, 0)
 	for rows.Next() {
 		var b Bucket
 		if err := rows.Scan(&b.BucketStart, &b.Count); err != nil {
@@ -60,7 +68,10 @@ func (r *PostgresRepository) queryNamedCounts(ctx context.Context, sql string, a
 		return nil, apperrors.NewDatabase("querying analytics breakdown", err)
 	}
 	defer rows.Close()
-	var out []NamedCount
+	// Pre-allocated non-nil — see queryBuckets' comment just above for
+	// why: a nil slice here marshals to JSON `null`, not `[]`, and every
+	// frontend consumer of byType/byStatus/etc assumes an array.
+	out := make([]NamedCount, 0)
 	for rows.Next() {
 		var n NamedCount
 		if err := rows.Scan(&n.Name, &n.Count); err != nil {

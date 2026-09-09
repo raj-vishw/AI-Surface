@@ -18,15 +18,6 @@ const (
 	EnvVarEnvironment = "AI_RECON_APP_ENV"
 	EnvVarConfigDir   = "AI_RECON_CONFIG_DIR"
 
-	envServerHost              = "AI_RECON_SERVER_HOST"
-	envServerPort              = "AI_RECON_SERVER_PORT"
-	envServerReadHeaderTimeout = "AI_RECON_SERVER_READ_HEADER_TIMEOUT"
-	envServerReadTimeout       = "AI_RECON_SERVER_READ_TIMEOUT"
-	envServerWriteTimeout      = "AI_RECON_SERVER_WRITE_TIMEOUT"
-	envServerIdleTimeout       = "AI_RECON_SERVER_IDLE_TIMEOUT"
-	envServerShutdownTimeout   = "AI_RECON_SERVER_SHUTDOWN_TIMEOUT"
-	envServerAllowedOrigins    = "AI_RECON_SERVER_ALLOWED_ORIGINS"
-
 	envDatabaseHost               = "AI_RECON_DATABASE_HOST"
 	envDatabasePort               = "AI_RECON_DATABASE_PORT"
 	envDatabaseUser               = "AI_RECON_DATABASE_USER"
@@ -177,15 +168,6 @@ func defaultConfig() *Config {
 			Name:        "ai-recon-platform",
 			Environment: defaultEnvironment,
 			Version:     "",
-		},
-		Server: ServerConfig{
-			Host:              "0.0.0.0",
-			Port:              8080,
-			ReadHeaderTimeout: 5 * time.Second,
-			ReadTimeout:       5 * time.Second,
-			WriteTimeout:      10 * time.Second,
-			IdleTimeout:       60 * time.Second,
-			ShutdownTimeout:   15 * time.Second,
 		},
 		Database: DatabaseConfig{
 			Host:               "localhost",
@@ -549,22 +531,6 @@ func applyEnvOverrides(cfg *Config) error {
 			*dst = v
 		}
 	}
-	setStringSlice := func(key string, dst *[]string) {
-		if v, ok := os.LookupEnv(key); ok {
-			if strings.TrimSpace(v) == "" {
-				*dst = nil
-				return
-			}
-			parts := strings.Split(v, ",")
-			out := make([]string, 0, len(parts))
-			for _, p := range parts {
-				if trimmed := strings.TrimSpace(p); trimmed != "" {
-					out = append(out, trimmed)
-				}
-			}
-			*dst = out
-		}
-	}
 	setInt := func(key string, dst *int) {
 		if v, ok := os.LookupEnv(key); ok {
 			n, err := strconv.Atoi(v)
@@ -625,15 +591,6 @@ func applyEnvOverrides(cfg *Config) error {
 			*dst = f
 		}
 	}
-
-	setString(envServerHost, &cfg.Server.Host)
-	setInt(envServerPort, &cfg.Server.Port)
-	setDuration(envServerReadHeaderTimeout, &cfg.Server.ReadHeaderTimeout)
-	setDuration(envServerReadTimeout, &cfg.Server.ReadTimeout)
-	setDuration(envServerWriteTimeout, &cfg.Server.WriteTimeout)
-	setDuration(envServerIdleTimeout, &cfg.Server.IdleTimeout)
-	setDuration(envServerShutdownTimeout, &cfg.Server.ShutdownTimeout)
-	setStringSlice(envServerAllowedOrigins, &cfg.Server.AllowedOrigins)
 
 	setString(envDatabaseHost, &cfg.Database.Host)
 	setInt(envDatabasePort, &cfg.Database.Port)
@@ -773,20 +730,12 @@ func applyEnvOverrides(cfg *Config) error {
 // effect. This is the highest-priority layer in the configuration
 // precedence: defaults -> config files -> environment variables -> flags.
 type Overrides struct {
-	ServerHost   *string
-	ServerPort   *int
 	LoggingLevel *string
 	DryRun       *bool
 }
 
 // ApplyOverrides layers o onto cfg in place.
 func ApplyOverrides(cfg *Config, o Overrides) {
-	if o.ServerHost != nil {
-		cfg.Server.Host = *o.ServerHost
-	}
-	if o.ServerPort != nil {
-		cfg.Server.Port = *o.ServerPort
-	}
 	if o.LoggingLevel != nil {
 		cfg.Logging.Level = *o.LoggingLevel
 	}

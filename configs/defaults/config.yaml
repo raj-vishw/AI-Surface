@@ -9,15 +9,6 @@
 application:
   name: ai-recon-platform
 
-server:
-  host: "0.0.0.0"
-  port: 8080
-  read_header_timeout: 5s
-  read_timeout: 5s
-  write_timeout: 10s
-  idle_timeout: 60s
-  shutdown_timeout: 15s
-
 database:
   port: 5432
   ssl_mode: disable

@@ -9,15 +9,15 @@ LDFLAGS := -X '$(MODULE)/internal/version.Version=$(VERSION)' \
 
 BIN_DIR      := bin
 COMPOSE_FILE := deployments/docker/docker-compose/dev.yml
-BIN          ?= server
+BIN          ?= cli
 
 .PHONY: build build-all test test-unit test-integration test-race vet fmt fmt-check lint \
         vuln-check secret-scan security-check \
         dev-up dev-down dev-logs dev-ps dev-wait docker-up docker-down \
         migrate migrate-up migrate-status migrate-version \
-        run-server run-worker run-cli clean
+        run-worker run-cli clean
 
-## Build a single executable, default server: make build [BIN=server|cli|worker|migrate]
+## Build a single executable, default cli: make build [BIN=cli|worker|migrate]
 build:
 	@mkdir -p $(BIN_DIR)
 	go build -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/$(BIN) ./cmd/$(BIN)
@@ -25,7 +25,7 @@ build:
 ## Build every executable
 build-all:
 	@mkdir -p $(BIN_DIR)
-	@for cmd in server cli worker migrate; do \
+	@for cmd in cli worker migrate; do \
 		echo "building $$cmd"; \
 		go build -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/$$cmd ./cmd/$$cmd || exit 1; \
 	done
@@ -82,7 +82,7 @@ secret-scan:
 ## build — see .github/workflows/ci.yml's security job).
 security-check: vuln-check secret-scan
 
-## Start PostgreSQL, Redis, and the API server for local development
+## Start PostgreSQL and Redis for local development
 dev-up:
 	docker compose -f $(COMPOSE_FILE) --env-file .env up -d --build
 
@@ -119,9 +119,6 @@ migrate-status:
 ## Print the current (highest applied) migration version
 migrate-version:
 	go run ./cmd/migrate version
-
-run-server:
-	go run ./cmd/server
 
 run-worker:
 	go run ./cmd/worker

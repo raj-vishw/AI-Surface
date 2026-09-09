@@ -66,8 +66,8 @@ func newConfigValidateCommand() *cobra.Command {
 			}
 
 			_, err = fmt.Fprintf(cmd.OutOrStdout(),
-				"configuration is valid\n  environment: %s\n  server:      %s\n  database:    %s\n  redis:       %s\n  log level:   %s\n",
-				cfg.Application.Environment, cfg.Server.Addr(), cfg.Database.RedactedDSN(), cfg.Redis.Address, cfg.Logging.Level,
+				"configuration is valid\n  environment: %s\n  database:    %s\n  redis:       %s\n  log level:   %s\n",
+				cfg.Application.Environment, cfg.Database.RedactedDSN(), cfg.Redis.Address, cfg.Logging.Level,
 			)
 			return err
 		},

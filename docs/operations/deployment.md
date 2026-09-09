@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- PostgreSQL 16+ and Redis 7+ reachable from wherever `server`/`worker`/
-  `cli`/`migrate` run.
+- PostgreSQL 16+ and Redis 7+ reachable from wherever `worker`/`cli`/
+  `migrate` run.
 - A copy of `.env` (see `.env.example`) or equivalent environment
   variables / secret-manager injection providing at minimum
   `AI_RECON_DATABASE_PASSWORD` and, if Redis auth is enabled,
@@ -58,30 +58,15 @@ applied versions in its own table (see `internal/migrate`) so re-running
 ## Startup
 
 ```
-go run ./cmd/server     # or the built `bin/server` binary
 go run ./cmd/worker     # or the built `bin/worker` binary
 ```
 
-`cmd/server` logs `starting_server` with version/commit/environment, then
-`server_starting` once its listener is up. `cmd/worker` logs
-`starting_worker`, verifies PostgreSQL and Redis, then logs
-`worker_ready` — see `docs/operations/runbook.md`'s Known Limitations for
-what the worker does and does not do today (it has no job queue to
-consume yet).
-
-## Reverse proxy / TLS
-
-`cmd/server`'s own `http.Server` does not terminate TLS — it is designed
-to sit behind a TLS-terminating reverse proxy (nginx, Caddy, an AWS
-ALB/GCP load balancer, etc.), consistent with `internal/httpserver`
-having no certificate-loading code anywhere in it (confirmed by
-inspection). Point the proxy at `server.host:server.port`
-(`0.0.0.0:8080` by default) and terminate TLS in front of it — see
-`docs/security/production-hardening.md`'s HTTPS section for what HSTS/
-security-header responsibility belongs to the app (already set — see
-`internal/httpserver/middleware.go`'s `securityHeadersMiddleware`) versus
-the proxy (HSTS, since only the proxy knows whether the connection is
-actually TLS).
+`cmd/worker` logs `starting_worker`, verifies PostgreSQL and Redis, then
+logs `worker_ready` — see `docs/operations/runbook.md`'s Known
+Limitations for what the worker does and does not do today (it has no
+job queue to consume yet). There is no server process — this platform is
+CLI-only; `cmd/cli` runs directly wherever an operator has shell access
+and needs no startup/listener of its own.
 
 ## Workers
 
@@ -92,13 +77,6 @@ line) — it currently only verifies PostgreSQL/Redis connectivity on a
 optional today; it exists so the deployment shape (a separate worker
 process) is already in place for the phase that adds real job
 processing.
-
-## Health checks
-
-- `GET /health` and `GET /live` — process liveness (no dependency checks).
-- `GET /ready` — process liveness AND PostgreSQL/Redis reachability
-  (returns 503 if either is down). Point your orchestrator's liveness
-  probe at `/health` or `/live`, and its readiness probe at `/ready`.
 
 ## Upgrades
 
