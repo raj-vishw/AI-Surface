@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/database"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/repository/sqlerr"
+	"ai-surface-platform/internal/database"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/repository/sqlerr"
 )
 
 // PostgresRepository implements Repository — every method is a read-only

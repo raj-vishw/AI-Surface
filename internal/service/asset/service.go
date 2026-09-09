@@ -13,13 +13,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"ai-recon-platform/internal/database"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainendpoint "ai-recon-platform/internal/domain/endpoint"
-	apperrors "ai-recon-platform/internal/errors"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/database"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainendpoint "ai-surface-platform/internal/domain/endpoint"
+	apperrors "ai-surface-platform/internal/errors"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // Service implements asset business logic.

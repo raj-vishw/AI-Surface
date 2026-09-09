@@ -1,7 +1,7 @@
 # Production Hardening
 
 This is the concrete, evidence-based hardening checklist for
-`ai-recon-platform` as it exists after Phase 15. Where a section says
+`ai-surface-platform` as it exists after Phase 15. Where a section says
 "not applicable," that reflects an actual architectural fact confirmed by
 inspection this phase, not an unaddressed gap — see
 `docs/security/threat-model.md` for the reasoning and
@@ -43,7 +43,7 @@ now defaults to `require` in the new `configs/production/config.yaml`
 (previously `disable` in every environment, inherited from
 `configs/defaults/config.yaml`, which remains the local-development
 default) — see `internal/config`'s new production-only startup guard rail
-rejecting `ssl_mode: disable` when `AI_RECON_APP_ENV=production`.
+rejecting `ssl_mode: disable` when `AI_SURFACE_APP_ENV=production`.
 
 ## Secrets
 
@@ -118,9 +118,9 @@ with the reasoning documented inline in `.gitleaks.toml`.
 
 Production defaults to `logging.level: info` (`configs/production/
 config.yaml`, and now enforced — `debug` is startup-fatal when
-`AI_RECON_APP_ENV=production`). No secret is ever logged (confirmed by
+`AI_SURFACE_APP_ENV=production`). No secret is ever logged (confirmed by
 inspection: every place a credential could reach a log call goes through
-`RedactedDSN()` or is simply never logged — e.g. `AI_RECON_DATABASE_PASSWORD`
+`RedactedDSN()` or is simply never logged — e.g. `AI_SURFACE_DATABASE_PASSWORD`
 is read once into `Config.Database.Password` and never passed to a
 logger call anywhere in this codebase).
 

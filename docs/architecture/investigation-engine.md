@@ -196,20 +196,20 @@ verifies this structurally for exports.
 ## 15. CLI
 
 ```sh
-ai-recon investigate create --target example.com --title "Suspicious API Surface Change" --created-by analyst1
-ai-recon investigate list --target example.com
-ai-recon investigate show <id>
-ai-recon investigate timeline <id> [--newest-first]
-ai-recon investigate correlate <id> [--dry-run]
-ai-recon investigate findings <id>
-ai-recon investigate attach <id> --finding <finding-id> --relation correlated --actor analyst1
-ai-recon investigate note <id> --content "..." --author analyst1
-ai-recon investigate hypothesis <id> --title "..." --created-by analyst1
-ai-recon investigate close <id> --actor analyst1 --reason "..."
-ai-recon investigate reopen <id> --actor analyst1 --reason "new evidence surfaced"
-ai-recon investigate export <id> --format json|csv|markdown
-ai-recon investigate cluster suggest --target example.com
-ai-recon investigate cluster accept <cluster-id> --actor analyst1
+ai-surface investigate create --target example.com --title "Suspicious API Surface Change" --created-by analyst1
+ai-surface investigate list --target example.com
+ai-surface investigate show <id>
+ai-surface investigate timeline <id> [--newest-first]
+ai-surface investigate correlate <id> [--dry-run]
+ai-surface investigate findings <id>
+ai-surface investigate attach <id> --finding <finding-id> --relation correlated --actor analyst1
+ai-surface investigate note <id> --content "..." --author analyst1
+ai-surface investigate hypothesis <id> --title "..." --created-by analyst1
+ai-surface investigate close <id> --actor analyst1 --reason "..."
+ai-surface investigate reopen <id> --actor analyst1 --reason "new evidence surfaced"
+ai-surface investigate export <id> --format json|csv|markdown
+ai-surface investigate cluster suggest --target example.com
+ai-surface investigate cluster accept <cluster-id> --actor analyst1
 ```
 
 ## 16. API
@@ -222,7 +222,7 @@ future API would call directly.
 
 ## 17. Export
 
-`ai-recon investigate export <id> --format json|csv|markdown` renders an
+`ai-surface investigate export <id> --format json|csv|markdown` renders an
 `ExportBundle` (findings, evidence references, timeline, relationships,
 hypotheses, notes) built entirely from already-persisted rows. Markdown
 follows phase9.md §85's exact section structure (Executive Summary,

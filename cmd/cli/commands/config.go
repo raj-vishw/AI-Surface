@@ -1,4 +1,4 @@
-// Package commands implements the ai-recon CLI's subcommands.
+// Package commands implements the ai-surface CLI's subcommands.
 package commands
 
 import (
@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
+	"ai-surface-platform/internal/config"
 )
 
 // loadConfig loads the effective configuration, applying the CLI's
@@ -42,7 +42,7 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 	return cfg, nil
 }
 
-// NewConfigCommand returns the `ai-recon config` parent command.
+// NewConfigCommand returns the `ai-surface config` parent command.
 func NewConfigCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
@@ -52,7 +52,7 @@ func NewConfigCommand() *cobra.Command {
 	return cmd
 }
 
-// newConfigValidateCommand returns the `ai-recon config validate`
+// newConfigValidateCommand returns the `ai-surface config validate`
 // subcommand, which loads and validates the effective configuration
 // without starting any server or performing any scan/probe activity.
 func newConfigValidateCommand() *cobra.Command {

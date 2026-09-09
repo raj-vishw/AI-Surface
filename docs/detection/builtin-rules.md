@@ -4,9 +4,9 @@ Five built-in rules ship with Phase 11 (`internal/ruleengine/builtin`),
 one per supported rule type plus a second threshold example. Every rule
 operates ONLY on this platform's own already-normalized findings/asset/
 fingerprint/intelligence data — none claims to detect a specific
-real-world threat actor. List them with `ai-recon detection builtin
-list`; run a rule's own regression suite with `ai-recon detection
-builtin test <name>`; persist one for a target with `ai-recon detection
+real-world threat actor. List them with `ai-surface detection builtin
+list`; run a rule's own regression suite with `ai-surface detection
+builtin test <name>`; persist one for a target with `ai-surface detection
 builtin install <name> --target <t> --created-by <analyst>`.
 
 ## high_severity_finding_burst

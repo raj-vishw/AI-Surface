@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"ai-recon-platform/internal/investigation"
+	"ai-surface-platform/internal/investigation"
 )
 
 const temporalProximityScore = 20

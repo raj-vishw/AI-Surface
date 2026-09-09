@@ -31,7 +31,7 @@ internal/discovery/
 └── service/    orchestration: authorization + scope setup, running the
                  scanner, persisting through Phase 2's AssetService
 
-cmd/cli/commands/scan.go   `ai-recon scan`
+cmd/cli/commands/scan.go   `ai-surface scan`
 test/fixtures/http/        local, fully offline HTTP test fixture
 ```
 
@@ -124,7 +124,7 @@ Scope is enforced in **two** places:
 **before generating a single candidate or sending a single request**. An
 unauthorized target fails immediately with "target is not authorized for
 active discovery" (phase3.md §7's exact wording). Authorization is set
-exclusively via `ai-recon target authorize` (`TargetService.
+exclusively via `ai-surface target authorize` (`TargetService.
 UpdateAuthorizationStatus`) — a target is never authorized merely by
 existing.
 
@@ -247,17 +247,17 @@ failure for one result is logged and does not abort the rest of the scan.
 When `security.dry_run` is `true` (or `--dry-run` is passed),
 `Service.Run` calls `GenerateCandidates` and returns a `DryRunReport`
 without ever constructing an HTTP client or calling `Scan` — no request is
-sent, and nothing is persisted (phase3.md §45). `ai-recon scan --dry-run`
+sent, and nothing is persisted (phase3.md §45). `ai-surface scan --dry-run`
 prints exactly the candidate method+path list.
 
 ## CLI usage
 
 ```sh
-ai-recon target create --name "local test" --type URL --value http://127.0.0.1:9000
-ai-recon target authorize --id <uuid>          # required before scan will run
-ai-recon scan --target http://127.0.0.1:9000 --profile quick
-ai-recon scan --target http://127.0.0.1:9000 --profile comprehensive --format json
-ai-recon scan --target http://127.0.0.1:9000 --dry-run
+ai-surface target create --name "local test" --type URL --value http://127.0.0.1:9000
+ai-surface target authorize --id <uuid>          # required before scan will run
+ai-surface scan --target http://127.0.0.1:9000 --profile quick
+ai-surface scan --target http://127.0.0.1:9000 --profile comprehensive --format json
+ai-surface scan --target http://127.0.0.1:9000 --dry-run
 ```
 
 Flags: `--target` (required), `--target-type` (auto-detected: a value
@@ -275,6 +275,6 @@ configured path set), `--format` (`table`/`json`), `--timeout`,
 phase3.md §6), `schemes` (`http`/`https`), `paths`, `detect_ai_endpoints`,
 and `profiles` (named path sets, e.g. `quick`/`comprehensive` — entirely
 data, loaded from configuration, never hard-coded in Go). Scalar fields
-have `AI_RECON_DISCOVERY_HTTP_*` environment overrides; `methods`/
+have `AI_SURFACE_DISCOVERY_HTTP_*` environment overrides; `methods`/
 `schemes`/`paths`/`profiles` are YAML-only, the same convention every other
 list-shaped setting in this project follows.

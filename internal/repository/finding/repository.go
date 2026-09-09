@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/finding"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/finding"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ListFilter narrows a finding listing. Zero-valued fields are not applied.

@@ -3,7 +3,7 @@ package strategies
 import (
 	"context"
 
-	"ai-recon-platform/internal/correlation"
+	"ai-surface-platform/internal/correlation"
 )
 
 // intelligenceStrategy links an asset (or anything observed on that

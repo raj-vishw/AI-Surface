@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/httpclient"
+	"ai-surface-platform/internal/httpclient"
 )
 
 // ServiceType classifies what an HTTP response looks like, based only on

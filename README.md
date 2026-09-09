@@ -30,7 +30,7 @@ tool by design; see `docs/security/threat-model.md`.
 
 ```sh
 git clone <this repo>
-cd ai-recon-platform
+cd ai-surface-platform
 go mod tidy
 cp .env.example .env   # then edit values as needed
 ```
@@ -41,8 +41,8 @@ Configuration is layered, lowest to highest priority:
 
 1. built-in defaults (`internal/config`)
 2. `configs/defaults/config.yaml`
-3. `configs/<environment>/config.yaml` (environment from `AI_RECON_APP_ENV`, default `development`)
-4. `AI_RECON_*` environment variables
+3. `configs/<environment>/config.yaml` (environment from `AI_SURFACE_APP_ENV`, default `development`)
+4. `AI_SURFACE_*` environment variables
 5. CLI flags, where a command supports them (`--config-dir`, `--env`, `--log-level`)
 
 See `.env.example` for the full list of recognized environment variables
@@ -159,7 +159,7 @@ identity), pagination, filters, and transaction atomicity.
 
 ## HTTP Discovery
 
-`ai-recon scan` discovers HTTP/HTTPS services and endpoints against an
+`ai-surface scan` discovers HTTP/HTTPS services and endpoints against an
 already-created, already-**authorized** target, classifies each response
 (including AI/LLM API *candidate* detection, never a specific provider or
 model — see
@@ -169,14 +169,14 @@ walkthrough:
 
 ```sh
 # 1. Create a target and authorize it — scan refuses an unauthorized target.
-ai-recon target create --name "local test" --type URL --value http://127.0.0.1:9000
-ai-recon target authorize --id <uuid-printed-above>
+ai-surface target create --name "local test" --type URL --value http://127.0.0.1:9000
+ai-surface target authorize --id <uuid-printed-above>
 
 # 2. Start a local test target (no real Internet target required):
 go run ./test/fixtures/http/cmd/fixtureserver -port 9000
 
 # 3. Scan it.
-ai-recon scan --target http://127.0.0.1:9000 --profile quick
+ai-surface scan --target http://127.0.0.1:9000 --profile quick
 ```
 
 - **Authorization requirement** — `scan` loads the target, validates it,
@@ -194,7 +194,7 @@ ai-recon scan --target http://127.0.0.1:9000 --profile quick
 - **`--format json`** — machine-readable output on stdout; operational
   logs always go to stderr, so stdout is always valid JSON in this mode.
 - **Troubleshooting**: "target is not authorized for active discovery"
-  means run `ai-recon target authorize --id <uuid>` first; "target type ...
+  means run `ai-surface target authorize --id <uuid>` first; "target type ...
   is not supported by HTTP discovery" means the target's type isn't
   `URL`/`HOST`/`DOMAIN`; an empty result table with all rows `ERROR`
   usually means the target isn't reachable — confirm the fixture/target is
@@ -202,16 +202,16 @@ ai-recon scan --target http://127.0.0.1:9000 --profile quick
 
 ## Network Discovery
 
-`ai-recon network-scan` performs authorized TCP connect discovery against a
+`ai-surface network-scan` performs authorized TCP connect discovery against a
 `HOST`/`IP`/`CIDR` target, conservatively classifies open ports, and
 persists them as `PORT` assets through the same persistence layer HTTP
 discovery uses — see
 [docs/architecture/network-discovery.md](docs/architecture/network-discovery.md)
 for the full architecture, including why a reachable port is never treated
 as proof of anything beyond "TCP reachable". **Scanning requires
-authorization**, exactly like `ai-recon scan`: the target must already
+authorization**, exactly like `ai-surface scan`: the target must already
 exist and have `authorization_status = AUTHORIZED`
-(`ai-recon target authorize --id <uuid>`) before `network-scan` will run
+(`ai-surface target authorize --id <uuid>`) before `network-scan` will run
 against it.
 
 ```sh
@@ -219,28 +219,28 @@ against it.
 # service on :9000 — no external targets needed.
 go run ./test/fixtures/localenv
 
-ai-recon target create --name "local test" --type IP --value 127.0.0.1
-ai-recon target authorize --id <uuid-printed-above>
+ai-surface target create --name "local test" --type IP --value 127.0.0.1
+ai-surface target authorize --id <uuid-printed-above>
 
 # Single port
-ai-recon network-scan --target 127.0.0.1 --ports 9000
+ai-surface network-scan --target 127.0.0.1 --ports 9000
 
 # Port list
-ai-recon network-scan --target 127.0.0.1 --ports 8000,8080,9000
+ai-surface network-scan --target 127.0.0.1 --ports 8000,8080,9000
 
 # Port range
-ai-recon network-scan --target 127.0.0.1 --ports 8000-8010
+ai-surface network-scan --target 127.0.0.1 --ports 8000-8010
 
 # Profiles (quick / standard / comprehensive — see configs/defaults/config.yaml)
-ai-recon network-scan --target 127.0.0.1 --profile quick
-ai-recon network-scan --target 127.0.0.1 --profile standard
-ai-recon network-scan --target 127.0.0.1 --profile comprehensive
+ai-surface network-scan --target 127.0.0.1 --profile quick
+ai-surface network-scan --target 127.0.0.1 --profile standard
+ai-surface network-scan --target 127.0.0.1 --profile comprehensive
 
 # Dry run — reports host:port pairs without connecting or persisting anything
-ai-recon network-scan --target 127.0.0.1 --ports 8000-8010 --dry-run
+ai-surface network-scan --target 127.0.0.1 --ports 8000-8010 --dry-run
 
 # Machine-readable output (stdout is always valid, log-free JSON)
-ai-recon network-scan --target 127.0.0.1 --ports 8000,8080 --format json
+ai-surface network-scan --target 127.0.0.1 --ports 8000,8080 --format json
 ```
 
 A `CIDR` target (e.g. `192.168.1.0/30`) expands to its usable host
@@ -250,15 +250,15 @@ rejected outright, never silently truncated.
 
 ## DNS & Subdomain Discovery
 
-`ai-recon dns-scan` performs authorized DNS record discovery (A, AAAA,
+`ai-surface dns-scan` performs authorized DNS record discovery (A, AAAA,
 CNAME, MX, NS, TXT, SOA, CAA, plus reverse PTR) against a `DOMAIN`/`HOST`
-target; `ai-recon subdomain-scan` is the same engine with wordlist-based
+target; `ai-surface subdomain-scan` is the same engine with wordlist-based
 subdomain enumeration always on — see
 [docs/architecture/dns-discovery.md](docs/architecture/dns-discovery.md)
 for the full architecture, including wildcard DNS detection and why a
 resolved name is never itself treated as proof an HTTP service is
 listening there. **Scanning requires authorization**, exactly like
-`ai-recon scan`/`network-scan`: the target must already exist and have
+`ai-surface scan`/`network-scan`: the target must already exist and have
 `authorization_status = AUTHORIZED` before `dns-scan`/`subdomain-scan`
 will run against it.
 
@@ -266,23 +266,23 @@ will run against it.
 # Local, fully offline DNS test fixture — no public DNS required.
 go run ./test/fixtures/dns/cmd/dnsserver -port 5300
 
-ai-recon target create --name "local test" --type DOMAIN --value example.test
-ai-recon target authorize --id <uuid-printed-above>
+ai-surface target create --name "local test" --type DOMAIN --value example.test
+ai-surface target authorize --id <uuid-printed-above>
 
 # Record discovery only, against the local fixture.
-ai-recon dns-scan --target example.test --resolvers 127.0.0.1:5300
+ai-surface dns-scan --target example.test --resolvers 127.0.0.1:5300
 
 # Subdomain enumeration with a wordlist.
-ai-recon subdomain-scan --target example.test --resolvers 127.0.0.1:5300 --wordlist words.txt
+ai-surface subdomain-scan --target example.test --resolvers 127.0.0.1:5300 --wordlist words.txt
 
 # Profiles (quick / standard / comprehensive — see configs/defaults/config.yaml)
-ai-recon dns-scan --target example.test --resolvers 127.0.0.1:5300 --profile quick
+ai-surface dns-scan --target example.test --resolvers 127.0.0.1:5300 --profile quick
 
 # Dry run — reports record types / candidate names without querying or persisting anything
-ai-recon dns-scan --target example.test --profile comprehensive --dry-run
+ai-surface dns-scan --target example.test --profile comprehensive --dry-run
 
 # Machine-readable output (stdout is always valid, log-free JSON)
-ai-recon dns-scan --target example.test --resolvers 127.0.0.1:5300 --format json
+ai-surface dns-scan --target example.test --resolvers 127.0.0.1:5300 --format json
 ```
 
 Subdomain candidate generation is capped by
@@ -297,7 +297,7 @@ domain is still recognized as genuine.
 
 ## Passive Fingerprinting
 
-`ai-recon fingerprint` identifies technologies (web servers, frameworks,
+`ai-surface fingerprint` identifies technologies (web servers, frameworks,
 frontends, CDNs, cloud providers, AI API candidates, database candidates,
 ...) from evidence Phase 3/4/5 already collected and persisted — see
 [docs/architecture/fingerprinting.md](docs/architecture/fingerprinting.md)
@@ -311,22 +311,22 @@ having actively verified anything.
 
 ```sh
 # Analyze every asset discovered for a target so far.
-ai-recon fingerprint --target example.com
+ai-surface fingerprint --target example.com
 
 # Analyze one specific asset.
-ai-recon fingerprint --asset <asset-uuid>
+ai-surface fingerprint --asset <asset-uuid>
 
 # Show the supporting evidence behind each result.
-ai-recon fingerprint --target example.com --explain
+ai-surface fingerprint --target example.com --explain
 
 # Filter by category / minimum confidence.
-ai-recon fingerprint --target example.com --category web_server --min-confidence 0.60
+ai-surface fingerprint --target example.com --category web_server --min-confidence 0.60
 
 # Evaluate without persisting anything.
-ai-recon fingerprint --target example.com --dry-run
+ai-surface fingerprint --target example.com --dry-run
 
 # Machine-readable output (stdout is always valid, log-free JSON)
-ai-recon fingerprint --target example.com --format json
+ai-surface fingerprint --target example.com --format json
 ```
 
 Signatures are declarative YAML
@@ -340,7 +340,7 @@ add/remove/version-change/significant-confidence-change is reported as a
 
 ## Endpoint & API Discovery
 
-`ai-recon endpoint-scan` discovers application-level endpoints and API
+`ai-surface endpoint-scan` discovers application-level endpoints and API
 surface from an authorized target — bounded crawling, HTML link/form
 extraction, JavaScript static route extraction, robots.txt/sitemap.xml
 parsing, and OpenAPI/Swagger discovery — see
@@ -352,16 +352,16 @@ only ever sends GET requests and never submits a discovered form.
 
 ```sh
 # Crawl the target's own known HTTP(S) assets.
-ai-recon endpoint-scan --target example.com --profile quick
+ai-surface endpoint-scan --target example.com --profile quick
 
 # Comprehensive crawl with a machine-readable summary.
-ai-recon endpoint-scan --target example.com --profile comprehensive --format json
+ai-surface endpoint-scan --target example.com --profile comprehensive --format json
 
 # Explicit seed URL(s), bounded depth.
-ai-recon endpoint-scan --target https://example.com --seed https://example.com/app --depth 2
+ai-surface endpoint-scan --target https://example.com --seed https://example.com/app --depth 2
 
 # Report the crawl plan without making any request.
-ai-recon endpoint-scan --target example.com --dry-run
+ai-surface endpoint-scan --target example.com --dry-run
 ```
 
 Every discovered endpoint records **documented** (named in an OpenAPI/
@@ -377,7 +377,7 @@ project enforces.
 
 ## Finding & Vulnerability Detection
 
-`ai-recon findings scan` transforms evidence Phase 3/4/6/7 already
+`ai-surface findings scan` transforms evidence Phase 3/4/6/7 already
 collected into structured, evidence-backed security findings — see
 [docs/architecture/finding-detection.md](docs/architecture/finding-detection.md)
 for the full architecture. **It defaults to passive analysis**: reading
@@ -390,23 +390,23 @@ or one of a fixed handful of well-known paths (`/.git/HEAD`, `/.env`,
 
 ```sh
 # Passive analysis (default) — no network request of its own.
-ai-recon findings scan --target example.com
+ai-surface findings scan --target example.com
 
 # Safe-active mode: a small set of additional bounded, already-known-path requests.
-ai-recon findings scan --target example.com --mode safe_active
+ai-surface findings scan --target example.com --mode safe_active
 
 # Report the detection plan (enabled detectors, 0 network requests) without persisting anything.
-ai-recon findings scan --target example.com --dry-run
+ai-surface findings scan --target example.com --dry-run
 
 # List / filter persisted findings.
-ai-recon findings list --target example.com --severity high --format json
-ai-recon findings list --target example.com --format csv
+ai-surface findings list --target example.com --severity high --format json
+ai-surface findings list --target example.com --format csv
 
 # One finding's full detail, evidence, and lifecycle history.
-ai-recon findings show <finding-id>
+ai-surface findings show <finding-id>
 
 # What changed during one specific scan.
-ai-recon findings diff --target example.com --scan <scan-id>
+ai-surface findings diff --target example.com --scan <scan-id>
 ```
 
 Every finding separates **severity** ("how serious could this be") from
@@ -421,7 +421,7 @@ Implemented" section for the complete boundary.
 
 ## Investigation & Incident Correlation
 
-`ai-recon investigate` gives an analyst a case-management workspace built
+`ai-surface investigate` gives an analyst a case-management workspace built
 on top of Phase 8's findings — see
 [docs/architecture/investigation-engine.md](docs/architecture/investigation-engine.md)
 for the full architecture. It is an analytical aid: it reasons only over
@@ -430,25 +430,25 @@ exploit, a credential attack, or an automatic remediation action.
 
 ```sh
 # Open an investigation and attach an initial finding.
-ai-recon investigate create --target example.com --title "Suspicious API Surface Change" \
+ai-surface investigate create --target example.com --title "Suspicious API Surface Change" \
   --created-by analyst1 --finding <finding-id>
 
 # Correlate every finding currently attached to it.
-ai-recon investigate correlate <investigation-id>
+ai-surface investigate correlate <investigation-id>
 
 # Review the timeline, add a note, propose a hypothesis.
-ai-recon investigate timeline <investigation-id>
-ai-recon investigate note <investigation-id> --content "..." --author analyst1
-ai-recon investigate hypothesis <investigation-id> --title "..." --created-by analyst1
+ai-surface investigate timeline <investigation-id>
+ai-surface investigate note <investigation-id> --content "..." --author analyst1
+ai-surface investigate hypothesis <investigation-id> --title "..." --created-by analyst1
 
 # Suggest incident clusters from currently-open findings, and accept one.
-ai-recon investigate cluster suggest --target example.com
-ai-recon investigate cluster accept <cluster-id> --actor analyst1
+ai-surface investigate cluster suggest --target example.com
+ai-surface investigate cluster accept <cluster-id> --actor analyst1
 
 # Close, reopen (a reason is required), and export.
-ai-recon investigate close <investigation-id> --actor analyst1 --reason "..."
-ai-recon investigate reopen <investigation-id> --actor analyst1 --reason "new evidence surfaced"
-ai-recon investigate export <investigation-id> --format markdown
+ai-surface investigate close <investigation-id> --actor analyst1 --reason "..."
+ai-surface investigate reopen <investigation-id> --actor analyst1 --reason "new evidence surfaced"
+ai-surface investigate export <investigation-id> --format markdown
 ```
 
 Every correlation carries an explicit **explanation** and the individual
@@ -465,7 +465,7 @@ historical evidence is always visible.
 
 ## Threat Intelligence & Risk Enrichment
 
-`ai-recon intel` and `ai-recon risk` add structured context and a
+`ai-surface intel` and `ai-surface risk` add structured context and a
 deterministic risk score on top of everything Phase 2-9 already
 collected — see
 [docs/architecture/threat-intelligence.md](docs/architecture/threat-intelligence.md)
@@ -480,25 +480,25 @@ environment variable, never from configuration).
 
 ```sh
 # Show already-persisted intelligence for an indicator (no provider is queried).
-ai-recon intel lookup example.com --target example.com
+ai-surface intel lookup example.com --target example.com
 
 # Actively enrich an indicator, or preview what would run without making any request.
-ai-recon intel enrich example.com --target example.com
-ai-recon intel enrich example.com --target example.com --dry-run
+ai-surface intel enrich example.com --target example.com
+ai-surface intel enrich example.com --target example.com --dry-run
 
 # Invalidate cached results and re-enrich; inspect provider health.
-ai-recon intel refresh example.com --target example.com
-ai-recon intel providers
-ai-recon intel status
+ai-surface intel refresh example.com --target example.com
+ai-surface intel providers
+ai-surface intel status
 
 # Calculate risk for an asset/finding/investigation (always explains itself).
-ai-recon risk asset <asset-id>
-ai-recon risk finding <finding-id>
-ai-recon risk investigation <investigation-id>
-ai-recon risk asset <asset-id> --history
+ai-surface risk asset <asset-id>
+ai-surface risk finding <finding-id>
+ai-surface risk investigation <investigation-id>
+ai-surface risk asset <asset-id> --history
 
 # Record analyst context that risk scoring can use (never inferred automatically).
-ai-recon risk criticality set <asset-id> --level high --set-by analyst1
+ai-surface risk criticality set <asset-id> --level high --set-by analyst1
 ```
 
 Every intelligence record carries full **provenance** (which provider,
@@ -520,7 +520,7 @@ identity from intelligence data.
 
 ## Detection Engineering
 
-`ai-recon detection` and `ai-recon alert` let an analyst define, version,
+`ai-surface detection` and `ai-surface alert` let an analyst define, version,
 test, and evaluate deterministic detection rules against this platform's
 own already-normalized findings, asset/endpoint observations, technology
 fingerprints, and threat intelligence — see
@@ -533,20 +533,20 @@ persisted, never an external log line.
 
 ```sh
 # Inspect, test, and install the 5 built-in rules — no database needed to test.
-ai-recon detection builtin list
-ai-recon detection builtin test high_severity_finding_burst
-ai-recon detection builtin install repeated_malicious_intelligence_signal --target example.com --created-by analyst1
+ai-surface detection builtin list
+ai-surface detection builtin test high_severity_finding_burst
+ai-surface detection builtin install repeated_malicious_intelligence_signal --target example.com --created-by analyst1
 
 # Author your own rule (JSON or YAML — see docs/detection/rule-authoring.md).
-ai-recon detection create --target example.com --name my_rule --definition-file my_rule.yaml --created-by analyst1
-ai-recon detection evaluate <rule-id> --dry-run --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
-ai-recon detection enable <rule-id> --actor analyst1
+ai-surface detection create --target example.com --name my_rule --definition-file my_rule.yaml --created-by analyst1
+ai-surface detection evaluate <rule-id> --dry-run --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
+ai-surface detection enable <rule-id> --actor analyst1
 
 # Work the resulting alerts.
-ai-recon alert list
-ai-recon alert acknowledge <alert-id>
-ai-recon alert suppress <alert-id> --reason "known scanner" --actor analyst1 --duration 30m
-ai-recon alert investigate <alert-id> --actor analyst1
+ai-surface alert list
+ai-surface alert acknowledge <alert-id>
+ai-surface alert suppress <alert-id> --reason "known scanner" --actor analyst1 --duration 30m
+ai-surface alert investigate <alert-id> --actor analyst1
 ```
 
 Four rule types only (`field_match`, `threshold`, `sequence`,
@@ -564,7 +564,7 @@ kind.
 
 ## Advanced Correlation
 
-`ai-recon correlation` and `ai-recon chain` link this platform's
+`ai-surface correlation` and `ai-surface chain` link this platform's
 individual signals — findings, Phase 11 detection matches/alerts, Phase
 10 intelligence, assets — into higher-level correlated activity and, when
 the evidence classifies into a recognizable sequence, an attack chain.
@@ -576,25 +576,25 @@ A correlation is never presented as a confirmed attack on its own —
 
 ```sh
 # Evaluate a target's recent observations — deterministic, explainable.
-ai-recon correlation evaluate --target example.com --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
+ai-surface correlation evaluate --target example.com --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
 
-ai-recon correlation list
-ai-recon correlation show <id>
-ai-recon correlation graph <id>       # nodes, edges, confidence, observed vs. inferred
-ai-recon correlation timeline <id>    # unified, chronologically-ordered evidence
-ai-recon correlation evidence <id>
+ai-surface correlation list
+ai-surface correlation show <id>
+ai-surface correlation graph <id>       # nodes, edges, confidence, observed vs. inferred
+ai-surface correlation timeline <id>    # unified, chronologically-ordered evidence
+ai-surface correlation evidence <id>
 
 # Analyst judgment — never automatic.
-ai-recon correlation confirm <id> --actor analyst1
-ai-recon correlation dismiss <id> --actor analyst1 --reason "known automation"
-ai-recon correlation merge <survivor-id> <source-id...>
-ai-recon correlation split <id> --node <node-id> --actor analyst1
-ai-recon correlation investigate <id> --actor analyst1   # attach to a Phase 9 investigation
+ai-surface correlation confirm <id> --actor analyst1
+ai-surface correlation dismiss <id> --actor analyst1 --reason "known automation"
+ai-surface correlation merge <survivor-id> <source-id...>
+ai-surface correlation split <id> --node <node-id> --actor analyst1
+ai-surface correlation investigate <id> --actor analyst1   # attach to a Phase 9 investigation
 
 # Attack chains — a narrative view, not proof of an attack.
-ai-recon chain list
-ai-recon chain show <id>
-ai-recon chain explain <id>
+ai-surface chain list
+ai-surface chain show <id>
+ai-surface chain explain <id>
 ```
 
 Six strategies (`asset`, `temporal`, `identity`, `network`, `detection`,
@@ -607,7 +607,7 @@ automatic threat attribution.
 
 ## AI Investigation Assistant
 
-`ai-recon ai` is an **analyst assistant, not an autonomous security
+`ai-surface ai` is an **analyst assistant, not an autonomous security
 operator** (disabled by default). It reasons only over evidence already
 persisted by Phases 2-12 — findings, alerts, detection matches,
 correlations, attack chains, intelligence, timeline, notes — through a
@@ -618,24 +618,24 @@ cited to that evidence or explicitly labeled `Inferred`/`Unknown`. See
 [docs/ai/investigation-guide.md](docs/ai/investigation-guide.md).
 
 ```sh
-ai-recon ai status
+ai-surface ai status
 
-ai-recon ai summarize <investigation-id> --actor analyst1
-ai-recon ai analyze <investigation-id> --actor analyst1      # timeline
-ai-recon ai questions <investigation-id> --actor analyst1
-ai-recon ai report <investigation-id> --actor analyst1 --save-as-note
+ai-surface ai summarize <investigation-id> --actor analyst1
+ai-surface ai analyze <investigation-id> --actor analyst1      # timeline
+ai-surface ai questions <investigation-id> --actor analyst1
+ai-surface ai report <investigation-id> --actor analyst1 --save-as-note
 
-ai-recon ai explain-alert <alert-id> --actor analyst1
-ai-recon ai explain-detection <detection-match-id> --actor analyst1
-ai-recon ai analyze-correlation <correlation-id> --actor analyst1
-ai-recon ai analyze-correlation <correlation-id> --actor analyst1 --chain
+ai-surface ai explain-alert <alert-id> --actor analyst1
+ai-surface ai explain-detection <detection-match-id> --actor analyst1
+ai-surface ai analyze-correlation <correlation-id> --actor analyst1
+ai-surface ai analyze-correlation <correlation-id> --actor analyst1 --chain
 
 # A bounded, session-scoped conversation.
-ai-recon ai session new --investigation <id> --actor analyst1
-ai-recon ai chat <session-id> "What evidence is missing?"
+ai-surface ai session new --investigation <id> --actor analyst1
+ai-surface ai chat <session-id> "What evidence is missing?"
 
 # AI-generated notes are always unapproved until an analyst says otherwise.
-ai-recon ai note approve <note-id> --approver analyst1
+ai-surface ai note approve <note-id> --approver analyst1
 ```
 
 Citations are validated against the exact evidence supplied — a
@@ -650,8 +650,8 @@ actions.
 
 ## Security Analytics & Reporting
 
-`ai-recon analytics`, `ai-recon report`, `ai-recon evidence-package`, and
-`ai-recon control` turn Phase 2-13's own data into dashboards, trend
+`ai-surface analytics`, `ai-surface report`, `ai-surface evidence-package`, and
+`ai-surface control` turn Phase 2-13's own data into dashboards, trend
 analysis, and exportable reports — never a duplicate copy of any
 existing model. See
 [docs/architecture/ai-assistant.md](docs/architecture/ai-assistant.md)'s
@@ -663,24 +663,24 @@ sibling docs for this phase:
 
 ```sh
 # Dashboards — read-only aggregates over existing data.
-ai-recon analytics overview --target example.com
-ai-recon analytics risk --target example.com --range 30d
-ai-recon analytics alerts --target example.com --range 7d
-ai-recon analytics posture --target example.com   # derived from risk data — not an objective security score
+ai-surface analytics overview --target example.com
+ai-surface analytics risk --target example.com --range 30d
+ai-surface analytics alerts --target example.com --range 7d
+ai-surface analytics posture --target example.com   # derived from risk data — not an objective security score
 
 # Reports — versioned, citation-validated, never overwriting an earlier version.
-ai-recon report create --target example.com --type executive --actor analyst1
-ai-recon report create --target example.com --type investigation --subject <investigation-id> --actor analyst1
-ai-recon report approve <report-id> --approver analyst1   # an explicit, distinct action — never automatic
-ai-recon report export <report-id> --format csv           # secrets redacted, spreadsheet-injection-safe
+ai-surface report create --target example.com --type executive --actor analyst1
+ai-surface report create --target example.com --type investigation --subject <investigation-id> --actor analyst1
+ai-surface report approve <report-id> --approver analyst1   # an explicit, distinct action — never automatic
+ai-surface report export <report-id> --format csv           # secrets redacted, spreadsheet-injection-safe
 
 # Evidence packages — scoped to one report's own cited evidence only.
-ai-recon evidence-package create --report <report-id> --actor analyst1
-ai-recon evidence-package manifest <package-id>            # item id, type, SHA-256 hash, timestamp
+ai-surface evidence-package create --report <report-id> --actor analyst1
+ai-surface evidence-package manifest <package-id>            # item id, type, SHA-256 hash, timestamp
 
 # Generic control evidence — no compliance framework or certification claim.
-ai-recon control record --target example.com --control AC-2 --evidence-type finding --reference <id> --description "..."
-ai-recon control list --target example.com                 # controls with evidence; a gap is represented by absence
+ai-surface control record --target example.com --control AC-2 --evidence-type finding --reference <id> --description "..."
+ai-surface control list --target example.com                 # controls with evidence; a gap is represented by absence
 ```
 
 Analytics results are cached briefly, in-process, always keyed by
@@ -694,19 +694,19 @@ a framework mapping this platform invents on its own.
 | Command       | Purpose                                                     |
 | ------------- | ------------------------------------------------------------ |
 | `cmd/server`  | HTTP API server (`/health`, `/live`, `/ready` — no other REST surface exists) |
-| `cmd/cli`     | `ai-recon` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`, `ai`, `analytics`, `report`, `evidence-package`, `control`) |
+| `cmd/cli`     | `ai-surface` CLI (`version`, `config validate`, `health`, `target`, `asset`, `scan`, `network-scan`, `dns-scan`, `subdomain-scan`, `fingerprint`, `endpoint-scan`, `findings`, `investigate`, `intel`, `risk`, `detection`, `alert`, `correlation`, `chain`, `ai`, `analytics`, `report`, `evidence-package`, `control`) |
 | `cmd/worker`  | Background worker: verifies Postgres/Redis, graceful shutdown |
 | `cmd/migrate` | Database migration runner (`up`, `status`, `version`)         |
 
-`ai-recon asset` (and `target create`/`target list`) remain development
+`ai-surface asset` (and `target create`/`target list`) remain development
 diagnostics for exercising the Phase 2 persistence layer by hand (see
-their `--help`); `ai-recon target authorize`, `ai-recon scan`,
-`ai-recon network-scan`, `ai-recon dns-scan`/`subdomain-scan`,
-`ai-recon fingerprint`, `ai-recon endpoint-scan`, `ai-recon findings`,
-`ai-recon investigate`, `ai-recon intel`, `ai-recon risk`,
-`ai-recon detection`, `ai-recon alert`, `ai-recon correlation`,
-`ai-recon chain`, `ai-recon ai`, `ai-recon analytics`, `ai-recon report`,
-`ai-recon evidence-package`, and `ai-recon control` are real, required
+their `--help`); `ai-surface target authorize`, `ai-surface scan`,
+`ai-surface network-scan`, `ai-surface dns-scan`/`subdomain-scan`,
+`ai-surface fingerprint`, `ai-surface endpoint-scan`, `ai-surface findings`,
+`ai-surface investigate`, `ai-surface intel`, `ai-surface risk`,
+`ai-surface detection`, `ai-surface alert`, `ai-surface correlation`,
+`ai-surface chain`, `ai-surface ai`, `ai-surface analytics`, `ai-surface report`,
+`ai-surface evidence-package`, and `ai-surface control` are real, required
 parts of running Phase 3/4/5/6/7/8/9/10/11/12/13/14.
 
 ## Production readiness

@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"time"
 
-	"ai-recon-platform/internal/config"
+	"ai-surface-platform/internal/config"
 )
 
 // Config is the endpoint discovery engine's resolved configuration — the

@@ -14,8 +14,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/intelligence"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/intelligence"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // RecordListFilter narrows an intelligence record listing.

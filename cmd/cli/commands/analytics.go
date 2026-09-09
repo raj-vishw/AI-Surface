@@ -8,13 +8,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/analytics"
-	"ai-recon-platform/internal/database"
-	analyticsrepo "ai-recon-platform/internal/repository/analytics"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/analytics"
+	"ai-surface-platform/internal/database"
+	analyticsrepo "ai-surface-platform/internal/repository/analytics"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewAnalyticsCommand returns the `ai-recon analytics` command group —
+// NewAnalyticsCommand returns the `ai-surface analytics` command group —
 // Phase 14's dashboard/analytics layer. Every subcommand is a read-only
 // aggregate query over Phase 2-13's own data; nothing here writes
 // anything (phase14.md's own "primarily a visualization/analytics/
@@ -507,7 +507,7 @@ func newAnalyticsIntelligenceCommand() *cobra.Command {
 
 func newAnalyticsAICommand() *cobra.Command {
 	var targetValue, targetType string
-	cmd := &cobra.Command{Use: "ai", Short: "AI (Phase 13) usage analytics: requests, latency, tokens, failures, tool calls"}
+	cmd := &cobra.Command{Use: "ai", Short: "AI copilot usage analytics: requests, latency, tokens, failures, tool calls"}
 	cmd.Flags().StringVar(&targetValue, "target", "", "target (required)")
 	cmd.Flags().StringVar(&targetType, "target-type", "", "URL|HOST|DOMAIN — defaults to DOMAIN")
 	rf := addRangeFlags(cmd)

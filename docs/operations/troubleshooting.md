@@ -16,7 +16,7 @@ fatal: loading configuration: invalid configuration:
   - logging.level "verbose" must be one of debug, info, warn, error
 ```
 
-As of this phase, running with `AI_RECON_APP_ENV=production` adds three
+As of this phase, running with `AI_SURFACE_APP_ENV=production` adds three
 possible new entries here that were previously accepted in every
 environment:
 
@@ -33,11 +33,11 @@ behavior (phase15.md §107), not a bug — see
 ## "connecting to database: ..." at startup
 
 The database is unreachable or credentials are wrong. Verify
-`AI_RECON_DATABASE_HOST`/`PORT`/`USER`/`PASSWORD`/`NAME` against a running
+`AI_SURFACE_DATABASE_HOST`/`PORT`/`USER`/`PASSWORD`/`NAME` against a running
 PostgreSQL instance; `internal/config.DatabaseConfig.RedactedDSN()`
 appears in logs with the password masked, so the logged connection string
 is safe to share when asking for help, but never share the raw
-`AI_RECON_DATABASE_PASSWORD` value itself.
+`AI_SURFACE_DATABASE_PASSWORD` value itself.
 
 ## `/ready` returns 503 with `"reason":"unreachable"`
 

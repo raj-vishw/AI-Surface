@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // ClusterStatus tracks whether an analyst has acted on a suggested

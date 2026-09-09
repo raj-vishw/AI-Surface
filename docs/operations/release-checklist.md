@@ -43,7 +43,7 @@ assumption.
 
 `VERSION` (currently `0.1.0`) plus the git commit SHA and build timestamp
 are baked into every binary via `-ldflags` (see `Makefile`'s `LDFLAGS` and
-`internal/version`) — `ai-recon version` (and `GET /health`'s `version`
+`internal/version`) — `ai-surface version` (and `GET /health`'s `version`
 field) report the running build's exact version/commit/build date. Bump
 `VERSION` following semver: patch for fixes, minor for additive
 functionality (a new phase), major for a breaking change to CLI

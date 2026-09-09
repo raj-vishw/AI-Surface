@@ -80,10 +80,10 @@ jobs:
         run: gitleaks detect --source . --no-git --config .gitleaks.toml
 
       - name: Build server image for scanning
-        run: docker build -f deployments/docker/Dockerfile.server -t ai-recon-server:ci .
+        run: docker build -f deployments/docker/Dockerfile.server -t ai-surface-server:ci .
 
       - name: Install Trivy
         run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Container image scan (Trivy)
-        run: trivy image --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed ai-recon-server:ci
+        run: trivy image --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed ai-surface-server:ci

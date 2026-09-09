@@ -12,12 +12,12 @@ import (
 
 	"github.com/google/uuid"
 
-	discoverydns "ai-recon-platform/internal/discovery/dns"
-	discoveryhttp "ai-recon-platform/internal/discovery/http"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	assetsvc "ai-recon-platform/internal/service/asset"
+	discoverydns "ai-surface-platform/internal/discovery/dns"
+	discoveryhttp "ai-surface-platform/internal/discovery/http"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	assetsvc "ai-surface-platform/internal/service/asset"
 )
 
 // dnsSource is DNS discovery's fixed evidence/asset Source attribution
@@ -46,7 +46,7 @@ var supportedDNSTargetTypes = map[domaintarget.Type]bool{
 	domaintarget.TypeHost:   true,
 }
 
-// DNSRequest describes one `ai-recon dns-scan` (or `subdomain-scan`)
+// DNSRequest describes one `ai-surface dns-scan` (or `subdomain-scan`)
 // invocation.
 type DNSRequest struct {
 	// TargetType/TargetValue identify an existing, already-authorized

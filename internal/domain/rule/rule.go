@@ -29,7 +29,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // Status tracks a Rule's lifecycle (phase11.md §3/§30). A rule is never

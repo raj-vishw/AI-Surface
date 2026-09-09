@@ -10,24 +10,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/analytics"
-	"ai-recon-platform/internal/database"
-	domainreporting "ai-recon-platform/internal/domain/reporting"
-	"ai-recon-platform/internal/logging"
-	analyticsrepo "ai-recon-platform/internal/repository/analytics"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	correlationrepo "ai-recon-platform/internal/repository/correlation"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
-	reportingrepo "ai-recon-platform/internal/repository/reporting"
-	rulerepo "ai-recon-platform/internal/repository/rule"
-	reportingsvc "ai-recon-platform/internal/service/reporting"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/analytics"
+	"ai-surface-platform/internal/database"
+	domainreporting "ai-surface-platform/internal/domain/reporting"
+	"ai-surface-platform/internal/logging"
+	analyticsrepo "ai-surface-platform/internal/repository/analytics"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	correlationrepo "ai-surface-platform/internal/repository/correlation"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
+	reportingrepo "ai-surface-platform/internal/repository/reporting"
+	rulerepo "ai-surface-platform/internal/repository/rule"
+	reportingsvc "ai-surface-platform/internal/service/reporting"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewReportCommand returns the `ai-recon report` command group —
+// NewReportCommand returns the `ai-surface report` command group —
 // Phase 14's reporting engine. Every report is built from Phase 2-13's
 // own already-persisted data; nothing here is a duplicate model
 // (phase14.md's own "do not create duplicate versions of these

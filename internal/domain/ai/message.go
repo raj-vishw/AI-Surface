@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // Message is one turn in a Session's conversation (phase13.md §9). Like

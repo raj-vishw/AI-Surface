@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/detection"
-	domainfinding "ai-recon-platform/internal/domain/finding"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/detection"
+	domainfinding "ai-surface-platform/internal/domain/finding"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // DiffEntry is one finding's classification within a specific scan

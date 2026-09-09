@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	domainrule "ai-recon-platform/internal/domain/rule"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/repository/pagination"
-	rulerepo "ai-recon-platform/internal/repository/rule"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	domainrule "ai-surface-platform/internal/domain/rule"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/repository/pagination"
+	rulerepo "ai-surface-platform/internal/repository/rule"
 )
 
 // GetAlert returns an alert by id.

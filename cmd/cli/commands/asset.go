@@ -7,29 +7,29 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/database"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	targetrepo "ai-recon-platform/internal/repository/target"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/database"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	targetrepo "ai-surface-platform/internal/repository/target"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewTargetCommand returns the `ai-recon target` command group.
+// NewTargetCommand returns the `ai-surface target` command group.
 //
 // create/list started as Phase 2 development diagnostics for exercising
 // internal/service/target directly (phase2.md §43) — this is still not
 // the platform's full scan/target-management CLI (no update-name,
 // deletion, etc.). authorize, however, is load-bearing as of Phase 3:
-// it's the only way to move a target to AUTHORIZED, which `ai-recon scan`
+// it's the only way to move a target to AUTHORIZED, which `ai-surface scan`
 // requires (phase3.md §7).
 func NewTargetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "target",
 		Short: "Create, authorize, and list targets",
-		Long: "Exercises internal/service/target's persistence directly. create/list are Phase 2\n" +
-			"development diagnostics; authorize is required before `ai-recon scan` will run against\n" +
+		Long: "Exercises internal/service/target's persistence directly. create/list are\n" +
+			"development diagnostics; authorize is required before `ai-surface scan` will run against\n" +
 			"a target — a target is never authorized merely by existing (see SECURITY.md).",
 	}
 	cmd.AddCommand(newTargetCreateCommand(), newTargetListCommand(), newTargetAuthorizeCommand())
@@ -42,7 +42,7 @@ func newTargetAuthorizeCommand() *cobra.Command {
 		Use:   "authorize",
 		Short: "Explicitly set a target's authorization status (default: AUTHORIZED)",
 		Long: "Sets a target's authorization_status. This is the only way a target becomes\n" +
-			"AUTHORIZED — required before `ai-recon scan` will run against it. Accepts\n" +
+			"AUTHORIZED — required before `ai-surface scan` will run against it. Accepts\n" +
 			"UNVERIFIED|AUTHORIZED|EXPIRED|REVOKED via --status; defaults to AUTHORIZED.",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg, err := loadConfig(cmd)
@@ -71,7 +71,7 @@ func newTargetAuthorizeCommand() *cobra.Command {
 			return err
 		},
 	}
-	cmd.Flags().StringVar(&id, "id", "", "target UUID (required — see `ai-recon target list`)")
+	cmd.Flags().StringVar(&id, "id", "", "target UUID (required — see `ai-surface target list`)")
 	cmd.Flags().StringVar(&status, "status", string(domaintarget.AuthorizationAuthorized), "UNVERIFIED|AUTHORIZED|EXPIRED|REVOKED")
 	_ = cmd.MarkFlagRequired("id")
 	return cmd
@@ -151,7 +151,7 @@ func newTargetListCommand() *cobra.Command {
 	return cmd
 }
 
-// NewAssetCommand returns the `ai-recon asset` command group — the same
+// NewAssetCommand returns the `ai-surface asset` command group — the same
 // kind of development diagnostic as NewTargetCommand, for
 // internal/service/asset. Not the future scan CLI.
 func NewAssetCommand() *cobra.Command {

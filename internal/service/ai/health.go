@@ -13,7 +13,7 @@ type Health struct {
 }
 
 // CheckHealth implements phase13.md §82's GET /ai/health, adapted to this
-// platform's CLI-only precedent (`ai-recon ai status`). It never performs
+// platform's CLI-only precedent (`ai-surface ai status`). It never performs
 // a real provider round-trip on every health check — a lightweight
 // "is a provider registered" check, not a billed API call.
 func (s *Service) CheckHealth(_ context.Context, providerName string) Health {

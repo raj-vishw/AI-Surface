@@ -6,9 +6,9 @@
   `migrate` run.
 - A copy of `.env` (see `.env.example`) or equivalent environment
   variables / secret-manager injection providing at minimum
-  `AI_RECON_DATABASE_PASSWORD` and, if Redis auth is enabled,
-  `AI_RECON_REDIS_PASSWORD`.
-- `AI_RECON_APP_ENV=production` for a production deployment — this
+  `AI_SURFACE_DATABASE_PASSWORD` and, if Redis auth is enabled,
+  `AI_SURFACE_REDIS_PASSWORD`.
+- `AI_SURFACE_APP_ENV=production` for a production deployment — this
   activates `configs/production/config.yaml` and the production-only
   startup guard rails in `Config.Validate()` (see
   `docs/security/production-hardening.md`).
@@ -19,12 +19,12 @@ See `docs/operations/production-readiness.md`'s Configuration section for
 the four-layer precedence. In practice, a production deployment sets:
 
 ```
-AI_RECON_APP_ENV=production
-AI_RECON_DATABASE_HOST=<your postgres host>
-AI_RECON_DATABASE_PASSWORD=<from secret manager>
-AI_RECON_DATABASE_SSL_MODE=require   # or verify-ca / verify-full
-AI_RECON_REDIS_ADDRESS=<your redis host>:6379
-AI_RECON_REDIS_PASSWORD=<from secret manager, if set>
+AI_SURFACE_APP_ENV=production
+AI_SURFACE_DATABASE_HOST=<your postgres host>
+AI_SURFACE_DATABASE_PASSWORD=<from secret manager>
+AI_SURFACE_DATABASE_SSL_MODE=require   # or verify-ca / verify-full
+AI_SURFACE_REDIS_ADDRESS=<your redis host>:6379
+AI_SURFACE_REDIS_PASSWORD=<from secret manager, if set>
 ```
 
 Every other setting has a safe default via `configs/defaults/config.yaml`
@@ -38,7 +38,7 @@ Every other setting has a safe default via `configs/defaults/config.yaml`
    the specific grants this platform actually needs — it never runs DDL
    at runtime outside `cmd/migrate`, so the application user does not
    need schema-modification privileges).
-3. Point `AI_RECON_DATABASE_*` at it.
+3. Point `AI_SURFACE_DATABASE_*` at it.
 
 ## Migrations
 

@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	domainfinding "ai-recon-platform/internal/domain/finding"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	domainfinding "ai-surface-platform/internal/domain/finding"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // SuggestClusters scans a target's currently-open findings and proposes

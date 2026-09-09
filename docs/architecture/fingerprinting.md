@@ -12,7 +12,7 @@ scanning, or any form of technology "confirmation" by attacking a target
 
 **The engine analyzes evidence Phase 3/4/5 already collected and
 persisted. It never performs a network or DNS request of its own —
-running `ai-recon fingerprint` twice against unchanged evidence produces
+running `ai-surface fingerprint` twice against unchanged evidence produces
 the same result, not a re-scan.** Its responsibility is a fixed pipeline:
 
 ```
@@ -91,7 +91,7 @@ internal/service/fingerprint/   the bridge: builds an Observation from real
 │                                Asset/Evidence/Endpoint rows, runs the
 │                                engine, persists results, detects changes
 
-cmd/cli/commands/fingerprint.go   `ai-recon fingerprint`
+cmd/cli/commands/fingerprint.go   `ai-surface fingerprint`
 migrations/000006_create_fingerprints.sql
 test/integration/fingerprint_persistence_test.go
 ```
@@ -299,12 +299,12 @@ every evidence snapshot it ever accumulated are preserved untouched
 ## CLI
 
 ```sh
-ai-recon fingerprint --target example.com
-ai-recon fingerprint --asset <asset-uuid>
-ai-recon fingerprint --target example.com --format json
-ai-recon fingerprint --target example.com --min-confidence 0.60 --category web_server
-ai-recon fingerprint --target example.com --explain
-ai-recon fingerprint --target example.com --dry-run
+ai-surface fingerprint --target example.com
+ai-surface fingerprint --asset <asset-uuid>
+ai-surface fingerprint --target example.com --format json
+ai-surface fingerprint --target example.com --min-confidence 0.60 --category web_server
+ai-surface fingerprint --target example.com --explain
+ai-surface fingerprint --target example.com --dry-run
 ```
 
 `--target` analyzes every asset belonging to that target; `--asset`

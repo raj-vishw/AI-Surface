@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	rept "ai-recon-platform/internal/reporting"
+	rept "ai-surface-platform/internal/reporting"
 )
 
 // Export implements phase14.md §42/§43/§44: renders a persisted report

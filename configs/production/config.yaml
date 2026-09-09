@@ -1,11 +1,11 @@
 # Production-environment overrides, layered on top of
 # configs/defaults/config.yaml (see internal/config.Load's four-layer
 # precedence: hard-coded defaults -> defaults/config.yaml ->
-# <environment>/config.yaml -> AI_RECON_* environment variables).
+# <environment>/config.yaml -> AI_SURFACE_* environment variables).
 #
 # This file intentionally does NOT set database/redis host, user, or any
-# password/API-key field — those come from AI_RECON_DATABASE_* /
-# AI_RECON_REDIS_* / *_API_KEY_ENV environment variables or your
+# password/API-key field — those come from AI_SURFACE_DATABASE_* /
+# AI_SURFACE_REDIS_* / *_API_KEY_ENV environment variables or your
 # deployment's secret manager (see docs/operations/production-readiness.md
 # and .env.example). Never add credentials to this file: it is committed
 # to version control.
@@ -26,7 +26,7 @@ logging:
   # logging in this codebase's detection/discovery/AI paths can include
   # verbose request/response detail not intended for long-term log
   # retention. Raise to "warn" if info-level volume is a concern; never
-  # lower to "debug" via this file — use AI_RECON_LOG_LEVEL transiently on
+  # lower to "debug" via this file — use AI_SURFACE_LOG_LEVEL transiently on
   # a single instance instead, and revert it.
   format: json # required for production log aggregation (internal/logging's own default rationale)
 
@@ -35,11 +35,11 @@ ai:
   # `false`) — Phase 13's own instruction is that AI must be an explicit,
   # per-deployment opt-in, never turned on by an environment file (see
   # docs/ai/safety.md). A production operator who wants AI assistance sets
-  # AI_RECON_AI_ENABLED=true (and the matching provider settings)
+  # AI_SURFACE_AI_ENABLED=true (and the matching provider settings)
   # themselves, not by this file's presence.
   provider:
     name: mock # placeholder acknowledging the same reasoning; overridden
-    # via AI_RECON_AI_PROVIDER_NAME/AI_RECON_AI_PROVIDER_API_KEY_ENV when
+    # via AI_SURFACE_AI_PROVIDER_NAME/AI_SURFACE_AI_PROVIDER_API_KEY_ENV when
     # an operator actually enables AI.
 
 intelligence:

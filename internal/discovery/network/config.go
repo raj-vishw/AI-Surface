@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"ai-recon-platform/internal/config"
+	"ai-surface-platform/internal/config"
 )
 
 // Config is the network discovery engine's resolved configuration — the

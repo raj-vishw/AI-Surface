@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	"ai-recon-platform/internal/httpclient"
-	"ai-recon-platform/internal/intelligence"
+	"ai-surface-platform/internal/httpclient"
+	"ai-surface-platform/internal/intelligence"
 )
 
 const threatFeedProviderVersion = "1"

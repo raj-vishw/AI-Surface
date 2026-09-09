@@ -8,12 +8,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	domainrule "ai-recon-platform/internal/domain/rule"
-	"ai-recon-platform/internal/repository/pagination"
-	rulerepo "ai-recon-platform/internal/repository/rule"
+	domainrule "ai-surface-platform/internal/domain/rule"
+	"ai-surface-platform/internal/repository/pagination"
+	rulerepo "ai-surface-platform/internal/repository/rule"
 )
 
-// NewAlertCommand returns the `ai-recon alert` command group — Phase
+// NewAlertCommand returns the `ai-surface alert` command group — Phase
 // 11's analyst-facing alert lifecycle. Resolving/suppressing an alert
 // never mutates or deletes the underlying detection match or its
 // evidence (phase11.md §20/§21/§35).
@@ -217,7 +217,7 @@ func newAlertInvestigateCommand() *cobra.Command {
 	var actorID string
 	cmd := &cobra.Command{
 		Use:   "investigate <alert-id>",
-		Short: "Promote an alert into a Phase 9 investigation, attaching its evidence and a timeline event automatically",
+		Short: "Promote an alert into an investigation, attaching its evidence and a timeline event automatically",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := uuid.Parse(args[0])

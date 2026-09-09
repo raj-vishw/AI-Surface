@@ -7,7 +7,7 @@ import (
 	"net"
 	"strings"
 
-	"ai-recon-platform/internal/domain/endpoint"
+	"ai-surface-platform/internal/domain/endpoint"
 )
 
 // Identity computes the deterministic natural key for a. The strategy

@@ -17,14 +17,14 @@ import (
 
 	"github.com/google/uuid"
 
-	discoveryhttp "ai-recon-platform/internal/discovery/http"
-	"ai-recon-platform/internal/discovery/model"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainendpoint "ai-recon-platform/internal/domain/endpoint"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	discoveryhttp "ai-surface-platform/internal/discovery/http"
+	"ai-surface-platform/internal/discovery/model"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainendpoint "ai-surface-platform/internal/domain/endpoint"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
 // discoverySource is the fixed evidence/asset Source attribution for

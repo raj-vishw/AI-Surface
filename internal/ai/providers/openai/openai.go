@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"ai-recon-platform/internal/ai"
+	"ai-surface-platform/internal/ai"
 )
 
 // Config configures Provider. APIKeyEnv names an environment variable —

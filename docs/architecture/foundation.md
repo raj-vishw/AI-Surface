@@ -32,7 +32,7 @@ builds it by layering, in increasing priority:
 1. hard-coded defaults (`defaultConfig()`)
 2. `configs/defaults/config.yaml`
 3. `configs/<environment>/config.yaml`
-4. `AI_RECON_*` environment variables
+4. `AI_SURFACE_*` environment variables
 
 A fifth, optional layer — CLI flags — is applied by callers via
 `ApplyOverrides` (see `cmd/cli/commands/config.go`) after `Load()` returns,

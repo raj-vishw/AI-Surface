@@ -1,13 +1,13 @@
 # Baseline configuration shared by every environment. Values here are
 # overlaid onto the built-in Go defaults (internal/config.defaultConfig)
 # and are themselves overlaid by configs/<environment>/config.yaml, then by
-# AI_RECON_* environment variables, then by CLI flags where applicable.
+# AI_SURFACE_* environment variables, then by CLI flags where applicable.
 #
 # Do not put secrets in this file — see .env.example / environment
 # variables for anything sensitive (database password, redis password).
 
 application:
-  name: ai-recon-platform
+  name: ai-surface-platform
 
 database:
   port: 5432
@@ -269,7 +269,7 @@ detection_rules:
     clock_skew: 2m # tolerance for late-arriving events relative to their evaluation window
   suppression_default_window: 15m
   historical:
-    max_range: 24h # widest [from, to) range `ai-recon detection evaluate` accepts without --backfill
+    max_range: 24h # widest [from, to) range `ai-surface detection evaluate` accepts without --backfill
 
 correlation:
   enabled: true
@@ -281,7 +281,7 @@ correlation:
     max_edges: 1000
   workers:
     max_concurrency: 4
-  historical_max_range: 24h # widest [--from, --to) range `ai-recon correlation evaluate` accepts
+  historical_max_range: 24h # widest [--from, --to) range `ai-surface correlation evaluate` accepts
   max_candidates: 2000 # observations considered per evaluation before candidate selection truncates
 
 ai:

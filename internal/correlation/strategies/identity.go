@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/correlation"
+	"ai-surface-platform/internal/correlation"
 )
 
 // identityStrategy is phase12.md §14's "identity correlation" adapted to
-// this platform's real architecture: ai-recon is an attack-surface
+// this platform's real architecture: ai-surface is an attack-surface
 // reconnaissance tool with no user/account/session model, so there is no
 // "failed login" / "successful login" event to correlate by username
 // (phase12.md §14's own worked example assumes exactly that). What this

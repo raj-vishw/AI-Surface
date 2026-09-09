@@ -11,17 +11,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	discoverynet "ai-recon-platform/internal/discovery/network"
-	discoverysvc "ai-recon-platform/internal/discovery/service"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/logging"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	discoverynet "ai-surface-platform/internal/discovery/network"
+	discoverysvc "ai-surface-platform/internal/discovery/service"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/logging"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewNetworkScanCommand returns the `ai-recon network-scan` command —
+// NewNetworkScanCommand returns the `ai-surface network-scan` command —
 // Phase 4's TCP connect discovery entry point. Like `scan` (Phase 3), it
 // requires the target to already exist and be authorized; network-scan
 // never creates or authorizes a target itself.
@@ -40,13 +40,12 @@ func NewNetworkScanCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "network-scan --target <target>",
 		Short: "Run TCP connect discovery against an authorized target",
-		Long: "network-scan runs the Phase 4 TCP connect discovery engine against an already-\n" +
+		Long: "network-scan runs the TCP connect discovery engine against an already-\n" +
 			"created, already-authorized target: it expands the target (HOST/IP as-is, CIDR within\n" +
 			"the configured host limit), attempts a bounded-concurrency TCP connection to every\n" +
 			"host:port combination within scope, conservatively classifies open ports, and persists\n" +
-			"them as PORT assets through the Phase 2 persistence layer. It refuses to run against a\n" +
-			"target that is not AUTHORIZED, and it never opens a TCP connection in dry-run mode\n" +
-			"(security.dry_run, or --dry-run).",
+			"them as PORT assets. It refuses to run against a target that is not AUTHORIZED, and it\n" +
+			"never opens a TCP connection in dry-run mode (security.dry_run, or --dry-run).",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			target, _ := cmd.Flags().GetString("target")
 			if strings.TrimSpace(target) == "" {

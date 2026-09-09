@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/investigation"
+	"ai-surface-platform/internal/investigation"
 )
 
 const sameTechnologyScore = 10

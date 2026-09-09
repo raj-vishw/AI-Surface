@@ -8,15 +8,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"ai-recon-platform/internal/detection"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainfinding "ai-recon-platform/internal/domain/finding"
-	domainfp "ai-recon-platform/internal/domain/fingerprint"
-	apperrors "ai-recon-platform/internal/errors"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/detection"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainfinding "ai-surface-platform/internal/domain/finding"
+	domainfp "ai-surface-platform/internal/domain/fingerprint"
+	apperrors "ai-surface-platform/internal/errors"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // analyzeAsset builds a detection.Input for asset from already-persisted

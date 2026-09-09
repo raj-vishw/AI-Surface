@@ -17,24 +17,24 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/database"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainintel "ai-recon-platform/internal/domain/intelligence"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/intelligence"
-	"ai-recon-platform/internal/intelligence/providers"
-	"ai-recon-platform/internal/intelligence/risk"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	correlationrepo "ai-recon-platform/internal/repository/correlation"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
-	rulerepo "ai-recon-platform/internal/repository/rule"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/database"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainintel "ai-surface-platform/internal/domain/intelligence"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/intelligence"
+	"ai-surface-platform/internal/intelligence/providers"
+	"ai-surface-platform/internal/intelligence/risk"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	correlationrepo "ai-surface-platform/internal/repository/correlation"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
+	rulerepo "ai-surface-platform/internal/repository/rule"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
 // Service orchestrates every intelligence and risk operation.
@@ -135,7 +135,7 @@ func (s *Service) GetAsset(ctx context.Context, assetID uuid.UUID) (domainasset.
 }
 
 // ListTargetAssets returns a page of assets belonging to targetID —
-// exposed for `ai-recon intel enrich-project`'s bounded batch enrichment
+// exposed for `ai-surface intel enrich-project`'s bounded batch enrichment
 // (phase10.md §71).
 func (s *Service) ListTargetAssets(ctx context.Context, targetID uuid.UUID, params pagination.Params) (pagination.Page[domainasset.Asset], error) {
 	return s.assets.List(ctx, assetrepo.ListFilter{TargetID: targetID, Pagination: params})
@@ -152,8 +152,8 @@ type LookupReport struct {
 
 // Enrich runs the engine against one indicator, persists every record it
 // produces, and returns the aggregated view — the active operation behind
-// `ai-recon intel enrich` (phase10.md §61/§72). See Show for the
-// read-only counterpart behind `ai-recon intel lookup`. It resolves any
+// `ai-surface intel enrich` (phase10.md §61/§72). See Show for the
+// read-only counterpart behind `ai-surface intel lookup`. It resolves any
 // already-known asset matching indicator so Local/DNS/Certificate/
 // Technology providers see that asset's data (phase10.md §7/§31); an
 // indicator with no matching asset still runs against an empty local
@@ -240,8 +240,8 @@ func (s *Service) emitVerdictChangeEvents(ctx context.Context, targetID uuid.UUI
 }
 
 // Show returns the aggregated view built ONLY from already-persisted
-// records — no provider is queried (phase10.md §61's `ai-recon intel
-// lookup`, distinct from the active `ai-recon intel enrich`).
+// records — no provider is queried (phase10.md §61's `ai-surface intel
+// lookup`, distinct from the active `ai-surface intel enrich`).
 func (s *Service) Show(ctx context.Context, targetID uuid.UUID, indicator intelligence.Indicator) (LookupReport, error) {
 	normalized := intelligence.Normalize(indicator)
 	stored, err := s.records.ListRecordsByIndicator(ctx, targetID, domainintel.IndicatorType(normalized.Type), normalized.Value)
@@ -279,7 +279,7 @@ func (s *Service) Refresh(ctx context.Context, targetID uuid.UUID, indicator int
 }
 
 // ProviderStatus reports one provider's configuration and health
-// (phase10.md §61's "ai-recon intel providers" / §74).
+// (phase10.md §61's "ai-surface intel providers" / §74).
 type ProviderStatus struct {
 	intelligence.ProviderMeta
 	Health intelligence.ProviderHealth

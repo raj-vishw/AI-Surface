@@ -1,6 +1,6 @@
 # Reports
 
-`ai-recon report` (`internal/reporting` + `internal/service/reporting`)
+`ai-surface report` (`internal/reporting` + `internal/service/reporting`)
 builds structured, versioned, citation-validated reports from Phase
 2-13's own already-persisted data. No report type duplicates any
 existing model — every section is assembled by reading Phase 2/8/9/10/
@@ -31,8 +31,8 @@ Phase 13 AI narration is embedded yet (a documented Known Limitation;
 the domain model's `Provider`/`Model`/`PromptVersion` fields and
 `StatusDraft` already exist for a future phase to use). A deterministic
 report therefore always starts at `generated`, never `draft`.
-`ai-recon report review <id>` moves it to `reviewed`;
-`ai-recon report approve <id> --approver <name>` is the only path to
+`ai-surface report review <id>` moves it to `reviewed`;
+`ai-surface report approve <id> --approver <name>` is the only path to
 `approved`, and requires an actor (phase14.md §40) — approving an
 already-approved report is rejected, never silently re-recorded.
 
@@ -42,7 +42,7 @@ already-approved report is rejected, never silently re-recorded.
 from Phase 11: one `(target_id, report_type, subject_id)` triple's
 reports form a sequential version series (`reports_version_unique`'s
 `NULLS NOT DISTINCT` index so target-wide types, whose `subject_id` is
-`NULL`, are deduplicated correctly too). `ai-recon report create`
+`NULL`, are deduplicated correctly too). `ai-surface report create`
 computes `LatestVersion + 1` and always inserts a new row — regenerating
 never overwrites an earlier version (phase14.md §77). Report content is
 otherwise immutable once created; `Approve` is the sole permitted
@@ -70,7 +70,7 @@ authentication mechanism.
 
 ## Export
 
-`ai-recon report export <id> --format json|csv`:
+`ai-surface report export <id> --format json|csv`:
 
 - **JSON**: the full `Envelope`, re-marshaled with Go's
   `encoding/json` (which HTML-escapes `<`, `>`, `&` by default — see
@@ -104,7 +104,7 @@ by this platform's own Go code, never from an analyst-supplied template.
 Reuses the investigation timeline as this platform's existing audit log
 — the same "these ARE the audit trail" precedent Phase 9/11/12/13 each
 already established for their own audit requirements — rather than a new
-audit table. `ai-recon report create --type audit` walks every
+audit table. `ai-surface report create --type audit` walks every
 investigation's timeline events within the requested range and renders
 `timestamp / actor / action / resource / description` lines.
 

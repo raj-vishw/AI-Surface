@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
 )
 
 // CreateHypothesis records a new analyst hypothesis (phase9.md §24) and a

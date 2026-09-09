@@ -19,7 +19,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"ai-recon-platform/migrations"
+	"ai-surface-platform/migrations"
 )
 
 // Migration is a single parsed migration file.

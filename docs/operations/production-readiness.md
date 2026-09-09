@@ -1,6 +1,6 @@
 # Production Readiness
 
-This document defines what "production" means for `ai-recon-platform` as
+This document defines what "production" means for `ai-surface-platform` as
 it exists today, and what an operator must provide to run it that way. It
 does not claim capabilities this codebase doesn't have — see
 `docs/security/final-audit.md` and `docs/operations/production-readiness-report.md`
@@ -8,7 +8,7 @@ for the honest, evidence-based verdict on how ready this actually is.
 
 ## What kind of "production" this platform supports
 
-`ai-recon-platform` is a **single-operator, CLI-driven security
+`ai-surface-platform` is a **single-operator, CLI-driven security
 reconnaissance and assessment tool**, not a multi-tenant SaaS. There is no
 authentication, RBAC, or multi-user session layer anywhere in this
 codebase (confirmed by inspection across every phase since Phase 1 —
@@ -79,12 +79,12 @@ Configuration is layered (`internal/config.Load`, precedence low to high):
 
 1. Hard-coded Go defaults (`internal/config.defaultConfig`)
 2. `configs/defaults/config.yaml`
-3. `configs/<AI_RECON_APP_ENV>/config.yaml` (`configs/development/config.yaml`
+3. `configs/<AI_SURFACE_APP_ENV>/config.yaml` (`configs/development/config.yaml`
    or the new `configs/production/config.yaml` — see
    `docs/security/production-hardening.md`)
-4. `AI_RECON_*` environment variables
+4. `AI_SURFACE_*` environment variables
 
-`AI_RECON_APP_ENV=production` now additionally activates startup guard
+`AI_SURFACE_APP_ENV=production` now additionally activates startup guard
 rails in `Config.Validate()` (added this phase): logging.level may not be
 `debug`, `security.require_authorization` may not be `false`, and
 `database.ssl_mode` may not be `disable` — an invalid combination refuses
@@ -103,7 +103,7 @@ audit of every credential-shaped configuration field in this codebase.
 
 ## Database
 
-- Run `ai-recon-platform`'s `migrate` binary (`make migrate-up` / `go run
+- Run `ai-surface-platform`'s `migrate` binary (`make migrate-up` / `go run
   ./cmd/migrate up`) before starting `server`/`worker`/`cli` against a new
   database. 14 migrations exist today (`migrations/000001_initial.sql`
   through `migrations/000014_create_reporting.sql`).
@@ -179,7 +179,7 @@ operational playbook to follow when something is actually down.
    are skipped; see `internal/migrate`).
 6. Start `server`/`worker`.
 7. Verify `/health`, `/live`, `/ready` all report OK, and run a smoke
-   workflow (`ai-recon target list`, or the full workflow in
+   workflow (`ai-surface target list`, or the full workflow in
    `docs/operations/runbook.md`).
 
 ## Rollback procedure

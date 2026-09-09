@@ -52,7 +52,7 @@ the reasoning behind any item marked "not applicable."
       production-hardening.md`).
 - [x] `database.ssl_mode` now defaults to `require` in the new
       `configs/production/config.yaml`, and `disable` is startup-fatal
-      when `AI_RECON_APP_ENV=production` (SEC-08, fixed and tested).
+      when `AI_SURFACE_APP_ENV=production` (SEC-08, fixed and tested).
 - [x] Connection pool bounds configured
       (`max_open_connections`/`max_idle_connections`/lifetimes).
 

@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/ai"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	apperrors "ai-recon-platform/internal/errors"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/ai"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	apperrors "ai-surface-platform/internal/errors"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // buildContext finalizes a raw fact slice into an ai.Context: bounds it

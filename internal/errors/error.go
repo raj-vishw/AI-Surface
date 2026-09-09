@@ -9,7 +9,7 @@
 // "errors", callers should import it under an alias, conventionally
 // "apperrors":
 //
-//	import apperrors "ai-recon-platform/internal/errors"
+//	import apperrors "ai-surface-platform/internal/errors"
 package errors
 
 import (

@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	domainrule "ai-recon-platform/internal/domain/rule"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/ruleengine"
+	domainrule "ai-surface-platform/internal/domain/rule"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/ruleengine"
 )
 
 // roleFor names the evidence role every event in a match should be

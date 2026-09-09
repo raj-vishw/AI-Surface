@@ -13,8 +13,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/correlation"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/correlation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ListFilter narrows a correlation listing. Zero-valued fields are not

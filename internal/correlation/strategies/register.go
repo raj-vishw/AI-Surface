@@ -1,6 +1,6 @@
 package strategies
 
-import "ai-recon-platform/internal/correlation"
+import "ai-surface-platform/internal/correlation"
 
 // RegisterAll registers every built-in correlation strategy into r
 // (phase12.md §22/§23).

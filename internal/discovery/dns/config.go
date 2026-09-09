@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"ai-recon-platform/internal/config"
+	"ai-surface-platform/internal/config"
 )
 
 // SubdomainConfig configures subdomain enumeration — kept as its own

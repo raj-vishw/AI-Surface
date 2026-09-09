@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/netip"
 
-	domaintarget "ai-recon-platform/internal/domain/target"
+	domaintarget "ai-surface-platform/internal/domain/target"
 )
 
 // ScopeChecker determines whether an expanded host is within an

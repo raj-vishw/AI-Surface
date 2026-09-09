@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"ai-recon-platform/internal/discovery/model"
-	"ai-recon-platform/internal/httpclient"
+	"ai-surface-platform/internal/discovery/model"
+	"ai-surface-platform/internal/httpclient"
 )
 
 // healthPaths are normalized paths treated as health-check endpoints.

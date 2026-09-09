@@ -7,7 +7,7 @@
 // DataSource interface it is built against has no mutating method at all.
 package tools
 
-import "ai-recon-platform/internal/ai"
+import "ai-surface-platform/internal/ai"
 
 // RegisterAll registers every built-in tool against ds into r.
 func RegisterAll(r *ai.ToolRegistry, ds ai.DataSource) error {

@@ -35,7 +35,7 @@
 //     its own "worker pool").
 //   - No REST API exists anywhere in this codebase (only /health,
 //     /ready — see internal/httpserver). phase13.md §77-82's endpoints are
-//     adapted to `ai-recon ai ...` CLI subcommands, the same adaptation
+//     adapted to `ai-surface ai ...` CLI subcommands, the same adaptation
 //     Phase 9-12 already applied to their own API sections.
 package ai
 

@@ -9,11 +9,11 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"ai-recon-platform/internal/database"
-	"ai-recon-platform/internal/domain/reporting"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/repository/pagination"
-	"ai-recon-platform/internal/repository/sqlerr"
+	"ai-surface-platform/internal/database"
+	"ai-surface-platform/internal/domain/reporting"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/repository/sqlerr"
 )
 
 // PostgresRepository implements every interface in this package.

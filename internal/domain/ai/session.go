@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // Session lets an analyst continue asking questions about one Target — and

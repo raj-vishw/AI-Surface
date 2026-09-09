@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // Relationship names why two nodes were linked (phase12.md §6). A closed,

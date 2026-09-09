@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ListFilter narrows a target listing. Zero-valued fields are not applied.

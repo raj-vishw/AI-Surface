@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	analyticsrepo "ai-recon-platform/internal/repository/analytics"
+	analyticsrepo "ai-surface-platform/internal/repository/analytics"
 )
 
 // Metric names one time-series this package can produce (phase14.md

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"ai-recon-platform/internal/intelligence"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
+	"ai-surface-platform/internal/intelligence"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
 )
 
 // postgresCache adapts intelrepo.CacheRepository (raw bytes) into

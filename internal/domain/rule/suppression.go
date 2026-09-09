@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // SuppressionScope names what a Suppression applies to (phase11.md

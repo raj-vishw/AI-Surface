@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	domainfp "ai-recon-platform/internal/domain/fingerprint"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	"ai-recon-platform/internal/investigation"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	domainfp "ai-surface-platform/internal/domain/fingerprint"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	"ai-surface-platform/internal/investigation"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // CorrelateResult is one non-dry-run Correlate call's outcome.

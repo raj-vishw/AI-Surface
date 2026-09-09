@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/correlation"
-	domaincorrelation "ai-recon-platform/internal/domain/correlation"
-	apperrors "ai-recon-platform/internal/errors"
+	"ai-surface-platform/internal/correlation"
+	domaincorrelation "ai-surface-platform/internal/domain/correlation"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // EvaluateResult is one Evaluate call's outcome.

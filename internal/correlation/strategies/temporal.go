@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"sort"
 
-	"ai-recon-platform/internal/correlation"
+	"ai-surface-platform/internal/correlation"
 )
 
 // temporalStrategy links observations first observed within a configured

@@ -4,7 +4,7 @@
 
 ```
 [ Operator's terminal / CI runner ]
-          │  (has AI_RECON_DATABASE_* / AI_RECON_REDIS_* / AI_RECON_AI_PROVIDER_API_KEY_ENV credentials)
+          │  (has AI_SURFACE_DATABASE_* / AI_SURFACE_REDIS_* / AI_SURFACE_AI_PROVIDER_API_KEY_ENV credentials)
           ▼
    [ cli / server / worker / migrate binaries ]   <- this codebase
           │                        │
@@ -177,7 +177,7 @@
   fingerprint signature loading (`fingerprint.signatures_path`).
 - **Impact**: a path-traversal payload could read an unintended file.
 - **Mitigation**: both paths are **operator-supplied configuration**
-  (`AI_RECON_CONFIG_DIR`, `fingerprint.signatures_path`), never derived
+  (`AI_SURFACE_CONFIG_DIR`, `fingerprint.signatures_path`), never derived
   from target/user-controlled input — there is no code path where a
   target's response influences a filesystem path this platform reads or
   writes.

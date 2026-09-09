@@ -59,7 +59,7 @@ internal/discovery/endpoint/    the engine — no database/domain dependency
 internal/discovery/service/endpoint.go, endpoint_persist.go
     the bridge: seed resolution, persistence, change detection
 
-cmd/cli/commands/endpoint_scan.go   `ai-recon endpoint-scan`
+cmd/cli/commands/endpoint_scan.go   `ai-surface endpoint-scan`
 migrations/000007_extend_endpoints.sql
 test/fixtures/endpoint/             local, fully offline HTTP fixture
 test/integration/endpoint_persistence_test.go
@@ -280,10 +280,10 @@ true` rather than crashing or silently dropping the endpoint.
 ## 18. CLI
 
 ```sh
-ai-recon endpoint-scan --target example.test --profile quick
-ai-recon endpoint-scan --target example.test --profile standard --format json
-ai-recon endpoint-scan --target https://example.test --seed https://example.test/app --depth 2
-ai-recon endpoint-scan --target example.test --dry-run
+ai-surface endpoint-scan --target example.test --profile quick
+ai-surface endpoint-scan --target example.test --profile standard --format json
+ai-surface endpoint-scan --target https://example.test --seed https://example.test/app --depth 2
+ai-surface endpoint-scan --target example.test --dry-run
 ```
 
 `--target`/`--target-type`, `--seed` (comma-separated, overrides the

@@ -4,12 +4,12 @@ import (
 	"context"
 	"net/url"
 
-	fpengine "ai-recon-platform/internal/fingerprint"
+	fpengine "ai-surface-platform/internal/fingerprint"
 
-	domainasset "ai-recon-platform/internal/domain/asset"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	"ai-recon-platform/internal/repository/pagination"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // buildObservation assembles a fpengine.Observation for asset entirely

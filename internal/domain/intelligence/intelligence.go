@@ -30,7 +30,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // IndicatorType identifies what kind of thing an Indicator's Value

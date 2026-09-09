@@ -10,17 +10,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	discoveryendpoint "ai-recon-platform/internal/discovery/endpoint"
-	discoverysvc "ai-recon-platform/internal/discovery/service"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/logging"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	discoveryendpoint "ai-surface-platform/internal/discovery/endpoint"
+	discoverysvc "ai-surface-platform/internal/discovery/service"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/logging"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewEndpointScanCommand returns the `ai-recon endpoint-scan` command —
+// NewEndpointScanCommand returns the `ai-surface endpoint-scan` command —
 // Phase 7's endpoint & API discovery entry point: bounded crawling, HTML/
 // JavaScript static extraction, robots.txt/sitemap.xml, and OpenAPI/
 // Swagger parsing against an already-authorized target. It is an
@@ -44,7 +44,7 @@ func NewEndpointScanCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "endpoint-scan --target <target>",
 		Short: "Discover application endpoints and API surface from an authorized target",
-		Long: "Runs the Phase 7 endpoint discovery engine: bounded crawling from the target's known\n" +
+		Long: "Runs the endpoint discovery engine: bounded crawling from the target's known\n" +
 			"HTTP(S) assets (or explicit --seed URLs), HTML link/form extraction, JavaScript static\n" +
 			"route extraction, robots.txt/sitemap.xml parsing, and OpenAPI/Swagger discovery. It only\n" +
 			"ever sends GET requests — it never submits a form and never sends PUT/PATCH/DELETE merely\n" +

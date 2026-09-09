@@ -6,10 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/version"
+	"ai-surface-platform/internal/version"
 )
 
-// NewVersionCommand returns the `ai-recon version` subcommand.
+// NewVersionCommand returns the `ai-surface version` subcommand.
 func NewVersionCommand() *cobra.Command {
 	var asJSON bool
 
@@ -23,7 +23,7 @@ func NewVersionCommand() *cobra.Command {
 				enc.SetIndent("", "  ")
 				return enc.Encode(info)
 			}
-			_, err := fmt.Fprintf(cmd.OutOrStdout(), "ai-recon %s (commit %s, built %s)\n", info.Version, info.Commit, info.BuildDate)
+			_, err := fmt.Fprintf(cmd.OutOrStdout(), "ai-surface %s (commit %s, built %s)\n", info.Version, info.Commit, info.BuildDate)
 			return err
 		},
 	}

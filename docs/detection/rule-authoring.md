@@ -141,12 +141,12 @@ considerations is a rule an analyst can't triage confidently.
 
 ```sh
 # Validate + compile without touching the database at all:
-ai-recon detection builtin test <name>          # for a built-in rule
+ai-surface detection builtin test <name>          # for a built-in rule
 
 # For a rule you're authoring, write test fixtures as Go
 # ruleengine.TestCase values (see internal/ruleengine/builtin/builtin.go
 # for worked examples) and call ruleengine.RunTest directly, or persist
-# the rule as draft and use `ai-recon detection evaluate <id> --dry-run`
+# the rule as draft and use `ai-surface detection evaluate <id> --dry-run`
 # against real historical data without creating any alert.
 ```
 
@@ -154,20 +154,20 @@ ai-recon detection builtin test <name>          # for a built-in rule
 
 ```sh
 # 1. Create as draft.
-ai-recon detection create --target example.com --name my_rule \
+ai-surface detection create --target example.com --name my_rule \
   --definition-file my_rule.yaml --created-by analyst1
 
 # 2. Dry-run it against recent history.
-ai-recon detection evaluate <rule-id> --dry-run --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
+ai-surface detection evaluate <rule-id> --dry-run --from 2026-01-01T00:00:00Z --to 2026-01-02T00:00:00Z
 
 # 3. Enable it once you're satisfied.
-ai-recon detection enable <rule-id> --actor analyst1
+ai-surface detection enable <rule-id> --actor analyst1
 
 # 4. Evaluate for real (creates matches/alerts).
-ai-recon detection evaluate <rule-id> --from ... --to ...
+ai-surface detection evaluate <rule-id> --from ... --to ...
 
 # 5. Edit later by creating a new version — the old version, and every
 #    match it ever produced, remain untouched and reproducible.
-ai-recon detection edit <rule-id> --definition-file my_rule_v2.yaml \
+ai-surface detection edit <rule-id> --definition-file my_rule_v2.yaml \
   --change-description "tightened threshold" --created-by analyst1
 ```

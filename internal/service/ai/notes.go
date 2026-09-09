@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
 )
 
 // SaveNoteFromResponse implements phase13.md §44 — saves AI-generated

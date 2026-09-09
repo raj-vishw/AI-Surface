@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // headerFromMetadata reads one curated response header from an asset's or

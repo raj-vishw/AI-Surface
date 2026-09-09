@@ -6,7 +6,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // VulnerabilityMapping links one technology + version constraint to a

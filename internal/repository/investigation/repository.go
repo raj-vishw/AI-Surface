@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ListFilter narrows an investigation listing. Zero-valued fields are not

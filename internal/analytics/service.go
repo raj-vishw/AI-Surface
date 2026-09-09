@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	analyticsrepo "ai-recon-platform/internal/repository/analytics"
+	analyticsrepo "ai-surface-platform/internal/repository/analytics"
 )
 
 // Filters narrows an analytics query — only fields this platform's data

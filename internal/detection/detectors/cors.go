@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // corsDetector flags the specific dangerous combination phase8.md §34

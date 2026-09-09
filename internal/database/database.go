@@ -14,8 +14,8 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"ai-recon-platform/internal/config"
-	apperrors "ai-recon-platform/internal/errors"
+	"ai-surface-platform/internal/config"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // Executor is the subset of *pgxpool.Pool and pgx.Tx that repositories

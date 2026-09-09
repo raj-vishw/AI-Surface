@@ -10,17 +10,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	discoverydns "ai-recon-platform/internal/discovery/dns"
-	discoverysvc "ai-recon-platform/internal/discovery/service"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/logging"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	discoverydns "ai-surface-platform/internal/discovery/dns"
+	discoverysvc "ai-surface-platform/internal/discovery/service"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/logging"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewDNSScanCommand returns the `ai-recon dns-scan` command — Phase 5's
+// NewDNSScanCommand returns the `ai-surface dns-scan` command — Phase 5's
 // canonical DNS discovery entry point, covering both record discovery and
 // (via --subdomains, on by default) subdomain enumeration in one command
 // (phase5.md §49). Like `scan`/`network-scan`, it requires the target to
@@ -30,7 +30,7 @@ func NewDNSScanCommand() *cobra.Command {
 	return newDNSCommand(false)
 }
 
-// NewSubdomainScanCommand returns `ai-recon subdomain-scan` — a thin
+// NewSubdomainScanCommand returns `ai-surface subdomain-scan` — a thin
 // alias over the exact same implementation as `dns-scan`, provided
 // because phase5.md's own required verification (§73) invokes it by that
 // name; it is not a second implementation (phase5.md §49's "do not create
@@ -68,12 +68,11 @@ func newDNSCommand(subdomainMode bool) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   use,
 		Short: short,
-		Long: "Runs the Phase 5 DNS discovery engine against an already-created, already-authorized\n" +
+		Long: "Runs the DNS discovery engine against an already-created, already-authorized\n" +
 			"target: it queries the configured record types for the domain itself, optionally\n" +
-			"enumerates subdomains (wordlist-based, with wildcard detection), and persists everything\n" +
-			"through the Phase 2 persistence layer. It refuses to run against a target that is not\n" +
-			"AUTHORIZED, and it never sends a DNS query in dry-run mode (security.dry_run, or\n" +
-			"--dry-run).",
+			"enumerates subdomains (wordlist-based, with wildcard detection), and persists everything.\n" +
+			"It refuses to run against a target that is not AUTHORIZED, and it never sends a DNS\n" +
+			"query in dry-run mode (security.dry_run, or --dry-run).",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			target, _ := cmd.Flags().GetString("target")
 			if strings.TrimSpace(target) == "" {

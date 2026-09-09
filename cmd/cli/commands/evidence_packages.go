@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewEvidencePackageCommand returns the `ai-recon evidence-package`
+// NewEvidencePackageCommand returns the `ai-surface evidence-package`
 // command group (phase14.md §45/§46/§47) — always scoped to one
 // already-generated report's own cited evidence, never a dump of an
 // entire target's data.

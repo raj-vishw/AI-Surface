@@ -16,12 +16,12 @@ import (
 	"syscall"
 	"time"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	"ai-recon-platform/internal/health"
-	"ai-recon-platform/internal/logging"
-	"ai-recon-platform/internal/redis"
-	"ai-recon-platform/internal/version"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	"ai-surface-platform/internal/health"
+	"ai-surface-platform/internal/logging"
+	"ai-surface-platform/internal/redis"
+	"ai-surface-platform/internal/version"
 )
 
 // healthCheckInterval controls how often the worker re-verifies its

@@ -11,17 +11,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	fpengine "ai-recon-platform/internal/fingerprint"
-	"ai-recon-platform/internal/logging"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	fingerprintsvc "ai-recon-platform/internal/service/fingerprint"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	fpengine "ai-surface-platform/internal/fingerprint"
+	"ai-surface-platform/internal/logging"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	fingerprintsvc "ai-surface-platform/internal/service/fingerprint"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewFingerprintCommand returns the `ai-recon fingerprint` command —
+// NewFingerprintCommand returns the `ai-surface fingerprint` command —
 // Phase 6's passive technology-fingerprinting entry point. It analyzes
 // evidence Phase 3/4/5 already collected and persisted; it never
 // performs a fresh network/DNS request itself, even when invoked
@@ -43,8 +43,8 @@ func NewFingerprintCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fingerprint --target <target> | --asset <asset-id>",
 		Short: "Passively identify technologies from already-collected evidence",
-		Long: "Runs Phase 6's passive fingerprinting engine against evidence Phase 3 (HTTP), Phase 4\n" +
-			"(network), and Phase 5 (DNS) already collected and persisted. It performs no network or\n" +
+		Long: "Runs the passive fingerprinting engine against evidence the HTTP, network, and DNS\n" +
+			"discovery engines already collected and persisted. It performs no network or\n" +
 			"DNS request of its own — analyzing an asset that was never actually scanned produces no\n" +
 			"fingerprints, not an error. Exactly one of --target or --asset is required.",
 		RunE: func(cmd *cobra.Command, _ []string) error {

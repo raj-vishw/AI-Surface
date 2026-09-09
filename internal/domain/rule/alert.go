@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // AlertStatus tracks an Alert's analyst-facing lifecycle (phase11.md

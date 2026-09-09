@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // sensitiveOpenPorts are TCP ports Phase 4 already treats as

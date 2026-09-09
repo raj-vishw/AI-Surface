@@ -8,11 +8,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	domaincorrelation "ai-recon-platform/internal/domain/correlation"
-	"ai-recon-platform/internal/repository/pagination"
+	domaincorrelation "ai-surface-platform/internal/domain/correlation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
-// NewChainCommand returns the `ai-recon chain` command group — Phase
+// NewChainCommand returns the `ai-surface chain` command group — Phase
 // 12's attack-chain read surface. A chain is a narrative representation
 // of correlated activity, never itself proof of an attack (phase12.md
 // §40).
@@ -116,7 +116,7 @@ func newChainExplainCommand() *cobra.Command {
 
 // printChain renders one attack chain (Attack Chain / Confidence /
 // Severity / Timeline / Evidence — the exact shape phase12.md §56's
-// worked "ai-recon chain show" example uses). It is a representation of
+// worked "ai-surface chain show" example uses). It is a representation of
 // correlated activity, never itself asserted as proof of an attack.
 func printChain(cmd *cobra.Command, chain domaincorrelation.AttackChain, stages []domaincorrelation.AttackChainStage) error {
 	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 4, 2, ' ', 0)

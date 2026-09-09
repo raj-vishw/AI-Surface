@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-airecon}
+      POSTGRES_USER: ${POSTGRES_USER:-aisurface}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set — copy .env.example to .env}
-      POSTGRES_DB: ${POSTGRES_DB:-airecon_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-aisurface_dev}
     ports:
       - "5432:5432"
     volumes:
-      - airecon_postgres_data:/var/lib/postgresql/data
+      - aisurface_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-airecon} -d ${POSTGRES_DB:-airecon_dev}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aisurface} -d ${POSTGRES_DB:-aisurface_dev}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -26,4 +26,4 @@ services:
       retries: 10
 
 volumes:
-  airecon_postgres_data:
+  aisurface_postgres_data:

@@ -4,7 +4,7 @@ This platform has no frontend anywhere in its codebase (confirmed by
 inspection before Phase 14 began — only `/health`/`/ready` exist as HTTP
 endpoints). Every "dashboard" phase14.md asks for is therefore adapted to
 its CLI-only precedent, exactly as every prior phase adapted its own
-missing infrastructure: a dashboard is `ai-recon analytics <command>`'s
+missing infrastructure: a dashboard is `ai-surface analytics <command>`'s
 tabwriter-formatted output, and a "preset" is simply which handful of
 `analytics`/`report` subcommands an analyst runs together.
 
@@ -48,9 +48,9 @@ add `--save-as <name>`/`--load <name>` without a schema migration.
 Every aggregate this layer returns names the underlying entity type
 (rule name, asset identity, correlation id, ...) needed to look it up
 directly with an existing command — e.g. `analytics alerts`'s "By Rule"
-breakdown names a rule you can then inspect with `ai-recon detection show
+breakdown names a rule you can then inspect with `ai-surface detection show
 <rule-id>` (Phase 11), and `analytics correlations`'s counts point at
-correlations inspectable with `ai-recon correlation show <id>` (Phase
+correlations inspectable with `ai-surface correlation show <id>` (Phase
 12). There is no separate "click to filter" mechanic to implement in a
 CLI — the drill-down *is* running the next command with that id.
 

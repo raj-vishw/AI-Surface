@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	domainendpoint "ai-recon-platform/internal/domain/endpoint"
-	apperrors "ai-recon-platform/internal/errors"
+	domainendpoint "ai-surface-platform/internal/domain/endpoint"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // unfetchedResult builds a Result for a candidate that is recorded

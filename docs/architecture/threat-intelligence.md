@@ -75,7 +75,7 @@ flowchart TD
 ```
 
 No REST API layer exists for this (or any prior) phase — the CLI
-(`ai-recon intel`/`ai-recon risk`) is the primary interface, consistent
+(`ai-surface intel`/`ai-surface risk`) is the primary interface, consistent
 with every phase since Phase 2; see §18.
 
 ## 2. Provider Interface
@@ -150,7 +150,7 @@ infrastructure (phase10.md §1; `internal/redis` is a bare connectivity
 client with no cache abstraction of its own). TTLs default to 24h for
 reputation-shaped providers and 7 days for the vulnerability-matching
 provider (`Engine.ttlFor`), both configurable via
-`intelligence.reputation_ttl`/`vulnerability_ttl`. `ai-recon intel
+`intelligence.reputation_ttl`/`vulnerability_ttl`. `ai-surface intel
 refresh` calls `Cache.Invalidate` for every active provider before
 re-enriching (phase10.md §24).
 
@@ -225,7 +225,7 @@ supports (phase10.md §39/§40).
 
 `risk_scores` is append-only — `CreateRiskScore` always inserts a new
 row; recalculation never overwrites a previous score (phase10.md §45/
-§46). `ai-recon risk asset <id> --history` lists every score ever
+§46). `ai-surface risk asset <id> --history` lists every score ever
 calculated for an entity, newest first, via a numeric-offset cursor (the
 same "ordering isn't the keyset `(created_at, id)` every other listing
 uses" exception `investigation_relationships`'s timeline listing already
@@ -235,7 +235,7 @@ recorded whenever a new score exceeds the previous one.
 
 Asset criticality (`AssetCriticality`) is analyst/business context — an
 explicit action only, never inferred from a hostname or any other
-observed signal (phase10.md §36): `ai-recon risk criticality set
+observed signal (phase10.md §36): `ai-surface risk criticality set
 <asset-id> --level high --set-by <analyst>`.
 
 ## 13. External Provider Policy
@@ -255,7 +255,7 @@ accidentally bypass it.
 
 ## 14. Privacy
 
-`ai-recon intel enrich <indicator> --dry-run` reports exactly which
+`ai-surface intel enrich <indicator> --dry-run` reports exactly which
 providers would run (`Engine.Plan`) and always "0 external requests" —
 no lookup is performed. Local/DNS/Certificate/Technology providers only
 ever look up indicators this platform already has an asset for (see §2);
@@ -295,8 +295,8 @@ indefinitely (phase10.md §69).
 
 ## 17. CLI
 
-`ai-recon intel {lookup,enrich,refresh,providers,status,enrich-project}`
-and `ai-recon risk {asset,finding,investigation,criticality}` — see the
+`ai-surface intel {lookup,enrich,refresh,providers,status,enrich-project}`
+and `ai-surface risk {asset,finding,investigation,criticality}` — see the
 README's Threat Intelligence & Risk Enrichment section for worked
 examples. `intel lookup` is read-only (never queries a provider); `intel
 enrich` is the active operation; `intel enrich-project` bounds batch
@@ -336,7 +336,7 @@ covered.
   database.
 - **Provider health is in-process only.** `Registry.Health` resets every
   CLI invocation — there is no long-running daemon in this project to
-  accumulate health across calls. `ai-recon intel providers`/`status`
+  accumulate health across calls. `ai-surface intel providers`/`status`
   report the current process's (typically empty, just-started) health
   plus each provider's `enabled` state; durable history lives in the
   `intelligence_records` table itself (via `RetrievedAt`), not in a

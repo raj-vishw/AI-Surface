@@ -573,7 +573,7 @@ type CorrelationConfig struct {
 	Graph    CorrelationGraphConfig    `yaml:"graph"`
 	Workers  CorrelationWorkersConfig  `yaml:"workers"`
 
-	// HistoricalMaxRange bounds one `ai-recon correlation evaluate`
+	// HistoricalMaxRange bounds one `ai-surface correlation evaluate`
 	// call's [--from, --to) range (phase12.md §64/§110) — mirrors
 	// RuleHistoricalConfig.MaxRange's identical purpose for Phase 11.
 	HistoricalMaxRange time.Duration `yaml:"historical_max_range"`
@@ -598,7 +598,7 @@ type CorrelationGraphConfig struct {
 
 // CorrelationWorkersConfig bounds evaluation concurrency. This platform
 // has no job/worker queue yet (see cmd/worker's own doc comment) — this
-// value is read by ai-recon's CLI-driven evaluation for a future worker
+// value is read by ai-surface's CLI-driven evaluation for a future worker
 // pool but does not yet dispatch background jobs of its own (documented
 // as a Known Limitation, not fabricated infrastructure).
 type CorrelationWorkersConfig struct {

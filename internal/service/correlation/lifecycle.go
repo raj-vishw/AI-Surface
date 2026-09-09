@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	domaincorrelation "ai-recon-platform/internal/domain/correlation"
-	apperrors "ai-recon-platform/internal/errors"
-	correlationrepo "ai-recon-platform/internal/repository/correlation"
-	"ai-recon-platform/internal/repository/pagination"
+	domaincorrelation "ai-surface-platform/internal/domain/correlation"
+	apperrors "ai-surface-platform/internal/errors"
+	correlationrepo "ai-surface-platform/internal/repository/correlation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // GetCorrelation returns a correlation by id.

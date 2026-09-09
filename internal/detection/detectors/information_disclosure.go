@@ -4,7 +4,7 @@ import (
 	"context"
 	"regexp"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // versionPattern requires a digit somewhere after the product name — a

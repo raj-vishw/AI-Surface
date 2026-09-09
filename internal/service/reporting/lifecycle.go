@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	domainreporting "ai-recon-platform/internal/domain/reporting"
-	apperrors "ai-recon-platform/internal/errors"
-	reportingrepo "ai-recon-platform/internal/repository/reporting"
+	domainreporting "ai-surface-platform/internal/domain/reporting"
+	apperrors "ai-surface-platform/internal/errors"
+	reportingrepo "ai-surface-platform/internal/repository/reporting"
 )
 
 // GetReport returns one report by id.

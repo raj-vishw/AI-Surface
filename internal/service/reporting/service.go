@@ -11,15 +11,15 @@ package reporting
 import (
 	"log/slog"
 
-	"ai-recon-platform/internal/analytics"
-	"ai-recon-platform/internal/database"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	correlationrepo "ai-recon-platform/internal/repository/correlation"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	reportingrepo "ai-recon-platform/internal/repository/reporting"
-	rulerepo "ai-recon-platform/internal/repository/rule"
+	"ai-surface-platform/internal/analytics"
+	"ai-surface-platform/internal/database"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	correlationrepo "ai-surface-platform/internal/repository/correlation"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	reportingrepo "ai-surface-platform/internal/repository/reporting"
+	rulerepo "ai-surface-platform/internal/repository/rule"
 )
 
 // Service orchestrates every report/evidence-package/control-evidence

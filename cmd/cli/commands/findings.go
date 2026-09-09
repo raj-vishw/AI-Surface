@@ -12,21 +12,21 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	detectionengine "ai-recon-platform/internal/detection"
-	"ai-recon-platform/internal/detection/detectors"
-	domainfinding "ai-recon-platform/internal/domain/finding"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/logging"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	detectionsvc "ai-recon-platform/internal/service/detection"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	detectionengine "ai-surface-platform/internal/detection"
+	"ai-surface-platform/internal/detection/detectors"
+	domainfinding "ai-surface-platform/internal/domain/finding"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/logging"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	detectionsvc "ai-surface-platform/internal/service/detection"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewFindingsCommand returns the `ai-recon findings` command group —
+// NewFindingsCommand returns the `ai-surface findings` command group —
 // Phase 8's finding/vulnerability detection entry point: it transforms
 // evidence Phase 2-7 already collected into structured, evidence-backed,
 // lifecycle-tracked findings. It defaults to passive analysis (no network
@@ -68,8 +68,8 @@ func newFindingsScanCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "scan --target <target>",
 		Short: "Run finding detection against a target's already-collected evidence",
-		Long: "Analyzes every HTTP/API/AI-endpoint asset already known for --target using Phase 8's\n" +
-			"detector set. Defaults to passive analysis (detection.mode / --mode passive): no network\n" +
+		Long: "Analyzes every HTTP/API/AI-endpoint asset already known for --target using this\n" +
+			"platform's detector set. Defaults to passive analysis (detection.mode / --mode passive): no network\n" +
 			"request of its own. --mode safe_active additionally allows a small set of bounded,\n" +
 			"already-known-path requests (e.g. re-checking an already-observed error page, or a fixed\n" +
 			"well-known path like /.git/HEAD) — and requires the target be AUTHORIZED, exactly like\n" +

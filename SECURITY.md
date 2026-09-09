@@ -20,7 +20,7 @@ summary, see:
 
 ## What this platform is (and isn't)
 
-`ai-recon-platform` is a **single-operator, CLI-driven** reconnaissance,
+`ai-surface-platform` is a **single-operator, CLI-driven** reconnaissance,
 detection, correlation, investigation, and reporting toolkit. There is no
 authentication, RBAC, or multi-tenancy anywhere in this codebase — this
 is a deliberate, documented architectural choice for its actual use case
@@ -36,9 +36,9 @@ adds an authentication layer.
 
 - **Authorization gate**: `security.require_authorization` /
   `security.dry_run` (`internal/config`,
-  `AI_RECON_SECURITY_REQUIRE_AUTHORIZATION` /
-  `AI_RECON_SECURITY_DRY_RUN`) — carried through configuration and
-  validation; `AI_RECON_APP_ENV=production` additionally makes
+  `AI_SURFACE_SECURITY_REQUIRE_AUTHORIZATION` /
+  `AI_SURFACE_SECURITY_DRY_RUN`) — carried through configuration and
+  validation; `AI_SURFACE_APP_ENV=production` additionally makes
   `require_authorization: false` a startup-fatal configuration error
   (Phase 15).
 - **No secrets in source, logs, or version control.** Every
@@ -71,7 +71,7 @@ adds an authentication layer.
   silently substitutes a default for an invalid value; Phase 15 added
   production-specific guard rails (rejecting `debug` logging, disabled
   authorization requirement, or disabled database TLS whenever
-  `AI_RECON_APP_ENV=production`).
+  `AI_SURFACE_APP_ENV=production`).
 - **Dependency/secret/toolchain hygiene.** Phase 15 added `govulncheck`,
   `gitleaks`, and a container image scan to CI; bumped the Go toolchain
   to 1.26.6 to close 6 standard-library vulnerabilities found this

@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ExportFormat names a supported investigation export format (phase9.md

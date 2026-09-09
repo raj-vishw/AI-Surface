@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/reporting"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/reporting"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ReportListFilter narrows a report listing.

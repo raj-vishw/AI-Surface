@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	analyticsrepo "ai-recon-platform/internal/repository/analytics"
+	analyticsrepo "ai-surface-platform/internal/repository/analytics"
 )
 
 // IntelligenceAnalytics implements phase14.md §16. Every record here is

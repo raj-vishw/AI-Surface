@@ -10,11 +10,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/database"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/repository/pagination"
-	targetrepo "ai-recon-platform/internal/repository/target"
+	"ai-surface-platform/internal/database"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/repository/pagination"
+	targetrepo "ai-surface-platform/internal/repository/target"
 )
 
 // Service implements target business logic: validation, duplicate

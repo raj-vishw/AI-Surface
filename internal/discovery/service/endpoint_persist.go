@@ -8,13 +8,13 @@ import (
 
 	"github.com/google/uuid"
 
-	discoveryendpoint "ai-recon-platform/internal/discovery/endpoint"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainendpoint "ai-recon-platform/internal/domain/endpoint"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	"ai-recon-platform/internal/repository/pagination"
-	assetsvc "ai-recon-platform/internal/service/asset"
+	discoveryendpoint "ai-surface-platform/internal/discovery/endpoint"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainendpoint "ai-surface-platform/internal/domain/endpoint"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	"ai-surface-platform/internal/repository/pagination"
+	assetsvc "ai-surface-platform/internal/service/asset"
 )
 
 // assetConfidenceFor is the Asset.Confidence recorded for a discovered

@@ -11,13 +11,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/ruleengine"
+	"ai-surface-platform/internal/ruleengine"
 )
 
 // Rule bundles a built-in Definition with the authoring metadata
 // internal/domain/rule.Rule/RuleVersion need, plus the documentation
 // phase11.md §75/§76 requires (purpose, expected inputs, logic,
-// limitations, false-positive guidance) — surfaced by `ai-recon
+// limitations, false-positive guidance) — surfaced by `ai-surface
 // detection builtin list` and docs/detection/builtin-rules.md. Tests
 // carries this rule's own positive/negative/boundary regression suite
 // (phase11.md §52/§119) — every built-in rule must pass its own Tests

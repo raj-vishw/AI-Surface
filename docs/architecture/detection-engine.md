@@ -259,7 +259,7 @@ Phase 11 implements no second correlation engine (phase11.md §97).
 Detection matches feed Phase 9's correlation engine only via
 `PromoteToInvestigation`'s evidence attachment — once findings/assets
 referenced by a match's evidence are attached to an investigation,
-`ai-recon investigate correlate` (Phase 9, unmodified) can reason over
+`ai-surface investigate correlate` (Phase 9, unmodified) can reason over
 them exactly as it already does for any other attached evidence.
 
 ## 19. Risk Integration
@@ -316,7 +316,7 @@ aggregation/sequence evaluation including boundary and out-of-order/
 exceeds-window negative cases, fingerprint determinism and group-
 sensitivity, JSON/YAML round-trip). `internal/ruleengine/builtin`: every
 built-in rule carries its own positive/negative/boundary regression
-suite (phase11.md §52/§119), run both as a Go test and via `ai-recon
+suite (phase11.md §52/§119), run both as a Go test and via `ai-surface
 detection builtin test <name>`. `internal/domain/rule`: 6 tests
 (validation, status/suppression logic).
 
@@ -349,7 +349,7 @@ honored trivially until a second schema version is introduced.
   has none in any phase; `TargetID` scoping is the only isolation
   boundary.
 - **No scheduler/job system.** Evaluation is CLI-invoked
-  (`ai-recon detection evaluate`), not automatically run on a cron
+  (`ai-surface detection evaluate`), not automatically run on a cron
   (phase11.md §32's "existing scheduler" does not exist here) — an
   operator wires external cron/CI to invoke it periodically if desired.
 - **Sequence detection finds one non-overlapping match per group at a

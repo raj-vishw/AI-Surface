@@ -70,7 +70,7 @@ reduces to "recover PostgreSQL, then restart the application."
 
 ## Backup Restoration
 
-`ai-recon-platform` ships no backup automation of its own — back up
+`ai-surface-platform` ships no backup automation of its own — back up
 PostgreSQL using your platform's standard tooling (`pg_dump`/
 `pg_basebackup`, a managed database's own snapshot feature, WAL
 archiving for point-in-time recovery, etc.). Recommended baseline:
@@ -112,16 +112,16 @@ environment:
 
 ```sh
 # 1. Take a backup of a database with real (or realistic test) data
-pg_dump -Fc "$AI_RECON_DATABASE_NAME" > backup.dump
+pg_dump -Fc "$AI_SURFACE_DATABASE_NAME" > backup.dump
 
 # 2. Restore it into a fresh, separate database
-createdb airecon_restore_test
-pg_restore -d airecon_restore_test backup.dump
+createdb aisurface_restore_test
+pg_restore -d aisurface_restore_test backup.dump
 
 # 3. Point a throwaway config at the restored database and verify
-AI_RECON_DATABASE_NAME=airecon_restore_test \
+AI_SURFACE_DATABASE_NAME=aisurface_restore_test \
   go run ./cmd/migrate status   # should show every migration already applied
-AI_RECON_DATABASE_NAME=airecon_restore_test \
+AI_SURFACE_DATABASE_NAME=aisurface_restore_test \
   go run ./cmd/cli target list  # should show the restored data
 ```
 
@@ -169,7 +169,7 @@ Covered above (Application secret/credential loss).
 
 1. `/health`, `/live`, `/ready` all report OK.
 2. `go run ./cmd/migrate status` shows no pending migrations.
-3. A read-only smoke check (`ai-recon target list`,
-   `ai-recon analytics overview --target <known target>`) returns
+3. A read-only smoke check (`ai-surface target list`,
+   `ai-surface analytics overview --target <known target>`) returns
    expected data.
 4. Check recent structured logs for unexpected errors following restart.

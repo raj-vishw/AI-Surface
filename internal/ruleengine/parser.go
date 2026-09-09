@@ -171,7 +171,7 @@ func EncodeJSON(def Definition) ([]byte, error) {
 	return data, nil
 }
 
-// EncodeYAML renders def as YAML, for `ai-recon detection export
+// EncodeYAML renders def as YAML, for `ai-surface detection export
 // --format yaml`.
 func EncodeYAML(def Definition) ([]byte, error) {
 	data, err := yaml.Marshal(toRaw(def))

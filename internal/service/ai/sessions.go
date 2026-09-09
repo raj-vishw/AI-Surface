@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	domainai "ai-recon-platform/internal/domain/ai"
-	airepo "ai-recon-platform/internal/repository/ai"
-	"ai-recon-platform/internal/repository/pagination"
+	domainai "ai-surface-platform/internal/domain/ai"
+	airepo "ai-surface-platform/internal/repository/ai"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // CreateSession implements phase13.md §8 — a session may optionally be

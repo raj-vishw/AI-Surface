@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/investigation"
+	"ai-surface-platform/internal/investigation"
 )
 
 // explanation joins a base sentence with the concrete evidence, e.g.

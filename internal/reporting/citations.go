@@ -3,7 +3,7 @@ package reporting
 import (
 	"time"
 
-	"ai-recon-platform/internal/ai"
+	"ai-surface-platform/internal/ai"
 )
 
 // EvidenceRef is one piece of evidence a report may cite — the exact

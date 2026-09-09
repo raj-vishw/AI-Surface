@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"ai-recon-platform/internal/intelligence"
+	"ai-surface-platform/internal/intelligence"
 )
 
 const certificateProviderVersion = "1"

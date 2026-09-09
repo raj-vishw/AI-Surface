@@ -10,19 +10,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/correlation"
-	"ai-recon-platform/internal/database"
-	domaincorrelation "ai-recon-platform/internal/domain/correlation"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/logging"
-	correlationrepo "ai-recon-platform/internal/repository/correlation"
-	"ai-recon-platform/internal/repository/pagination"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	correlationsvc "ai-recon-platform/internal/service/correlation"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/correlation"
+	"ai-surface-platform/internal/database"
+	domaincorrelation "ai-surface-platform/internal/domain/correlation"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/logging"
+	correlationrepo "ai-surface-platform/internal/repository/correlation"
+	"ai-surface-platform/internal/repository/pagination"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	correlationsvc "ai-surface-platform/internal/service/correlation"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewCorrelationCommand returns the `ai-recon correlation` command group
+// NewCorrelationCommand returns the `ai-surface correlation` command group
 // — Phase 12's correlation engine entry point. Correlations are
 // deterministic and explainable, never automatically labeled a
 // "confirmed attack" (phase12.md §46); this platform implements no
@@ -487,7 +487,7 @@ func newCorrelationInvestigateCommand() *cobra.Command {
 	var actorID string
 	cmd := &cobra.Command{
 		Use:   "investigate <id>",
-		Short: "Attach a correlation to a new Phase 9 investigation",
+		Short: "Attach a correlation to a new investigation",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := uuid.Parse(args[0])

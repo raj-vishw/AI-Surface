@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // cookieDetector flags a Set-Cookie observed without Secure and/or

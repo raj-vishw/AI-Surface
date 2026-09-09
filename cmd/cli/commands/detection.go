@@ -11,20 +11,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/database"
-	domainrule "ai-recon-platform/internal/domain/rule"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/logging"
-	"ai-recon-platform/internal/repository/pagination"
-	rulerepo "ai-recon-platform/internal/repository/rule"
-	"ai-recon-platform/internal/ruleengine"
-	"ai-recon-platform/internal/ruleengine/builtin"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	rulesvc "ai-recon-platform/internal/service/rule"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/database"
+	domainrule "ai-surface-platform/internal/domain/rule"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/logging"
+	"ai-surface-platform/internal/repository/pagination"
+	rulerepo "ai-surface-platform/internal/repository/rule"
+	"ai-surface-platform/internal/ruleengine"
+	"ai-surface-platform/internal/ruleengine/builtin"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	rulesvc "ai-surface-platform/internal/service/rule"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewDetectionCommand returns the `ai-recon detection` command group —
+// NewDetectionCommand returns the `ai-surface detection` command group —
 // Phase 11's detection rule engine entry point. Rules are deterministic,
 // versioned, and testable; this platform implements no autonomous
 // response and no offensive action of any kind (phase11.md §127/§128).
@@ -563,7 +563,7 @@ func newDetectionBuiltinListCommand() *cobra.Command {
 func newDetectionBuiltinTestCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "test <name>",
-		Short: "Run a built-in rule's own positive/negative/boundary test suite (phase11.md §49's dry-run test workflow)",
+		Short: "Run a built-in rule's own positive/negative/boundary test suite (a dry-run test workflow)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			r, ok := findBuiltin(args[0])

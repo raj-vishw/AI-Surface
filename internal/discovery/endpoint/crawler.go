@@ -10,9 +10,9 @@ import (
 
 	"github.com/google/uuid"
 
-	discoveryhttp "ai-recon-platform/internal/discovery/http"
-	domainendpoint "ai-recon-platform/internal/domain/endpoint"
-	"ai-recon-platform/internal/httpclient"
+	discoveryhttp "ai-surface-platform/internal/discovery/http"
+	domainendpoint "ai-surface-platform/internal/domain/endpoint"
+	"ai-surface-platform/internal/httpclient"
 )
 
 // wellKnownAPIDocPaths are the standard OpenAPI/Swagger document

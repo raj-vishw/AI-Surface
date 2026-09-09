@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/ai"
-	domainai "ai-recon-platform/internal/domain/ai"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	apperrors "ai-recon-platform/internal/errors"
+	"ai-surface-platform/internal/ai"
+	domainai "ai-surface-platform/internal/domain/ai"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // structuredToMap converts an internal/ai.StructuredResult to the generic

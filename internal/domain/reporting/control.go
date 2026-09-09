@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // ControlEvidence is a generic, framework-agnostic record linking a

@@ -1,6 +1,6 @@
 package reporting
 
-import "ai-recon-platform/internal/ai"
+import "ai-surface-platform/internal/ai"
 
 // RedactSections applies internal/ai.Redact — Phase 13's already-built
 // secret-redaction utility, reused rather than re-implemented (phase14.md

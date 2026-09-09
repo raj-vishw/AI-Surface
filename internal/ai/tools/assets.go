@@ -3,7 +3,7 @@ package tools
 import (
 	"context"
 
-	"ai-recon-platform/internal/ai"
+	"ai-surface-platform/internal/ai"
 )
 
 // getAssetsTool implements "get_assets" (phase13.md §28).

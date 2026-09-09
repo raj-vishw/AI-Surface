@@ -1,4 +1,4 @@
-// Command ai-recon is the platform's command-line interface.
+// Command ai-surface is the platform's command-line interface.
 package main
 
 import (

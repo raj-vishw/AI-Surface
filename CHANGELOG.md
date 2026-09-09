@@ -38,7 +38,7 @@ readiness").
   `configs/production/config.yaml` and three new startup guard rails in
   `internal/config.Config.Validate()` rejecting `logging.level: debug`,
   `security.require_authorization: false`, or `database.ssl_mode:
-  disable` whenever `AI_RECON_APP_ENV=production`.
+  disable` whenever `AI_SURFACE_APP_ENV=production`.
 - **No race-detector testing in CI/Makefile** — added `make test-race`
   and a corresponding CI step; full suite re-verified clean.
 - **No dependency/secret/container vulnerability scanning in CI** — added
@@ -138,18 +138,18 @@ readiness").
   `evidence_packages`, `evidence_items`, `control_evidence`,
   `dashboard_preferences` (minimal filter-persistence table).
 - `cmd/cli/commands/{analytics,reports,evidence_packages,controls}.go`
-  — `ai-recon analytics {overview,risk,alerts,detections,findings,
+  — `ai-surface analytics {overview,risk,alerts,detections,findings,
   assets,attack-surface,correlations,attack-chains,investigations,
-  intelligence,ai,posture,timeseries}`, `ai-recon report {create,list,
-  show,approve,review,export}`, `ai-recon evidence-package {create,show,
-  manifest}`, `ai-recon control {record,list,evidence}`.
+  intelligence,ai,posture,timeseries}`, `ai-surface report {create,list,
+  show,approve,review,export}`, `ai-surface evidence-package {create,show,
+  manifest}`, `ai-surface control {record,list,evidence}`.
 - `docs/analytics/{metrics,dashboards}.md`, `docs/reporting/reports.md`,
   `docs/compliance/evidence.md`.
 
 ### Design notes
 
 - No frontend exists in this codebase (confirmed by inspection) — every
-  "dashboard" is `ai-recon analytics`'s tabwriter output; a "preset" is
+  "dashboard" is `ai-surface analytics`'s tabwriter output; a "preset" is
   simply which handful of subcommands an analyst runs together (see
   `docs/analytics/dashboards.md`'s mapping table).
 - No REST API exists beyond `/health`/`/ready` — phase14.md's API
@@ -238,7 +238,7 @@ readiness").
   trail — no separate generic audit table); `investigation_notes` gains
   `ai_generated`/`approved_by`/`approved_at` (an AI-drafted note IS an
   `investigation.Note`, not a duplicate model).
-- `cmd/cli/commands/ai.go` — `ai-recon ai {status, summarize, analyze,
+- `cmd/cli/commands/ai.go` — `ai-surface ai {status, summarize, analyze,
   questions, report, explain-alert, explain-detection,
   analyze-correlation, session {new,list,show,clear,delete}, chat,
   note approve}`.
@@ -317,9 +317,9 @@ readiness").
   evidence-preserving), `AttachToInvestigation` (Phase 9 integration,
   mirrors Phase 11's `PromoteToInvestigation`), `ExportCorrelation`
   (JSON/YAML, no secrets).
-- `cmd/cli/commands/{correlation,chain}.go` — `ai-recon correlation
+- `cmd/cli/commands/{correlation,chain}.go` — `ai-surface correlation
   list|show|evaluate|graph|timeline|evidence|confirm|dismiss|merge|
-  split|investigate|export` and `ai-recon chain list|show|explain`.
+  split|investigate|export` and `ai-surface chain list|show|explain`.
 - `correlation.*` top-level configuration section (`enabled`,
   `temporal.default_window`, `graph.{max_depth,max_nodes,max_edges}`,
   `workers.max_concurrency`, `historical_max_range`, `max_candidates`).
@@ -351,7 +351,7 @@ readiness").
   "network correlation" uses Phase 2's already-recorded `Asset.IP`,
   never a new scan.
 - **No job/worker queue** — `cmd/worker` still has none (see its own doc
-  comment, unchanged since Phase 1); `ai-recon correlation evaluate` is
+  comment, unchanged since Phase 1); `ai-surface correlation evaluate` is
   CLI-invoked, the same "CLI is the interface, no daemon" precedent every
   prior phase follows.
 - **No REST API** — consistent with every phase since Phase 1; the CLI
@@ -368,7 +368,7 @@ readiness").
   row is never deleted, so its own id, `MergedIntoID`, and
   `SplitFromID` already form the permanent record.
 - **No GraphML export** — phase12.md itself permits skipping it "if not
-  useful"; JSON/YAML via `ai-recon correlation export` covers the
+  useful"; JSON/YAML via `ai-surface correlation export` covers the
   documented need.
 - **No second correlation engine, no second risk calculator** — Phase
   9's finding-pair correlation and Phase 10's risk scorer are reused and
@@ -417,9 +417,9 @@ readiness").
   matches, attaches evidence, applies suppression, upserts alerts),
   alert lifecycle (`AcknowledgeAlert`/`ResolveAlert`/`SuppressAlert`),
   `PromoteToInvestigation` (Phase 9 integration), `Import`/`Export`.
-- `cmd/cli/commands/{detection,alert}.go` — `ai-recon detection
+- `cmd/cli/commands/{detection,alert}.go` — `ai-surface detection
   list|show|create|edit|enable|disable|versions|export|import|evaluate|
-  suppress|builtin(list/test/install)` and `ai-recon alert
+  suppress|builtin(list/test/install)` and `ai-surface alert
   list|show|acknowledge|resolve|suppress|investigate`.
 - `detection_rules.*` top-level configuration section (`enabled`,
   `evaluation.{max_concurrency,timeout,clock_skew}`,
@@ -458,7 +458,7 @@ readiness").
 - **No authentication/authorization/multi-tenancy RBAC** — this
   platform has none in any phase; `TargetID` scoping is the only
   isolation boundary, identical to every other entity since Phase 2.
-- **No scheduler/job system** — `ai-recon detection evaluate` is
+- **No scheduler/job system** — `ai-surface detection evaluate` is
   CLI-invoked; an operator wires external cron/CI for periodic
   evaluation if desired, the same "CLI is the interface, no daemon"
   precedent every prior phase follows.
@@ -513,8 +513,8 @@ readiness").
   fingerprint → vulnerability match → risk score pipeline),
   `SetCriticality`, `RiskHistory`/`LatestRisk`, verdict-change and
   risk-increase `EnrichmentEvent` emission.
-- `cmd/cli/commands/intel.go` + `risk.go` — `ai-recon intel
-  lookup|enrich|refresh|providers|status|enrich-project` and `ai-recon
+- `cmd/cli/commands/intel.go` + `risk.go` — `ai-surface intel
+  lookup|enrich|refresh|providers|status|enrich-project` and `ai-surface
   risk asset|finding|investigation|criticality`.
 - `intelligence.*` top-level configuration section (`enabled`,
   `external.enabled`, `providers` enable/disable map, `provider_timeout`,
@@ -602,7 +602,7 @@ readiness").
   correlation orchestration (dry-run supported), hypotheses, notes,
   incident-cluster suggestion/accept/reject, automatically-generated
   summary (dashboard view model), JSON/CSV/Markdown export.
-- `cmd/cli/commands/investigate.go` — `ai-recon investigate
+- `cmd/cli/commands/investigate.go` — `ai-surface investigate
   create|list|show|timeline|correlate|findings|attach|note|hypothesis|
   close|reopen|export|cluster` (suggest/list/accept/reject).
 - `investigation.*` top-level configuration section (`enabled`,
@@ -682,7 +682,7 @@ readiness").
   already-persisted assets/endpoints/TLS-service-observations/
   fingerprints, evaluates, and persists with historical lifecycle
   tracking; enforces target authorization for safe-active mode only.
-- `cmd/cli/commands/findings.go` — `ai-recon findings scan|list|show|diff`
+- `cmd/cli/commands/findings.go` — `ai-surface findings scan|list|show|diff`
   (table/JSON/CSV output, dry-run, severity/category/status/detector
   filters).
 - `detection.*` top-level configuration section (`enabled`, `mode`,
@@ -792,7 +792,7 @@ readiness").
   sitemap-recursion limits, seed paths, a configurable sensitive-
   parameter-name list, and named profiles (`quick`, `standard`,
   `comprehensive`).
-- `cmd/cli endpoint-scan`: `ai-recon endpoint-scan --target <target>
+- `cmd/cli endpoint-scan`: `ai-surface endpoint-scan --target <target>
   [--seed] [--depth] [--max-pages] [--max-endpoints] [--timeout]
   [--concurrency] [--requests-per-second] [--format table|json]
   [--profile] [--dry-run]`. Only ever sends GET requests; never submits a
@@ -892,7 +892,7 @@ readiness").
   min_confidence, confidence_change_threshold, configurable score
   thresholds, historical_tracking/detect_changes/redact_sensitive_data
   toggles — all YAML/env configurable.
-- `cmd/cli fingerprint`: `ai-recon fingerprint --target <target> |
+- `cmd/cli fingerprint`: `ai-surface fingerprint --target <target> |
   --asset <asset-id> [--scan] [--format table|json] [--min-confidence]
   [--category] [--explain] [--dry-run]`. Never performs a network/DNS
   request itself, even when invoked.
@@ -983,7 +983,7 @@ readiness").
   wildcard detection toggle), and named profiles (`quick`, `standard`,
   `comprehensive`) with a per-profile `max_depth` override — all YAML/env
   configurable.
-- `cmd/cli dns-scan` / `cmd/cli subdomain-scan`: `ai-recon dns-scan
+- `cmd/cli dns-scan` / `cmd/cli subdomain-scan`: `ai-surface dns-scan
   --target <target> [--record-types] [--subdomains] [--wordlist]
   [--max-candidates] [--max-depth] [--profile] [--format table|json]
   [--timeout] [--concurrency] [--rate] [--resolvers] [--dry-run]`;
@@ -1074,7 +1074,7 @@ readiness").
   timeout, concurrency/rate/host limits, HTTP/AI candidate port lists, and
   named profiles (`quick`, `standard`, `comprehensive`) — all YAML/env
   configurable.
-- `cmd/cli network-scan`: `ai-recon network-scan --target <target>
+- `cmd/cli network-scan`: `ai-surface network-scan --target <target>
   [--ports | --profile] [--target-type] [--format table|json] [--timeout]
   [--concurrency] [--rate] [--dry-run]`. `cmd/cli target authorize`
   (Phase 3) is reused unchanged — Phase 4 adds no second authorization
@@ -1134,7 +1134,7 @@ readiness").
   enforced), schemes, paths, AI-candidate detection toggle, and named
   profiles (`quick`, `comprehensive`) — all YAML/env configurable, no
   hard-coded path lists.
-- `cmd/cli scan`: `ai-recon scan --target <target> [--target-type]
+- `cmd/cli scan`: `ai-surface scan --target <target> [--target-type]
   [--profile] [--format table|json] [--timeout] [--concurrency]
   [--dry-run]`. `cmd/cli target authorize`: the (now load-bearing, not
   merely diagnostic) command to move a target to `AUTHORIZED`.
@@ -1221,8 +1221,8 @@ readiness").
 - `SECURITY.md`, `docs/architecture/foundation.md`.
 
 ### Changed
-- **Breaking:** environment variable prefix renamed `AIRECON_*` ->
-  `AI_RECON_*` throughout (config, `.env.example`, docker-compose).
+- **Breaking:** environment variable prefix renamed `AISURFACE_*` ->
+  `AI_SURFACE_*` throughout (config, `.env.example`, docker-compose).
 - **Breaking:** `Config.Redis` now uses a single `Address` (`host:port`)
   field instead of separate `Host`/`Port`; `DB` renamed `Database`.
 - **Breaking:** `internal/apperror` renamed `internal/errors` (import

@@ -46,7 +46,7 @@ internal/discovery/
                  dns.go (Phase 5) — the SAME orchestrator: authorization +
                  scope + persist
 
-cmd/cli/commands/dns_scan.go        `ai-recon dns-scan` / `subdomain-scan`
+cmd/cli/commands/dns_scan.go        `ai-surface dns-scan` / `subdomain-scan`
 test/fixtures/dns/                  local, fully offline authoritative-
                                      style UDP DNS test server
 ```
@@ -72,7 +72,7 @@ mutated except through `NormalizeName` before use.
 or sending a single DNS query** — the identical discipline Phase 3/4
 established, reusing the same `TargetService`/`Target.IsAuthorized()`
 call. An unauthorized target fails immediately with "target is not
-authorized for active discovery"; `ai-recon target authorize` is the only
+authorized for active discovery"; `ai-surface target authorize` is the only
 way a target becomes `AUTHORIZED` — Phase 5 adds no second authorization
 mechanism.
 
@@ -298,12 +298,12 @@ while `LastSeen` and `Metadata` (the latest-snapshot value) advance.
 ## CLI usage
 
 ```sh
-ai-recon target create --name "local test" --type DOMAIN --value example.test
-ai-recon target authorize --id <uuid>
+ai-surface target create --name "local test" --type DOMAIN --value example.test
+ai-surface target authorize --id <uuid>
 go run ./test/fixtures/dns/cmd/dnsserver -port 5300   # local fixture, no public DNS
-ai-recon dns-scan --target example.test --resolvers 127.0.0.1:5300 --format table
-ai-recon subdomain-scan --target example.test --resolvers 127.0.0.1:5300 --wordlist words.txt
-ai-recon dns-scan --target example.test --profile comprehensive --dry-run
+ai-surface dns-scan --target example.test --resolvers 127.0.0.1:5300 --format table
+ai-surface subdomain-scan --target example.test --resolvers 127.0.0.1:5300 --wordlist words.txt
+ai-surface dns-scan --target example.test --profile comprehensive --dry-run
 ```
 
 `subdomain-scan` is a thin alias for `dns-scan` with subdomain enumeration
@@ -337,7 +337,7 @@ When `security.dry_run` is `true` (or `--dry-run` is passed),
 `Service.RunDNS` resolves the profile and generates the subdomain
 candidate list, but never builds a `Resolver` or sends a single DNS
 query — nothing is looked up, and nothing is persisted (phase5.md §53).
-`ai-recon dns-scan --dry-run` prints exactly the record types and
+`ai-surface dns-scan --dry-run` prints exactly the record types and
 candidate names that would have been queried.
 
 ## Failure handling
@@ -385,7 +385,7 @@ ceiling at scale.
   or network scanning itself** (phase5.md §3/§46/§47/§79) — a discovered
   name is only ever flagged `HTTPCandidate` metadata; composing it with
   Phase 3 is left to a future orchestration phase or an operator manually
-  running `ai-recon scan` next.
+  running `ai-surface scan` next.
 - No randomized/stealth query timing — the optional rate limiter uses a
   fixed interval, purely for target stability.
 - Reverse PTR lookups only ever target an address this scan itself

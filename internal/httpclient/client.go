@@ -23,7 +23,7 @@ import (
 	"net/url"
 	"time"
 
-	"ai-recon-platform/internal/config"
+	"ai-surface-platform/internal/config"
 )
 
 // Options configures a Client.

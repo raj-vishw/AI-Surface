@@ -6,13 +6,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/database"
-	"ai-recon-platform/internal/health"
-	"ai-recon-platform/internal/logging"
-	"ai-recon-platform/internal/redis"
+	"ai-surface-platform/internal/database"
+	"ai-surface-platform/internal/health"
+	"ai-surface-platform/internal/logging"
+	"ai-surface-platform/internal/redis"
 )
 
-// NewHealthCommand returns the `ai-recon health` subcommand. It connects to
+// NewHealthCommand returns the `ai-surface health` subcommand. It connects to
 // every required dependency (PostgreSQL, Redis) using the effective
 // configuration and reports whether each is reachable — the same check the
 // server's /ready endpoint performs, but usable standalone without running

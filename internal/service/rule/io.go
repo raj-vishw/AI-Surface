@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	domainrule "ai-recon-platform/internal/domain/rule"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/ruleengine"
+	domainrule "ai-surface-platform/internal/domain/rule"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/ruleengine"
 )
 
-// ExportedRule is the full, self-contained representation `ai-recon
-// detection export` writes and `ai-recon detection import` reads back
+// ExportedRule is the full, self-contained representation `ai-surface
+// detection export` writes and `ai-surface detection import` reads back
 // (phase11.md §69/§70) — no secrets or internal credentials
 // (phase11.md §69: this platform has none in the rule model to begin
 // with, so nothing is deliberately excluded beyond the Definition/

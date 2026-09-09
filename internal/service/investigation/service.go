@@ -15,18 +15,18 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/database"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/investigation"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/database"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/investigation"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
 // Service orchestrates every investigation operation.

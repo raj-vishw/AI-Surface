@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	domainreporting "ai-recon-platform/internal/domain/reporting"
-	apperrors "ai-recon-platform/internal/errors"
-	rept "ai-recon-platform/internal/reporting"
+	domainreporting "ai-surface-platform/internal/domain/reporting"
+	apperrors "ai-surface-platform/internal/errors"
+	rept "ai-surface-platform/internal/reporting"
 )
 
 // CreateEvidencePackage implements phase14.md §45/§46/§47: builds an

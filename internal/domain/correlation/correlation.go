@@ -28,7 +28,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // Status tracks a Correlation's analyst-workflow lifecycle (phase12.md

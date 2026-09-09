@@ -17,15 +17,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"ai-recon-platform/internal/database"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainfp "ai-recon-platform/internal/domain/fingerprint"
-	apperrors "ai-recon-platform/internal/errors"
-	fpengine "ai-recon-platform/internal/fingerprint"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	"ai-recon-platform/internal/repository/pagination"
-	assetsvc "ai-recon-platform/internal/service/asset"
+	"ai-surface-platform/internal/database"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainfp "ai-surface-platform/internal/domain/fingerprint"
+	apperrors "ai-surface-platform/internal/errors"
+	fpengine "ai-surface-platform/internal/fingerprint"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	"ai-surface-platform/internal/repository/pagination"
+	assetsvc "ai-surface-platform/internal/service/asset"
 )
 
 // Config configures the service's own behavior — distinct from

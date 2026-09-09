@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
 )
 
 // AddNote records an immutable analyst note (phase9.md §26) and an

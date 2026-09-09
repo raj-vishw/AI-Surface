@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/endpoint"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/endpoint"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ListFilter narrows an endpoint listing. Zero-valued fields are not

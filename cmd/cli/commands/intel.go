@@ -11,23 +11,23 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/httpclient"
-	"ai-recon-platform/internal/intelligence"
-	"ai-recon-platform/internal/intelligence/providers"
-	"ai-recon-platform/internal/intelligence/risk"
-	"ai-recon-platform/internal/logging"
-	correlationrepo "ai-recon-platform/internal/repository/correlation"
-	"ai-recon-platform/internal/repository/pagination"
-	rulerepo "ai-recon-platform/internal/repository/rule"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	intelligencesvc "ai-recon-platform/internal/service/intelligence"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/httpclient"
+	"ai-surface-platform/internal/intelligence"
+	"ai-surface-platform/internal/intelligence/providers"
+	"ai-surface-platform/internal/intelligence/risk"
+	"ai-surface-platform/internal/logging"
+	correlationrepo "ai-surface-platform/internal/repository/correlation"
+	"ai-surface-platform/internal/repository/pagination"
+	rulerepo "ai-surface-platform/internal/repository/rule"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	intelligencesvc "ai-surface-platform/internal/service/intelligence"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewIntelCommand returns the `ai-recon intel` command group — Phase
+// NewIntelCommand returns the `ai-surface intel` command group — Phase
 // 10's threat intelligence entry point. It enriches already-known
 // indicators with local platform context and (only when explicitly
 // opted in) external provider data; it never blocks, remediates, or

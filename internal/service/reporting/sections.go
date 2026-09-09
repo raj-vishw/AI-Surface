@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/analytics"
-	domainintel "ai-recon-platform/internal/domain/intelligence"
-	apperrors "ai-recon-platform/internal/errors"
-	rept "ai-recon-platform/internal/reporting"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/analytics"
+	domainintel "ai-surface-platform/internal/domain/intelligence"
+	apperrors "ai-surface-platform/internal/errors"
+	rept "ai-surface-platform/internal/reporting"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // buildResult is what every per-type section builder returns: the
@@ -73,7 +73,7 @@ func (s *Service) buildInvestigationReport(ctx context.Context, targetID, invest
 		{Title: "Executive Summary", Body: fmt.Sprintf("Investigation %q. %s", inv.Title, summary), Citations: []string{invRef.Token()}},
 		{Title: "Scope", Body: joinOrNone(scopeLines, "No evidence has been attached to this investigation.")},
 		{Title: "Timeline", Body: joinOrNone(timelineLines, "No timeline events recorded.")},
-		{Title: "Evidence Gaps", Body: "See `ai-recon ai report` for an AI-assisted evidence-gap analysis of this investigation — not duplicated here."},
+		{Title: "Evidence Gaps", Body: "See `ai-surface ai report` for an AI-assisted evidence-gap analysis of this investigation — not duplicated here."},
 		{Title: "Analyst Conclusions", Body: "Pending analyst review — this section is intentionally left for manual completion before approval."},
 		{Title: "Recommendations", Body: "Pending analyst review."},
 	}

@@ -3,7 +3,7 @@ package correlation
 import (
 	"context"
 
-	"ai-recon-platform/internal/investigation"
+	"ai-surface-platform/internal/investigation"
 )
 
 // sameNetworkScore is deliberately low — phase9.md §39 explicitly warns

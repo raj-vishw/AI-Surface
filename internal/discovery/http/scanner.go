@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/discovery/model"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/httpclient"
+	"ai-surface-platform/internal/discovery/model"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/httpclient"
 )
 
 // Scanner executes HTTP discovery against a single authorized target,

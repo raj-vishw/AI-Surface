@@ -3,7 +3,7 @@ package tools
 import (
 	"context"
 
-	"ai-recon-platform/internal/ai"
+	"ai-surface-platform/internal/ai"
 )
 
 // getRiskTool implements "get_risk" (phase13.md §28).

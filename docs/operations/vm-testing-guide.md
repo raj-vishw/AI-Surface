@@ -1,6 +1,6 @@
 # VM deployment & full end-to-end testing walkthrough
 
-This is a practical, start-to-finish walkthrough for standing up AI-RECON
+This is a practical, start-to-finish walkthrough for standing up AI-SURFACE
 on a throwaway VM and exercising the entire real pipeline — recon scans →
 findings → detection rules → alerts → correlations → investigations —
 against real (not mock, not demo) data. It complements
@@ -64,8 +64,8 @@ sudo systemctl enable --now postgresql redis-server
 ## 3. Get the code onto the VM
 
 ```bash
-git clone <your-fork-or-repo-url> ai-recon-platform
-cd ai-recon-platform/ai-recon-platform
+git clone <your-fork-or-repo-url> ai-surface-platform
+cd ai-surface-platform/ai-surface-platform
 go build ./...   # sanity check before touching the database
 ```
 
@@ -76,8 +76,8 @@ only copy of anything uncommitted.)
 ## 4. Set up PostgreSQL and Redis
 
 ```bash
-sudo -u postgres psql -c "CREATE ROLE airecon WITH LOGIN PASSWORD 'CHANGE-ME';"
-sudo -u postgres psql -c "CREATE DATABASE airecon_prod OWNER airecon;"
+sudo -u postgres psql -c "CREATE ROLE aisurface WITH LOGIN PASSWORD 'CHANGE-ME';"
+sudo -u postgres psql -c "CREATE DATABASE aisurface_prod OWNER aisurface;"
 ```
 
 Redis's default install has no password and only listens on localhost,
@@ -93,19 +93,19 @@ cp .env.example .env
 Edit `.env` (or export these directly) — at minimum:
 
 ```
-AI_RECON_APP_ENV=production
-AI_RECON_DATABASE_HOST=127.0.0.1
-AI_RECON_DATABASE_USER=airecon
-AI_RECON_DATABASE_PASSWORD=CHANGE-ME
-AI_RECON_DATABASE_NAME=airecon_prod
-AI_RECON_DATABASE_SSL_MODE=disable
-AI_RECON_REDIS_ADDRESS=127.0.0.1:6379
+AI_SURFACE_APP_ENV=production
+AI_SURFACE_DATABASE_HOST=127.0.0.1
+AI_SURFACE_DATABASE_USER=aisurface
+AI_SURFACE_DATABASE_PASSWORD=CHANGE-ME
+AI_SURFACE_DATABASE_NAME=aisurface_prod
+AI_SURFACE_DATABASE_SSL_MODE=disable
+AI_SURFACE_REDIS_ADDRESS=127.0.0.1:6379
 ```
 
-`AI_RECON_APP_ENV=production` activates `configs/production/config.yaml`
+`AI_SURFACE_APP_ENV=production` activates `configs/production/config.yaml`
 plus the startup guard rails in `Config.Validate()` — see
 `docs/security/production-hardening.md`. If you're just testing (not
-trying to model a real production posture), `AI_RECON_APP_ENV=development`
+trying to model a real production posture), `AI_SURFACE_APP_ENV=development`
 is fine too and slightly more forgiving.
 
 ## 6. Run migrations
@@ -196,12 +196,12 @@ actually run without error.
 ## 11. Tearing down / resetting
 
 ```bash
-sudo -u postgres psql -c "DROP DATABASE airecon_prod;"
+sudo -u postgres psql -c "DROP DATABASE aisurface_prod;"
 ```
 
 To start a clean test run without dropping the whole database:
 `DELETE FROM targets` fails with a foreign-key violation — the FK from
 `assets`/`findings`/etc. back to `targets` is `RESTRICT`, not `CASCADE`.
-Use `TRUNCATE targets CASCADE;` instead (as the `airecon` role, via
+Use `TRUNCATE targets CASCADE;` instead (as the `aisurface` role, via
 `psql`) — it cascades to every referencing table regardless of the FK's
 own delete rule.

@@ -6,15 +6,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/ai"
-	domainai "ai-recon-platform/internal/domain/ai"
-	domainintel "ai-recon-platform/internal/domain/intelligence"
-	apperrors "ai-recon-platform/internal/errors"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/ai"
+	domainai "ai-surface-platform/internal/domain/ai"
+	domainintel "ai-surface-platform/internal/domain/intelligence"
+	apperrors "ai-surface-platform/internal/errors"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // dataSource implements ai.DataSource against Service's real

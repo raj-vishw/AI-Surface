@@ -168,7 +168,7 @@ reflects what was actually done, not what would ideally be done.
 
 - **Severity**: Medium.
 - **Description**: only `configs/defaults/` and `configs/development/`
-  existed; nothing prevented `AI_RECON_APP_ENV=production` from running
+  existed; nothing prevented `AI_SURFACE_APP_ENV=production` from running
   with `logging.level: debug`, `security.require_authorization: false`,
   or `database.ssl_mode: disable`.
 - **Impact**: a production deployment could silently inherit

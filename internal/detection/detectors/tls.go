@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // obsoleteTLSVersions are protocol versions considered obsolete

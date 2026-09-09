@@ -82,15 +82,15 @@ mean of 1.6 rounds up to `high` rather than down to `medium`.
 If a chain has evidence for `authentication` and `privilege_change` but
 nothing for `execution`, the chain simply has two stages, not three —
 `execution` is an observed gap, never fabricated to make the narrative
-feel complete. `ai-recon chain show`/`explain` render exactly the stages
+feel complete. `ai-surface chain show`/`explain` render exactly the stages
 that exist; there is no "unknown" placeholder stage inserted between
 them (a genuine `unknown`/gap presentation is a documented product
 choice left for a future phase, per phase12.md §44's either/or wording).
 
 ## Analyst confirmation and dismissal
 
-A chain's `Status` follows its correlation's: `ai-recon correlation
-confirm <id>` requires an actor (and accepts optional notes); `ai-recon
+A chain's `Status` follows its correlation's: `ai-surface correlation
+confirm <id>` requires an actor (and accepts optional notes); `ai-surface
 correlation dismiss <id>` requires a reason. Neither the engine nor the
 service layer ever transitions a chain to `confirmed` on its own —
 `internal/correlation` produces language like "correlated activity" and
@@ -99,9 +99,9 @@ service layer ever transitions a chain to `confirmed` on its own —
 ## CLI
 
 ```sh
-ai-recon chain list                 # every attack chain
-ai-recon chain show <id>            # stages, confidence, severity, status
-ai-recon chain explain <id>         # + the parent correlation's own explanation text
+ai-surface chain list                 # every attack chain
+ai-surface chain show <id>            # stages, confidence, severity, status
+ai-surface chain explain <id>         # + the parent correlation's own explanation text
 ```
 
 ## Limitations
@@ -110,6 +110,6 @@ ai-recon chain explain <id>         # + the parent correlation's own explanation
   labels, not a formal technique-detection engine.
 - One chain per correlation (no branching/parallel sub-chains).
 - A chain never spans more than one correlation's graph; merging two
-  correlations (`ai-recon correlation merge`) does not currently
+  correlations (`ai-surface correlation merge`) does not currently
   recompute or merge their chains — each retains its own until the next
   evaluation regenerates one for the merged evidence set.

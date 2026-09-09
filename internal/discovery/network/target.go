@@ -5,7 +5,7 @@ import (
 	"net"
 	"net/netip"
 
-	domaintarget "ai-recon-platform/internal/domain/target"
+	domaintarget "ai-surface-platform/internal/domain/target"
 )
 
 // supportedTargetTypes are the target types network discovery accepts

@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"ai-recon-platform/internal/config"
+	"ai-surface-platform/internal/config"
 )
 
 // Config is the HTTP discovery engine's resolved configuration — the same

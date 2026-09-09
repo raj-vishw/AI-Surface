@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	apperrors "ai-recon-platform/internal/errors"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // Request describes a single HTTP request to execute.

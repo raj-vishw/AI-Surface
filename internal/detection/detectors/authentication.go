@@ -3,7 +3,7 @@ package detectors
 import (
 	"context"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // authSurfaceDetector reports an endpoint Phase 7's classifier already

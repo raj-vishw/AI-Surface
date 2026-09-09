@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 
-	domaincorrelation "ai-recon-platform/internal/domain/correlation"
+	domaincorrelation "ai-surface-platform/internal/domain/correlation"
 )
 
 // Export is the full, self-contained representation of one correlation
-// returned by ai-recon correlation export — metadata, graph, evidence,
+// returned by ai-surface correlation export — metadata, graph, evidence,
 // timeline-relevant timestamps, confidence, strategy versions, and
 // explanation (phase12.md §105). It never carries a secret: every field
 // here is already public-within-the-platform data (phase12.md §105's "do

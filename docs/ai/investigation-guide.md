@@ -19,13 +19,13 @@ ai:
 Check status:
 
 ```sh
-ai-recon ai status
+ai-surface ai status
 ```
 
 ## Summarize an investigation
 
 ```sh
-ai-recon ai summarize <investigation-id> --actor analyst1
+ai-surface ai summarize <investigation-id> --actor analyst1
 ```
 
 Produces an executive summary, per-item observations (each cited), an
@@ -35,7 +35,7 @@ relative to a standard coverage checklist, and suggested next steps.
 ## Analyze a timeline
 
 ```sh
-ai-recon ai analyze <investigation-id> --actor analyst1
+ai-surface ai analyze <investigation-id> --actor analyst1
 ```
 
 A chronological account of the investigation's evidence, flagging the
@@ -45,7 +45,7 @@ happened during a gap, only that one exists.
 ## Generate investigation questions
 
 ```sh
-ai-recon ai questions <investigation-id> --actor analyst1
+ai-surface ai questions <investigation-id> --actor analyst1
 ```
 
 Questions are always tied to an actual evidence gap or an actual
@@ -55,7 +55,7 @@ appears when no asset context is attached yet.
 ## Draft a report
 
 ```sh
-ai-recon ai report <investigation-id> --actor analyst1 --save-as-note
+ai-surface ai report <investigation-id> --actor analyst1 --save-as-note
 ```
 
 Combines the summary and questions into one draft. `--save-as-note` saves
@@ -63,13 +63,13 @@ the result as an AI-generated investigation note (`AIGenerated = true`,
 unapproved) — approve it explicitly once reviewed:
 
 ```sh
-ai-recon ai note approve <note-id> --approver analyst1
+ai-surface ai note approve <note-id> --approver analyst1
 ```
 
 ## Explain an alert
 
 ```sh
-ai-recon ai explain-alert <alert-id> --actor analyst1
+ai-surface ai explain-alert <alert-id> --actor analyst1
 ```
 
 Explains what triggered the alert (its underlying detection match and
@@ -79,7 +79,7 @@ changes the alert's own severity or status.
 ## Explain a detection match
 
 ```sh
-ai-recon ai explain-detection <detection-match-id> --actor analyst1
+ai-surface ai explain-detection <detection-match-id> --actor analyst1
 ```
 
 Explains the rule, its version, and the match's own recorded explanation
@@ -88,8 +88,8 @@ Explains the rule, its version, and the match's own recorded explanation
 ## Analyze a correlation or attack chain
 
 ```sh
-ai-recon ai analyze-correlation <correlation-id> --actor analyst1
-ai-recon ai analyze-correlation <correlation-id> --actor analyst1 --chain
+ai-surface ai analyze-correlation <correlation-id> --actor analyst1
+ai-surface ai analyze-correlation <correlation-id> --actor analyst1 --chain
 ```
 
 Without `--chain`: explains why the underlying evidence was grouped
@@ -104,11 +104,11 @@ Open a session (optionally scoped to one investigation) to ask follow-up
 questions with preserved context:
 
 ```sh
-ai-recon ai session new --investigation <id> --actor analyst1
-ai-recon ai chat <session-id> "What evidence is missing?"
-ai-recon ai session show <session-id>
-ai-recon ai session clear <session-id>   # wipes messages, keeps the session and all investigation data
-ai-recon ai session delete <session-id>  # deletes the session entirely
+ai-surface ai session new --investigation <id> --actor analyst1
+ai-surface ai chat <session-id> "What evidence is missing?"
+ai-surface ai session show <session-id>
+ai-surface ai session clear <session-id>   # wipes messages, keeps the session and all investigation data
+ai-surface ai session delete <session-id>  # deletes the session entirely
 ```
 
 ## Reading the output

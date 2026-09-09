@@ -8,7 +8,7 @@ specification's template to what this codebase actually is.
 
 ## What this platform actually is
 
-`ai-recon-platform` is a **CLI-driven** security reconnaissance,
+`ai-surface-platform` is a **CLI-driven** security reconnaissance,
 detection, correlation, investigation, and reporting toolkit with a thin
 HTTP surface (`/health`, `/live`, `/ready` only — no REST API for any
 security-platform resource exists). There is no frontend, no job queue

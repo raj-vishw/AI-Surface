@@ -3,13 +3,13 @@ package http
 import (
 	"net/http"
 
-	"ai-recon-platform/internal/httpclient"
+	"ai-surface-platform/internal/httpclient"
 )
 
 // userAgent identifies the platform to the servers it discovers against.
 // Discovery must never impersonate a browser or another tool — this is an
 // authorized reconnaissance platform, not an evasion tool (phase3.md §6).
-const userAgent = "ai-recon-platform/http-discovery"
+const userAgent = "ai-surface-platform/http-discovery"
 
 // buildRequest converts a Candidate into the httpclient.Request that will
 // be executed. Every discovery request is GET-only, carries no body, and

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // backupFileExtensionPattern matches common backup-file suffixes. Used

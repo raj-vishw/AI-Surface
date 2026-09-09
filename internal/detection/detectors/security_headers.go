@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // httpAnalyzed reports whether ep carries evidence Phase 3's full HTTP

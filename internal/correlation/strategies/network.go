@@ -3,7 +3,7 @@ package strategies
 import (
 	"context"
 
-	"ai-recon-platform/internal/correlation"
+	"ai-surface-platform/internal/correlation"
 )
 
 // networkStrategy links observations whose underlying asset shares an IP

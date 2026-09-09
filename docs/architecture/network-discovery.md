@@ -32,7 +32,7 @@ internal/discovery/
 └── service/    discovery.go (Phase 3, HTTP) and network.go (Phase 4) —
                  the SAME orchestrator: authorization + scope + persist
 
-cmd/cli/commands/network_scan.go   `ai-recon network-scan`
+cmd/cli/commands/network_scan.go   `ai-surface network-scan`
 test/fixtures/tcp/                 local, fully offline generic TCP fixture
 test/fixtures/localenv/            starts the full local test environment
 ```
@@ -79,7 +79,7 @@ connection is attempted (phase4.md §11).
 sending a single TCP connection** — exactly the same discipline Phase 3
 established for HTTP discovery, reusing the identical `TargetService`/
 `Target.IsAuthorized()` call. An unauthorized target fails immediately with
-"target is not authorized for active discovery"; `ai-recon target
+"target is not authorized for active discovery"; `ai-surface target
 authorize` (Phase 3's CLI command) is the only way a target becomes
 `AUTHORIZED` — Phase 4 adds no second authorization mechanism.
 
@@ -179,7 +179,7 @@ HTTP discovery (phase4.md §22/§23): an open port on a configured
 flagged `HTTPCandidate = true` — "worth a Phase 3 HTTP discovery pass" —
 never a confirmed HTTP service. Phase 4 does not call Phase 3's scanner
 inline; that composition is left to a future orchestration phase (or an
-operator manually running `ai-recon scan` next).
+operator manually running `ai-surface scan` next).
 
 ## AI candidate detection
 
@@ -239,12 +239,12 @@ repeated scans of unchanged content.
 ## CLI usage
 
 ```sh
-ai-recon target create --name "local test" --type IP --value 127.0.0.1
-ai-recon target authorize --id <uuid>
+ai-surface target create --name "local test" --type IP --value 127.0.0.1
+ai-surface target authorize --id <uuid>
 go run ./test/fixtures/localenv                 # starts :8000, :8080 (HTTP), :9000 (TCP)
-ai-recon network-scan --target 127.0.0.1 --ports 8000,8080,9000 --format table
-ai-recon network-scan --target 127.0.0.1 --profile quick --format json
-ai-recon network-scan --target 192.168.1.0/30 --ports 22,80,443 --dry-run
+ai-surface network-scan --target 127.0.0.1 --ports 8000,8080,9000 --format table
+ai-surface network-scan --target 127.0.0.1 --profile quick --format json
+ai-surface network-scan --target 192.168.1.0/30 --ports 22,80,443 --dry-run
 ```
 
 Flags: `--target` (required), `--target-type` (auto-detected: contains
@@ -269,7 +269,7 @@ behavior.
 When `security.dry_run` is `true` (or `--dry-run` is passed),
 `Service.RunNetwork` expands the target and resolves ports but never
 constructs a `Scanner` or opens any TCP connection — no connection is
-made, and nothing is persisted (phase4.md §19). `ai-recon network-scan
+made, and nothing is persisted (phase4.md §19). `ai-surface network-scan
 --dry-run` prints exactly the `host:port` pairs that would have been
 attempted.
 

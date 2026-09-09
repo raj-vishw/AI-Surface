@@ -11,20 +11,20 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	discoveryhttp "ai-recon-platform/internal/discovery/http"
-	"ai-recon-platform/internal/discovery/model"
-	discoverysvc "ai-recon-platform/internal/discovery/service"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/logging"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	discoveryhttp "ai-surface-platform/internal/discovery/http"
+	"ai-surface-platform/internal/discovery/model"
+	discoverysvc "ai-surface-platform/internal/discovery/service"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/logging"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewScanCommand returns the `ai-recon scan` command — Phase 3's HTTP
+// NewScanCommand returns the `ai-surface scan` command — Phase 3's HTTP
 // discovery entry point. It requires the target to already exist and be
-// authorized (`ai-recon target create` + `ai-recon target authorize`,
+// authorized (`ai-surface target create` + `ai-surface target authorize`,
 // below); scan itself never creates or authorizes a target.
 func NewScanCommand() *cobra.Command {
 	var (
@@ -39,11 +39,11 @@ func NewScanCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "scan --target <target>",
 		Short: "Run HTTP discovery against an authorized target",
-		Long: "scan runs the Phase 3 HTTP discovery engine against an already-created, already-\n" +
+		Long: "scan runs the HTTP discovery engine against an already-created, already-\n" +
 			"authorized target: it generates candidate URLs, requests each within scope, classifies\n" +
-			"the response, and persists discovered assets/endpoints/evidence through the Phase 2\n" +
-			"persistence layer. It refuses to run against a target that is not AUTHORIZED, and it\n" +
-			"never sends a request in dry-run mode (security.dry_run, or --dry-run).",
+			"the response, and persists discovered assets/endpoints/evidence. It refuses to run\n" +
+			"against a target that is not AUTHORIZED, and it never sends a request in dry-run mode\n" +
+			"(security.dry_run, or --dry-run).",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			target, _ := cmd.Flags().GetString("target")
 			if strings.TrimSpace(target) == "" {

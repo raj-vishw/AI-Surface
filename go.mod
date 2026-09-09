@@ -1,4 +1,4 @@
-module ai-recon-platform
+module ai-surface-platform
 
 go 1.26.6
 

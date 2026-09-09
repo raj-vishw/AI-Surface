@@ -11,20 +11,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"ai-recon-platform/internal/database"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	"ai-recon-platform/internal/investigation"
-	"ai-recon-platform/internal/investigation/correlation"
-	"ai-recon-platform/internal/logging"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
-	assetsvc "ai-recon-platform/internal/service/asset"
-	investigationsvc "ai-recon-platform/internal/service/investigation"
-	targetsvc "ai-recon-platform/internal/service/target"
+	"ai-surface-platform/internal/database"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	"ai-surface-platform/internal/investigation"
+	"ai-surface-platform/internal/investigation/correlation"
+	"ai-surface-platform/internal/logging"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
+	assetsvc "ai-surface-platform/internal/service/asset"
+	investigationsvc "ai-surface-platform/internal/service/investigation"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewInvestigateCommand returns the `ai-recon investigate` command group
+// NewInvestigateCommand returns the `ai-surface investigate` command group
 // — Phase 9's analyst case-management and correlation entry point. It
 // reasons only over evidence Phase 2-8 already collected and persisted;
 // it never performs a network request, an exploit, a credential attack,

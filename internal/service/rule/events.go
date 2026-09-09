@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	domainasset "ai-recon-platform/internal/domain/asset"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
-	"ai-recon-platform/internal/repository/pagination"
-	"ai-recon-platform/internal/ruleengine"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
+	"ai-surface-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/ruleengine"
 )
 
 // buildEvents assembles every normalized Event within [from, to) for

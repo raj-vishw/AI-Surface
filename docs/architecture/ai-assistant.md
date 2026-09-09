@@ -198,7 +198,7 @@ flowchart TD
 ## Known adaptations
 
 - No REST API exists in this codebase (only `/health`, `/ready`) —
-  phase13.md's API sections are adapted to `ai-recon ai ...` CLI
+  phase13.md's API sections are adapted to `ai-surface ai ...` CLI
   subcommands, the same adaptation every prior phase applied.
 - No job/worker queue exists yet — AI requests (including report drafts)
   run synchronously, bounded by `ai.timeouts.request` and cancelable via

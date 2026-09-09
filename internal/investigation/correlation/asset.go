@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/investigation"
+	"ai-surface-platform/internal/investigation"
 )
 
 // sameAssetScore is the point value phase9.md §36's worked example uses

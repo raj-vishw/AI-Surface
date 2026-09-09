@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/fingerprint"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/fingerprint"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ListFilter narrows a fingerprint listing. Zero-valued fields are not

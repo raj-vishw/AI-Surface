@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	domainreporting "ai-recon-platform/internal/domain/reporting"
-	"ai-recon-platform/internal/repository/pagination"
-	reportingrepo "ai-recon-platform/internal/repository/reporting"
+	domainreporting "ai-surface-platform/internal/domain/reporting"
+	"ai-surface-platform/internal/repository/pagination"
+	reportingrepo "ai-surface-platform/internal/repository/reporting"
 )
 
 // RecordControlEvidence implements phase14.md §50 — an explicit analyst

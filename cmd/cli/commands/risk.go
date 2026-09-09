@@ -8,12 +8,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	domainintel "ai-recon-platform/internal/domain/intelligence"
-	"ai-recon-platform/internal/repository/pagination"
-	intelligencesvc "ai-recon-platform/internal/service/intelligence"
+	domainintel "ai-surface-platform/internal/domain/intelligence"
+	"ai-surface-platform/internal/repository/pagination"
+	intelligencesvc "ai-surface-platform/internal/service/intelligence"
 )
 
-// NewRiskCommand returns the `ai-recon risk` command group — Phase 10's
+// NewRiskCommand returns the `ai-surface risk` command group — Phase 10's
 // risk-scoring entry point. A risk score is always a combined security
 // context signal, never a claim of confirmed vulnerability (phase10.md
 // §35); every score prints the factors that produced it.

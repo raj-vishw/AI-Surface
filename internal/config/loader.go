@@ -12,148 +12,148 @@ import (
 )
 
 // Environment variable names recognized by Load. All configuration
-// environment variables are prefixed with AI_RECON_ to avoid colliding
+// environment variables are prefixed with AI_SURFACE_ to avoid colliding
 // with unrelated process environment variables.
 const (
-	EnvVarEnvironment = "AI_RECON_APP_ENV"
-	EnvVarConfigDir   = "AI_RECON_CONFIG_DIR"
+	EnvVarEnvironment = "AI_SURFACE_APP_ENV"
+	EnvVarConfigDir   = "AI_SURFACE_CONFIG_DIR"
 
-	envDatabaseHost               = "AI_RECON_DATABASE_HOST"
-	envDatabasePort               = "AI_RECON_DATABASE_PORT"
-	envDatabaseUser               = "AI_RECON_DATABASE_USER"
-	envDatabasePassword           = "AI_RECON_DATABASE_PASSWORD" //nolint:gosec // this is an env var NAME, not a credential value
-	envDatabaseName               = "AI_RECON_DATABASE_NAME"
-	envDatabaseSSLMode            = "AI_RECON_DATABASE_SSL_MODE"
-	envDatabaseConnectTimeout     = "AI_RECON_DATABASE_CONNECT_TIMEOUT"
-	envDatabaseMaxOpenConnections = "AI_RECON_DATABASE_MAX_OPEN_CONNECTIONS"
-	envDatabaseMaxIdleConnections = "AI_RECON_DATABASE_MAX_IDLE_CONNECTIONS"
-	envDatabaseConnMaxLifetime    = "AI_RECON_DATABASE_CONNECTION_MAX_LIFETIME"
-	envDatabaseConnMaxIdleTime    = "AI_RECON_DATABASE_CONNECTION_MAX_IDLE_TIME"
+	envDatabaseHost               = "AI_SURFACE_DATABASE_HOST"
+	envDatabasePort               = "AI_SURFACE_DATABASE_PORT"
+	envDatabaseUser               = "AI_SURFACE_DATABASE_USER"
+	envDatabasePassword           = "AI_SURFACE_DATABASE_PASSWORD" //nolint:gosec // this is an env var NAME, not a credential value
+	envDatabaseName               = "AI_SURFACE_DATABASE_NAME"
+	envDatabaseSSLMode            = "AI_SURFACE_DATABASE_SSL_MODE"
+	envDatabaseConnectTimeout     = "AI_SURFACE_DATABASE_CONNECT_TIMEOUT"
+	envDatabaseMaxOpenConnections = "AI_SURFACE_DATABASE_MAX_OPEN_CONNECTIONS"
+	envDatabaseMaxIdleConnections = "AI_SURFACE_DATABASE_MAX_IDLE_CONNECTIONS"
+	envDatabaseConnMaxLifetime    = "AI_SURFACE_DATABASE_CONNECTION_MAX_LIFETIME"
+	envDatabaseConnMaxIdleTime    = "AI_SURFACE_DATABASE_CONNECTION_MAX_IDLE_TIME"
 
-	envRedisAddress        = "AI_RECON_REDIS_ADDRESS"
-	envRedisPassword       = "AI_RECON_REDIS_PASSWORD" //nolint:gosec // this is an env var NAME, not a credential value
-	envRedisDatabase       = "AI_RECON_REDIS_DATABASE"
-	envRedisConnectTimeout = "AI_RECON_REDIS_CONNECT_TIMEOUT"
+	envRedisAddress        = "AI_SURFACE_REDIS_ADDRESS"
+	envRedisPassword       = "AI_SURFACE_REDIS_PASSWORD" //nolint:gosec // this is an env var NAME, not a credential value
+	envRedisDatabase       = "AI_SURFACE_REDIS_DATABASE"
+	envRedisConnectTimeout = "AI_SURFACE_REDIS_CONNECT_TIMEOUT"
 
-	envHTTPClientTimeout               = "AI_RECON_HTTP_TIMEOUT"
-	envHTTPClientMaxIdleConnections    = "AI_RECON_HTTP_MAX_IDLE_CONNECTIONS"
-	envHTTPClientMaxConnectionsPerHost = "AI_RECON_HTTP_MAX_CONNECTIONS_PER_HOST"
-	envHTTPClientMaxResponseSize       = "AI_RECON_HTTP_MAX_RESPONSE_SIZE"
-	envHTTPClientMaxRedirects          = "AI_RECON_HTTP_MAX_REDIRECTS"
+	envHTTPClientTimeout               = "AI_SURFACE_HTTP_TIMEOUT"
+	envHTTPClientMaxIdleConnections    = "AI_SURFACE_HTTP_MAX_IDLE_CONNECTIONS"
+	envHTTPClientMaxConnectionsPerHost = "AI_SURFACE_HTTP_MAX_CONNECTIONS_PER_HOST"
+	envHTTPClientMaxResponseSize       = "AI_SURFACE_HTTP_MAX_RESPONSE_SIZE"
+	envHTTPClientMaxRedirects          = "AI_SURFACE_HTTP_MAX_REDIRECTS"
 
 	// Discovery HTTP env overrides cover scalar fields only — methods,
 	// schemes, paths, and profiles are structured/list-shaped and are
 	// configured exclusively via YAML (configs/*/config.yaml), the same
 	// convention every other list-shaped setting in this project follows.
-	envDiscoveryHTTPEnabled           = "AI_RECON_DISCOVERY_HTTP_ENABLED"
-	envDiscoveryHTTPTimeout           = "AI_RECON_DISCOVERY_HTTP_TIMEOUT"
-	envDiscoveryHTTPMaxConcurrency    = "AI_RECON_DISCOVERY_HTTP_MAX_CONCURRENCY"
-	envDiscoveryHTTPMaxResponseSize   = "AI_RECON_DISCOVERY_HTTP_MAX_RESPONSE_SIZE"
-	envDiscoveryHTTPFollowRedirects   = "AI_RECON_DISCOVERY_HTTP_FOLLOW_REDIRECTS"
-	envDiscoveryHTTPMaxRedirects      = "AI_RECON_DISCOVERY_HTTP_MAX_REDIRECTS"
-	envDiscoveryHTTPDetectAIEndpoints = "AI_RECON_DISCOVERY_HTTP_DETECT_AI_ENDPOINTS"
+	envDiscoveryHTTPEnabled           = "AI_SURFACE_DISCOVERY_HTTP_ENABLED"
+	envDiscoveryHTTPTimeout           = "AI_SURFACE_DISCOVERY_HTTP_TIMEOUT"
+	envDiscoveryHTTPMaxConcurrency    = "AI_SURFACE_DISCOVERY_HTTP_MAX_CONCURRENCY"
+	envDiscoveryHTTPMaxResponseSize   = "AI_SURFACE_DISCOVERY_HTTP_MAX_RESPONSE_SIZE"
+	envDiscoveryHTTPFollowRedirects   = "AI_SURFACE_DISCOVERY_HTTP_FOLLOW_REDIRECTS"
+	envDiscoveryHTTPMaxRedirects      = "AI_SURFACE_DISCOVERY_HTTP_MAX_REDIRECTS"
+	envDiscoveryHTTPDetectAIEndpoints = "AI_SURFACE_DISCOVERY_HTTP_DETECT_AI_ENDPOINTS"
 
 	// Same scalars-only-via-env convention as discovery.http above —
 	// http_candidate_ports/ai_candidate_ports/profiles are YAML-only.
-	envDiscoveryNetworkEnabled           = "AI_RECON_DISCOVERY_NETWORK_ENABLED"
-	envDiscoveryNetworkConnectTimeout    = "AI_RECON_DISCOVERY_NETWORK_CONNECT_TIMEOUT"
-	envDiscoveryNetworkMaxConcurrency    = "AI_RECON_DISCOVERY_NETWORK_MAX_CONCURRENCY"
-	envDiscoveryNetworkMaxHosts          = "AI_RECON_DISCOVERY_NETWORK_MAX_HOSTS"
-	envDiscoveryNetworkRequestsPerSecond = "AI_RECON_DISCOVERY_NETWORK_REQUESTS_PER_SECOND"
+	envDiscoveryNetworkEnabled           = "AI_SURFACE_DISCOVERY_NETWORK_ENABLED"
+	envDiscoveryNetworkConnectTimeout    = "AI_SURFACE_DISCOVERY_NETWORK_CONNECT_TIMEOUT"
+	envDiscoveryNetworkMaxConcurrency    = "AI_SURFACE_DISCOVERY_NETWORK_MAX_CONCURRENCY"
+	envDiscoveryNetworkMaxHosts          = "AI_SURFACE_DISCOVERY_NETWORK_MAX_HOSTS"
+	envDiscoveryNetworkRequestsPerSecond = "AI_SURFACE_DISCOVERY_NETWORK_REQUESTS_PER_SECOND"
 
 	// Same scalars-only-via-env convention — resolvers/record_types/
 	// subdomains.wordlist/profiles are YAML-only.
-	envDiscoveryDNSEnabled           = "AI_RECON_DISCOVERY_DNS_ENABLED"
-	envDiscoveryDNSTimeout           = "AI_RECON_DISCOVERY_DNS_TIMEOUT"
-	envDiscoveryDNSMaxConcurrency    = "AI_RECON_DISCOVERY_DNS_MAX_CONCURRENCY"
-	envDiscoveryDNSReversePTR        = "AI_RECON_DISCOVERY_DNS_REVERSE_PTR"
-	envDiscoveryDNSRequestsPerSecond = "AI_RECON_DISCOVERY_DNS_REQUESTS_PER_SECOND"
-	envDiscoveryDNSSubdomainsEnabled = "AI_RECON_DISCOVERY_DNS_SUBDOMAINS_ENABLED"
-	envDiscoveryDNSMaxCandidates     = "AI_RECON_DISCOVERY_DNS_MAX_CANDIDATES"
-	envDiscoveryDNSMaxDepth          = "AI_RECON_DISCOVERY_DNS_MAX_DEPTH"
+	envDiscoveryDNSEnabled           = "AI_SURFACE_DISCOVERY_DNS_ENABLED"
+	envDiscoveryDNSTimeout           = "AI_SURFACE_DISCOVERY_DNS_TIMEOUT"
+	envDiscoveryDNSMaxConcurrency    = "AI_SURFACE_DISCOVERY_DNS_MAX_CONCURRENCY"
+	envDiscoveryDNSReversePTR        = "AI_SURFACE_DISCOVERY_DNS_REVERSE_PTR"
+	envDiscoveryDNSRequestsPerSecond = "AI_SURFACE_DISCOVERY_DNS_REQUESTS_PER_SECOND"
+	envDiscoveryDNSSubdomainsEnabled = "AI_SURFACE_DISCOVERY_DNS_SUBDOMAINS_ENABLED"
+	envDiscoveryDNSMaxCandidates     = "AI_SURFACE_DISCOVERY_DNS_MAX_CANDIDATES"
+	envDiscoveryDNSMaxDepth          = "AI_SURFACE_DISCOVERY_DNS_MAX_DEPTH"
 
 	// Same scalars-only-via-env convention — profiles/seed_paths/
 	// sensitive_parameters are YAML-only.
-	envDiscoveryEndpointEnabled           = "AI_RECON_DISCOVERY_ENDPOINT_ENABLED"
-	envDiscoveryEndpointTimeout           = "AI_RECON_DISCOVERY_ENDPOINT_TIMEOUT"
-	envDiscoveryEndpointMaxConcurrency    = "AI_RECON_DISCOVERY_ENDPOINT_MAX_CONCURRENCY"
-	envDiscoveryEndpointRequestsPerSecond = "AI_RECON_DISCOVERY_ENDPOINT_REQUESTS_PER_SECOND"
-	envDiscoveryEndpointMaxDepth          = "AI_RECON_DISCOVERY_ENDPOINT_MAX_DEPTH"
-	envDiscoveryEndpointMaxPages          = "AI_RECON_DISCOVERY_ENDPOINT_MAX_PAGES"
-	envDiscoveryEndpointMaxEndpoints      = "AI_RECON_DISCOVERY_ENDPOINT_MAX_ENDPOINTS"
-	envDiscoveryEndpointEnableRobots      = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_ROBOTS"
-	envDiscoveryEndpointEnableSitemap     = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_SITEMAP"
-	envDiscoveryEndpointEnableJavaScript  = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_JAVASCRIPT"
-	envDiscoveryEndpointEnableOpenAPI     = "AI_RECON_DISCOVERY_ENDPOINT_ENABLE_OPENAPI"
+	envDiscoveryEndpointEnabled           = "AI_SURFACE_DISCOVERY_ENDPOINT_ENABLED"
+	envDiscoveryEndpointTimeout           = "AI_SURFACE_DISCOVERY_ENDPOINT_TIMEOUT"
+	envDiscoveryEndpointMaxConcurrency    = "AI_SURFACE_DISCOVERY_ENDPOINT_MAX_CONCURRENCY"
+	envDiscoveryEndpointRequestsPerSecond = "AI_SURFACE_DISCOVERY_ENDPOINT_REQUESTS_PER_SECOND"
+	envDiscoveryEndpointMaxDepth          = "AI_SURFACE_DISCOVERY_ENDPOINT_MAX_DEPTH"
+	envDiscoveryEndpointMaxPages          = "AI_SURFACE_DISCOVERY_ENDPOINT_MAX_PAGES"
+	envDiscoveryEndpointMaxEndpoints      = "AI_SURFACE_DISCOVERY_ENDPOINT_MAX_ENDPOINTS"
+	envDiscoveryEndpointEnableRobots      = "AI_SURFACE_DISCOVERY_ENDPOINT_ENABLE_ROBOTS"
+	envDiscoveryEndpointEnableSitemap     = "AI_SURFACE_DISCOVERY_ENDPOINT_ENABLE_SITEMAP"
+	envDiscoveryEndpointEnableJavaScript  = "AI_SURFACE_DISCOVERY_ENDPOINT_ENABLE_JAVASCRIPT"
+	envDiscoveryEndpointEnableOpenAPI     = "AI_SURFACE_DISCOVERY_ENDPOINT_ENABLE_OPENAPI"
 
-	envFingerprintEnabled                   = "AI_RECON_FINGERPRINT_ENABLED"
-	envFingerprintSignaturesPath            = "AI_RECON_FINGERPRINT_SIGNATURES_PATH"
-	envFingerprintMinConfidence             = "AI_RECON_FINGERPRINT_MIN_CONFIDENCE"
-	envFingerprintConfidenceChangeThreshold = "AI_RECON_FINGERPRINT_CONFIDENCE_CHANGE_THRESHOLD"
-	envFingerprintHistoricalTracking        = "AI_RECON_FINGERPRINT_HISTORICAL_TRACKING"
-	envFingerprintDetectChanges             = "AI_RECON_FINGERPRINT_DETECT_CHANGES"
+	envFingerprintEnabled                   = "AI_SURFACE_FINGERPRINT_ENABLED"
+	envFingerprintSignaturesPath            = "AI_SURFACE_FINGERPRINT_SIGNATURES_PATH"
+	envFingerprintMinConfidence             = "AI_SURFACE_FINGERPRINT_MIN_CONFIDENCE"
+	envFingerprintConfidenceChangeThreshold = "AI_SURFACE_FINGERPRINT_CONFIDENCE_CHANGE_THRESHOLD"
+	envFingerprintHistoricalTracking        = "AI_SURFACE_FINGERPRINT_HISTORICAL_TRACKING"
+	envFingerprintDetectChanges             = "AI_SURFACE_FINGERPRINT_DETECT_CHANGES"
 
-	envDetectionEnabled               = "AI_RECON_DETECTION_ENABLED"
-	envDetectionMode                  = "AI_RECON_DETECTION_MODE"
-	envDetectionTimeout               = "AI_RECON_DETECTION_TIMEOUT"
-	envDetectionMaxResponseSize       = "AI_RECON_DETECTION_MAX_RESPONSE_SIZE"
-	envDetectionMaxExcerptSize        = "AI_RECON_DETECTION_MAX_EXCERPT_SIZE"
-	envDetectionCertificateExpiryDays = "AI_RECON_DETECTION_CERTIFICATE_EXPIRY_DAYS"
+	envDetectionEnabled               = "AI_SURFACE_DETECTION_ENABLED"
+	envDetectionMode                  = "AI_SURFACE_DETECTION_MODE"
+	envDetectionTimeout               = "AI_SURFACE_DETECTION_TIMEOUT"
+	envDetectionMaxResponseSize       = "AI_SURFACE_DETECTION_MAX_RESPONSE_SIZE"
+	envDetectionMaxExcerptSize        = "AI_SURFACE_DETECTION_MAX_EXCERPT_SIZE"
+	envDetectionCertificateExpiryDays = "AI_SURFACE_DETECTION_CERTIFICATE_EXPIRY_DAYS"
 
-	envInvestigationEnabled            = "AI_RECON_INVESTIGATION_ENABLED"
-	envInvestigationCorrelationEnabled = "AI_RECON_INVESTIGATION_CORRELATION_ENABLED"
-	envInvestigationThreshold          = "AI_RECON_INVESTIGATION_CORRELATION_THRESHOLD"
-	envInvestigationTemporalWindow     = "AI_RECON_INVESTIGATION_CORRELATION_TEMPORAL_WINDOW"
+	envInvestigationEnabled            = "AI_SURFACE_INVESTIGATION_ENABLED"
+	envInvestigationCorrelationEnabled = "AI_SURFACE_INVESTIGATION_CORRELATION_ENABLED"
+	envInvestigationThreshold          = "AI_SURFACE_INVESTIGATION_CORRELATION_THRESHOLD"
+	envInvestigationTemporalWindow     = "AI_SURFACE_INVESTIGATION_CORRELATION_TEMPORAL_WINDOW"
 
-	envIntelligenceEnabled              = "AI_RECON_INTELLIGENCE_ENABLED"
-	envIntelligenceExternalEnabled      = "AI_RECON_INTELLIGENCE_EXTERNAL_ENABLED"
-	envIntelligenceProviderTimeout      = "AI_RECON_INTELLIGENCE_PROVIDER_TIMEOUT"
-	envIntelligenceReputationTTL        = "AI_RECON_INTELLIGENCE_REPUTATION_TTL"
-	envIntelligenceVulnerabilityTTL     = "AI_RECON_INTELLIGENCE_VULNERABILITY_TTL"
-	envIntelligenceThreatFeedBaseURL    = "AI_RECON_INTELLIGENCE_THREAT_FEED_BASE_URL"
-	envIntelligenceThreatFeedAPIKeyEnv  = "AI_RECON_INTELLIGENCE_THREAT_FEED_API_KEY_ENV"
-	envIntelligenceThreatFeedRPS        = "AI_RECON_INTELLIGENCE_THREAT_FEED_REQUESTS_PER_SECOND"
-	envIntelligenceThreatFeedMaxRetries = "AI_RECON_INTELLIGENCE_THREAT_FEED_MAX_RETRIES"
+	envIntelligenceEnabled              = "AI_SURFACE_INTELLIGENCE_ENABLED"
+	envIntelligenceExternalEnabled      = "AI_SURFACE_INTELLIGENCE_EXTERNAL_ENABLED"
+	envIntelligenceProviderTimeout      = "AI_SURFACE_INTELLIGENCE_PROVIDER_TIMEOUT"
+	envIntelligenceReputationTTL        = "AI_SURFACE_INTELLIGENCE_REPUTATION_TTL"
+	envIntelligenceVulnerabilityTTL     = "AI_SURFACE_INTELLIGENCE_VULNERABILITY_TTL"
+	envIntelligenceThreatFeedBaseURL    = "AI_SURFACE_INTELLIGENCE_THREAT_FEED_BASE_URL"
+	envIntelligenceThreatFeedAPIKeyEnv  = "AI_SURFACE_INTELLIGENCE_THREAT_FEED_API_KEY_ENV"
+	envIntelligenceThreatFeedRPS        = "AI_SURFACE_INTELLIGENCE_THREAT_FEED_REQUESTS_PER_SECOND"
+	envIntelligenceThreatFeedMaxRetries = "AI_SURFACE_INTELLIGENCE_THREAT_FEED_MAX_RETRIES"
 
-	envDetectionRulesEnabled            = "AI_RECON_DETECTION_RULES_ENABLED"
-	envDetectionRulesMaxConcurrency     = "AI_RECON_DETECTION_RULES_MAX_CONCURRENCY"
-	envDetectionRulesTimeout            = "AI_RECON_DETECTION_RULES_TIMEOUT"
-	envDetectionRulesClockSkew          = "AI_RECON_DETECTION_RULES_CLOCK_SKEW"
-	envDetectionRulesSuppressionWindow  = "AI_RECON_DETECTION_RULES_SUPPRESSION_DEFAULT_WINDOW"
-	envDetectionRulesHistoricalMaxRange = "AI_RECON_DETECTION_RULES_HISTORICAL_MAX_RANGE"
+	envDetectionRulesEnabled            = "AI_SURFACE_DETECTION_RULES_ENABLED"
+	envDetectionRulesMaxConcurrency     = "AI_SURFACE_DETECTION_RULES_MAX_CONCURRENCY"
+	envDetectionRulesTimeout            = "AI_SURFACE_DETECTION_RULES_TIMEOUT"
+	envDetectionRulesClockSkew          = "AI_SURFACE_DETECTION_RULES_CLOCK_SKEW"
+	envDetectionRulesSuppressionWindow  = "AI_SURFACE_DETECTION_RULES_SUPPRESSION_DEFAULT_WINDOW"
+	envDetectionRulesHistoricalMaxRange = "AI_SURFACE_DETECTION_RULES_HISTORICAL_MAX_RANGE"
 
-	envCorrelationEnabled            = "AI_RECON_CORRELATION_ENABLED"
-	envCorrelationTemporalWindow     = "AI_RECON_CORRELATION_TEMPORAL_DEFAULT_WINDOW"
-	envCorrelationGraphMaxDepth      = "AI_RECON_CORRELATION_GRAPH_MAX_DEPTH"
-	envCorrelationGraphMaxNodes      = "AI_RECON_CORRELATION_GRAPH_MAX_NODES"
-	envCorrelationGraphMaxEdges      = "AI_RECON_CORRELATION_GRAPH_MAX_EDGES"
-	envCorrelationWorkersConcurrency = "AI_RECON_CORRELATION_WORKERS_MAX_CONCURRENCY"
-	envCorrelationHistoricalMaxRange = "AI_RECON_CORRELATION_HISTORICAL_MAX_RANGE"
-	envCorrelationMaxCandidates      = "AI_RECON_CORRELATION_MAX_CANDIDATES"
+	envCorrelationEnabled            = "AI_SURFACE_CORRELATION_ENABLED"
+	envCorrelationTemporalWindow     = "AI_SURFACE_CORRELATION_TEMPORAL_DEFAULT_WINDOW"
+	envCorrelationGraphMaxDepth      = "AI_SURFACE_CORRELATION_GRAPH_MAX_DEPTH"
+	envCorrelationGraphMaxNodes      = "AI_SURFACE_CORRELATION_GRAPH_MAX_NODES"
+	envCorrelationGraphMaxEdges      = "AI_SURFACE_CORRELATION_GRAPH_MAX_EDGES"
+	envCorrelationWorkersConcurrency = "AI_SURFACE_CORRELATION_WORKERS_MAX_CONCURRENCY"
+	envCorrelationHistoricalMaxRange = "AI_SURFACE_CORRELATION_HISTORICAL_MAX_RANGE"
+	envCorrelationMaxCandidates      = "AI_SURFACE_CORRELATION_MAX_CANDIDATES"
 
-	envAIEnabled             = "AI_RECON_AI_ENABLED"
-	envAIProviderName        = "AI_RECON_AI_PROVIDER_NAME"
-	envAIProviderModel       = "AI_RECON_AI_PROVIDER_MODEL"
-	envAIProviderEndpoint    = "AI_RECON_AI_PROVIDER_ENDPOINT"
-	envAIProviderAPIKeyEnv   = "AI_RECON_AI_PROVIDER_API_KEY_ENV" //nolint:gosec // this is an env var NAME, not a credential value
-	envAIProviderMaxTokens   = "AI_RECON_AI_PROVIDER_MAX_TOKENS"  //nolint:gosec // false positive: "tokens" here means LLM output tokens, not a credential
-	envAIProviderTemp        = "AI_RECON_AI_PROVIDER_TEMPERATURE"
-	envAILimitsFactsPerType  = "AI_RECON_AI_LIMITS_MAX_CONTEXT_FACTS_PER_TYPE"
-	envAILimitsTotalFacts    = "AI_RECON_AI_LIMITS_MAX_CONTEXT_FACTS"
-	envAILimitsOutputTokens  = "AI_RECON_AI_LIMITS_MAX_OUTPUT_TOKENS" //nolint:gosec // false positive: "tokens" here means LLM output tokens, not a credential
-	envAITimeoutRequest      = "AI_RECON_AI_TIMEOUTS_REQUEST"
-	envAITimeoutTool         = "AI_RECON_AI_TIMEOUTS_TOOL"
-	envAIRetriesMax          = "AI_RECON_AI_RETRIES_MAX"
-	envAIRetriesBackoff      = "AI_RECON_AI_RETRIES_BACKOFF"
-	envAIRateLimitPerUser    = "AI_RECON_AI_RATE_LIMIT_PER_USER_PER_MINUTE"
-	envAIRateLimitPerTarget  = "AI_RECON_AI_RATE_LIMIT_PER_TARGET_PER_MINUTE"
-	envAIRateLimitConcurrent = "AI_RECON_AI_RATE_LIMIT_MAX_CONCURRENT"
+	envAIEnabled             = "AI_SURFACE_AI_ENABLED"
+	envAIProviderName        = "AI_SURFACE_AI_PROVIDER_NAME"
+	envAIProviderModel       = "AI_SURFACE_AI_PROVIDER_MODEL"
+	envAIProviderEndpoint    = "AI_SURFACE_AI_PROVIDER_ENDPOINT"
+	envAIProviderAPIKeyEnv   = "AI_SURFACE_AI_PROVIDER_API_KEY_ENV" //nolint:gosec // this is an env var NAME, not a credential value
+	envAIProviderMaxTokens   = "AI_SURFACE_AI_PROVIDER_MAX_TOKENS"  //nolint:gosec // false positive: "tokens" here means LLM output tokens, not a credential
+	envAIProviderTemp        = "AI_SURFACE_AI_PROVIDER_TEMPERATURE"
+	envAILimitsFactsPerType  = "AI_SURFACE_AI_LIMITS_MAX_CONTEXT_FACTS_PER_TYPE"
+	envAILimitsTotalFacts    = "AI_SURFACE_AI_LIMITS_MAX_CONTEXT_FACTS"
+	envAILimitsOutputTokens  = "AI_SURFACE_AI_LIMITS_MAX_OUTPUT_TOKENS" //nolint:gosec // false positive: "tokens" here means LLM output tokens, not a credential
+	envAITimeoutRequest      = "AI_SURFACE_AI_TIMEOUTS_REQUEST"
+	envAITimeoutTool         = "AI_SURFACE_AI_TIMEOUTS_TOOL"
+	envAIRetriesMax          = "AI_SURFACE_AI_RETRIES_MAX"
+	envAIRetriesBackoff      = "AI_SURFACE_AI_RETRIES_BACKOFF"
+	envAIRateLimitPerUser    = "AI_SURFACE_AI_RATE_LIMIT_PER_USER_PER_MINUTE"
+	envAIRateLimitPerTarget  = "AI_SURFACE_AI_RATE_LIMIT_PER_TARGET_PER_MINUTE"
+	envAIRateLimitConcurrent = "AI_SURFACE_AI_RATE_LIMIT_MAX_CONCURRENT"
 
-	envLoggingLevel  = "AI_RECON_LOG_LEVEL"
-	envLoggingFormat = "AI_RECON_LOG_FORMAT"
+	envLoggingLevel  = "AI_SURFACE_LOG_LEVEL"
+	envLoggingFormat = "AI_SURFACE_LOG_FORMAT"
 
-	envSecurityRequireAuthorization = "AI_RECON_SECURITY_REQUIRE_AUTHORIZATION"
-	envSecurityDryRun               = "AI_RECON_SECURITY_DRY_RUN"
+	envSecurityRequireAuthorization = "AI_SURFACE_SECURITY_REQUIRE_AUTHORIZATION"
+	envSecurityDryRun               = "AI_SURFACE_SECURITY_DRY_RUN"
 
 	defaultConfigDir   = "configs"
 	defaultEnvironment = "development"
@@ -165,16 +165,16 @@ const (
 func defaultConfig() *Config {
 	return &Config{
 		Application: ApplicationConfig{
-			Name:        "ai-recon-platform",
+			Name:        "ai-surface-platform",
 			Environment: defaultEnvironment,
 			Version:     "",
 		},
 		Database: DatabaseConfig{
 			Host:               "localhost",
 			Port:               5432,
-			User:               "airecon",
+			User:               "aisurface",
 			Password:           "",
-			Name:               "airecon",
+			Name:               "aisurface",
 			SSLMode:            "disable",
 			ConnectTimeout:     5 * time.Second,
 			MaxOpenConnections: 20,
@@ -464,11 +464,11 @@ func defaultConfig() *Config {
 //  1. hard-coded defaults (defaultConfig)
 //  2. <configDir>/defaults/config.yaml
 //  3. <configDir>/<environment>/config.yaml
-//  4. AI_RECON_* environment variables
+//  4. AI_SURFACE_* environment variables
 //
 // configDir defaults to "configs" and environment defaults to
-// "development"; both may be overridden via AI_RECON_CONFIG_DIR /
-// AI_RECON_APP_ENV before Load is called. The result is validated before
+// "development"; both may be overridden via AI_SURFACE_CONFIG_DIR /
+// AI_SURFACE_APP_ENV before Load is called. The result is validated before
 // being returned. Callers that need command-line flag overrides should
 // apply them to the returned Config (see ApplyOverrides) and call Validate
 // again.
@@ -509,7 +509,7 @@ func Load() (*Config, error) {
 // a replacement. A missing file is not an error: both the defaults and
 // environment config files are optional.
 func mergeYAMLFile(cfg *Config, path string) error {
-	data, err := os.ReadFile(path) //nolint:gosec // path is an operator-controlled config directory (AI_RECON_CONFIG_DIR / --config-dir), not external/user input
+	data, err := os.ReadFile(path) //nolint:gosec // path is an operator-controlled config directory (AI_SURFACE_CONFIG_DIR / --config-dir), not external/user input
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -522,7 +522,7 @@ func mergeYAMLFile(cfg *Config, path string) error {
 	return nil
 }
 
-// applyEnvOverrides overlays AI_RECON_* environment variables onto cfg.
+// applyEnvOverrides overlays AI_SURFACE_* environment variables onto cfg.
 func applyEnvOverrides(cfg *Config) error {
 	var errs []string
 

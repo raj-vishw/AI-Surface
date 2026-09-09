@@ -11,7 +11,7 @@ import (
 	"context"
 	"time"
 
-	"ai-recon-platform/internal/ai"
+	"ai-surface-platform/internal/ai"
 )
 
 // Provider is internal/ai.Provider's mock/offline implementation.

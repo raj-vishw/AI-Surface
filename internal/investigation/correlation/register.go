@@ -1,6 +1,6 @@
 package correlation
 
-import "ai-recon-platform/internal/investigation"
+import "ai-surface-platform/internal/investigation"
 
 // RegisterAll registers every built-in correlation rule into r.
 func RegisterAll(r *investigation.Registry) error {

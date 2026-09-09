@@ -43,7 +43,7 @@ from the result's `Factors` list.
 | `exposed_api` | Any endpoint classified `api`/`graphql`/`openapi`/`swagger` | +5 |
 | `vulnerability_match` | Strongest vulnerability match status | confirmed +20, probable +10 (no_match/insufficient_evidence: 0) |
 | `threat_intelligence` | Aggregated intelligence verdict for a related indicator | malicious +15, suspicious +7 (benign/unknown: 0) |
-| `asset_criticality` | Analyst-set criticality (`ai-recon risk criticality set`) | critical +15, high +10, normal 0, low -5 |
+| `asset_criticality` | Analyst-set criticality (`ai-surface risk criticality set`) | critical +15, high +10, normal 0, low -5 |
 | `recent_change` | Asset's `updated_at` is within the last 7 days | +10 |
 
 These are the exact values `risk.DefaultWeights()` returns; an operator

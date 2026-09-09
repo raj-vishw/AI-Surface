@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/analytics"
-	domainreporting "ai-recon-platform/internal/domain/reporting"
-	apperrors "ai-recon-platform/internal/errors"
-	rept "ai-recon-platform/internal/reporting"
+	"ai-surface-platform/internal/analytics"
+	domainreporting "ai-surface-platform/internal/domain/reporting"
+	apperrors "ai-surface-platform/internal/errors"
+	rept "ai-surface-platform/internal/reporting"
 )
 
 // GenerateRequest is one caller's ask to build a report (phase14.md

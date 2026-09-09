@@ -14,11 +14,11 @@ import (
 
 	"github.com/google/uuid"
 
-	discoverynet "ai-recon-platform/internal/discovery/network"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	assetsvc "ai-recon-platform/internal/service/asset"
+	discoverynet "ai-surface-platform/internal/discovery/network"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	assetsvc "ai-surface-platform/internal/service/asset"
 )
 
 // networkSource is network discovery's fixed evidence/asset Source
@@ -43,7 +43,7 @@ var supportedNetworkTargetTypes = map[domaintarget.Type]bool{
 	domaintarget.TypeCIDR: true,
 }
 
-// NetworkRequest describes one `ai-recon network-scan` invocation.
+// NetworkRequest describes one `ai-surface network-scan` invocation.
 type NetworkRequest struct {
 	// TargetType/TargetValue identify an existing, already-authorized
 	// target (phase4.md §12) — RunNetwork never creates or authorizes a

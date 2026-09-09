@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 
-	apperrors "ai-recon-platform/internal/errors"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // PostgreSQL SQLSTATE codes this package recognizes and maps to a specific

@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"os"
 
-	"ai-recon-platform/internal/config"
-	"ai-recon-platform/internal/database"
-	"ai-recon-platform/internal/logging"
-	"ai-recon-platform/internal/migrate"
+	"ai-surface-platform/internal/config"
+	"ai-surface-platform/internal/database"
+	"ai-surface-platform/internal/logging"
+	"ai-surface-platform/internal/migrate"
 )
 
 func main() {

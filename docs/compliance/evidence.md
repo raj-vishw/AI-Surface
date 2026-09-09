@@ -1,7 +1,7 @@
 # Control Evidence
 
 This platform makes **no compliance certification claims of any kind**.
-`ai-recon control` is a generic, framework-agnostic evidence ledger — an
+`ai-surface control` is a generic, framework-agnostic evidence ledger — an
 analyst-populated record linking a security control identifier to a
 piece of evidence already collected elsewhere in this platform. Nothing
 here computes a compliance percentage, nothing marks a control
@@ -31,7 +31,7 @@ type ControlEvidence struct {
 }
 ```
 
-Recording evidence (`ai-recon control record`) is always an explicit
+Recording evidence (`ai-surface control record`) is always an explicit
 analyst action — nothing in `internal/service/reporting` calls
 `RecordControlEvidence` automatically.
 
@@ -48,7 +48,7 @@ record remains the single source of truth.
 
 ## The dashboard: evidence, not compliance
 
-`ai-recon control list` (phase14.md §51) shows, per control that has any
+`ai-surface control list` (phase14.md §51) shows, per control that has any
 recorded evidence at all: how many pieces of evidence exist, and when
 the most recently collected one was gathered. **A control nobody has
 ever recorded evidence against simply never appears in this list** —
@@ -61,7 +61,7 @@ from, and none is invented.
 
 ## Evidence freshness
 
-`ai-recon control list` and the underlying `ControlFreshness` struct
+`ai-surface control list` and the underlying `ControlFreshness` struct
 report evidence count and most-recent-collection timestamp only. This
 platform defines no expiration policy for control evidence, so **old
 evidence is never labeled invalid** (phase14.md §52's own instruction) —

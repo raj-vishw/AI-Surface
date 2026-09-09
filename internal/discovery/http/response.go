@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/discovery/model"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	"ai-recon-platform/internal/httpclient"
+	"ai-surface-platform/internal/discovery/model"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	"ai-surface-platform/internal/httpclient"
 )
 
 // buildResult converts one candidate's outcome (a completed response or a

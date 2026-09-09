@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // Summary is an automatically generated, evidence-derived investigation

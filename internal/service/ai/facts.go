@@ -13,13 +13,13 @@ import (
 	"sort"
 	"strings"
 
-	"ai-recon-platform/internal/ai"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domaincorrelation "ai-recon-platform/internal/domain/correlation"
-	domainfinding "ai-recon-platform/internal/domain/finding"
-	domainintel "ai-recon-platform/internal/domain/intelligence"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	domainrule "ai-recon-platform/internal/domain/rule"
+	"ai-surface-platform/internal/ai"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domaincorrelation "ai-surface-platform/internal/domain/correlation"
+	domainfinding "ai-surface-platform/internal/domain/finding"
+	domainintel "ai-surface-platform/internal/domain/intelligence"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	domainrule "ai-surface-platform/internal/domain/rule"
 )
 
 // attrs renders a small set of key/value pairs deterministically

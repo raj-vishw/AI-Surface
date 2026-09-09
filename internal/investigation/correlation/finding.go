@@ -3,7 +3,7 @@ package correlation
 import (
 	"context"
 
-	"ai-recon-platform/internal/investigation"
+	"ai-surface-platform/internal/investigation"
 )
 
 const changeBasedScore = 25

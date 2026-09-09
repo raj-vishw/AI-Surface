@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"sort"
 
-	domainendpoint "ai-recon-platform/internal/domain/endpoint"
-	domaintarget "ai-recon-platform/internal/domain/target"
+	domainendpoint "ai-surface-platform/internal/domain/endpoint"
+	domaintarget "ai-surface-platform/internal/domain/target"
 )
 
 // Candidate is one URL+method combination the scanner will request.

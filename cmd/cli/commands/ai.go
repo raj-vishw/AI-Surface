@@ -8,24 +8,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	engineai "ai-recon-platform/internal/ai"
-	"ai-recon-platform/internal/ai/providers/mock"
-	"ai-recon-platform/internal/ai/providers/openai"
-	"ai-recon-platform/internal/database"
-	"ai-recon-platform/internal/logging"
-	airepo "ai-recon-platform/internal/repository/ai"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	correlationrepo "ai-recon-platform/internal/repository/correlation"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
-	rulerepo "ai-recon-platform/internal/repository/rule"
-	aisvc "ai-recon-platform/internal/service/ai"
-	targetsvc "ai-recon-platform/internal/service/target"
+	engineai "ai-surface-platform/internal/ai"
+	"ai-surface-platform/internal/ai/providers/mock"
+	"ai-surface-platform/internal/ai/providers/openai"
+	"ai-surface-platform/internal/database"
+	"ai-surface-platform/internal/logging"
+	airepo "ai-surface-platform/internal/repository/ai"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	correlationrepo "ai-surface-platform/internal/repository/correlation"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
+	rulerepo "ai-surface-platform/internal/repository/rule"
+	aisvc "ai-surface-platform/internal/service/ai"
+	targetsvc "ai-surface-platform/internal/service/target"
 )
 
-// NewAICommand returns the `ai-recon ai` command group — Phase 13's
+// NewAICommand returns the `ai-surface ai` command group — Phase 13's
 // evidence-grounded investigation assistant. Every subcommand produces
 // advisory output for an analyst to review; nothing here changes any
 // alert/investigation/correlation/detection/risk state (phase13.md §90).
@@ -282,7 +282,7 @@ func newAIReportCommand() *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("report generated, but saving as a draft note failed: %w", err)
 				}
-				fmt.Fprintf(cmd.OutOrStdout(), "\nSaved as draft note %s (AI-generated, pending analyst approval — see `ai-recon ai note approve`).\n", note.ID) //nolint:errcheck
+				fmt.Fprintf(cmd.OutOrStdout(), "\nSaved as draft note %s (AI-generated, pending analyst approval — see `ai-surface ai note approve`).\n", note.ID) //nolint:errcheck
 			}
 			return nil
 		},

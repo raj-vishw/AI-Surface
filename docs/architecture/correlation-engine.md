@@ -13,7 +13,7 @@ are reached only through an explicit analyst action.
 
 The originating specification assumed SIEM-shaped infrastructure this
 platform doesn't have: raw log ingestion, a user/account/session model,
-network-flow events, and a job/worker queue. ai-recon is a reconnaissance
+network-flow events, and a job/worker queue. ai-surface is a reconnaissance
 and attack-surface-monitoring platform with none of these. Phase 12
 adapts the same way Phase 11 did:
 
@@ -25,10 +25,10 @@ adapts the same way Phase 11 did:
   event to correlate by username.
 - "Network correlation" uses `Asset.IP`, never a new network scan.
 - There is no job/worker queue yet (`cmd/worker` still has none — see its
-  own doc comment); `ai-recon correlation evaluate` runs synchronously,
-  the same pattern `ai-recon detection evaluate` uses for Phase 11.
-- No REST API exists anywhere in this platform; the CLI (`ai-recon
-  correlation`, `ai-recon chain`) is the sole interface, consistent with
+  own doc comment); `ai-surface correlation evaluate` runs synchronously,
+  the same pattern `ai-surface detection evaluate` uses for Phase 11.
+- No REST API exists anywhere in this platform; the CLI (`ai-surface
+  correlation`, `ai-surface chain`) is the sole interface, consistent with
   every prior phase.
 - No auth/RBAC/multi-tenancy layer exists; `TargetID` scoping is the
   isolation boundary, as it is everywhere else in this codebase.

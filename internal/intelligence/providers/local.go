@@ -23,7 +23,7 @@ import (
 	"sync"
 	"time"
 
-	"ai-recon-platform/internal/intelligence"
+	"ai-surface-platform/internal/intelligence"
 )
 
 // DNSRecordObservation is one already-persisted DNS record (Phase 5) for

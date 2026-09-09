@@ -3,7 +3,7 @@ package detection
 import (
 	"context"
 
-	"ai-recon-platform/internal/httpclient"
+	"ai-surface-platform/internal/httpclient"
 )
 
 // HTTPFetcher implements SafeActiveFetcher over internal/httpclient.Client

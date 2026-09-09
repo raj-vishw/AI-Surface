@@ -13,14 +13,14 @@ import (
 
 	"github.com/google/uuid"
 
-	discoveryendpoint "ai-recon-platform/internal/discovery/endpoint"
-	discoveryhttp "ai-recon-platform/internal/discovery/http"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainendpoint "ai-recon-platform/internal/domain/endpoint"
-	domaintarget "ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	"ai-recon-platform/internal/repository/pagination"
+	discoveryendpoint "ai-surface-platform/internal/discovery/endpoint"
+	discoveryhttp "ai-surface-platform/internal/discovery/http"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainendpoint "ai-surface-platform/internal/domain/endpoint"
+	domaintarget "ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // endpointSource is the fixed evidence/asset Source attribution for
@@ -37,7 +37,7 @@ var supportedEndpointTargetTypes = map[domaintarget.Type]bool{
 	domaintarget.TypeURL: true, domaintarget.TypeHost: true, domaintarget.TypeDomain: true,
 }
 
-// EndpointRequest describes one `ai-recon endpoint-scan` invocation.
+// EndpointRequest describes one `ai-surface endpoint-scan` invocation.
 type EndpointRequest struct {
 	TargetType  domaintarget.Type
 	TargetValue string

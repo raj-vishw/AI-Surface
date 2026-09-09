@@ -277,13 +277,13 @@ disclosure (only a structural marker like a Python traceback header or a
 ## 16. CLI
 
 ```sh
-ai-recon findings scan --target example.com                       # passive
-ai-recon findings scan --target example.com --mode safe_active
-ai-recon findings scan --target example.com --dry-run
-ai-recon findings list --target example.com --severity high --format json
-ai-recon findings list --target example.com --format csv
-ai-recon findings show <finding-id>
-ai-recon findings diff --target example.com --scan <scan-id>
+ai-surface findings scan --target example.com                       # passive
+ai-surface findings scan --target example.com --mode safe_active
+ai-surface findings scan --target example.com --dry-run
+ai-surface findings list --target example.com --severity high --format json
+ai-surface findings list --target example.com --format csv
+ai-surface findings show <finding-id>
+ai-surface findings diff --target example.com --scan <scan-id>
 ```
 
 ## 17. API

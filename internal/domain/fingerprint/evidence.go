@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/validation"
+	"ai-surface-platform/internal/domain/validation"
 )
 
 // Signal is one concrete piece of matched evidence — e.g. "the Server

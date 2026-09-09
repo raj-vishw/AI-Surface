@@ -8,12 +8,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	domainreporting "ai-recon-platform/internal/domain/reporting"
-	"ai-recon-platform/internal/repository/pagination"
-	reportingrepo "ai-recon-platform/internal/repository/reporting"
+	domainreporting "ai-surface-platform/internal/domain/reporting"
+	"ai-surface-platform/internal/repository/pagination"
+	reportingrepo "ai-surface-platform/internal/repository/reporting"
 )
 
-// NewControlCommand returns the `ai-recon control` command group
+// NewControlCommand returns the `ai-surface control` command group
 // (phase14.md §50/§51/§52) — a generic, framework-agnostic evidence
 // ledger. No compliance framework is hard-coded (none already exists in
 // this project — phase14.md §50's own instruction), and this platform

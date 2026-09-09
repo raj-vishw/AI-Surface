@@ -116,8 +116,8 @@ Not applicable — this platform has no authentication layer (see
 issues" in the traditional sense do not exist; database connection
 authentication failures show up as database-category errors at startup
 (`connecting to database: ...`) and are resolved the same way any
-PostgreSQL credential issue would be (verify `AI_RECON_DATABASE_USER`/
-`AI_RECON_DATABASE_PASSWORD` against what PostgreSQL actually has
+PostgreSQL credential issue would be (verify `AI_SURFACE_DATABASE_USER`/
+`AI_SURFACE_DATABASE_PASSWORD` against what PostgreSQL actually has
 configured for that role).
 
 ## AI provider failure
@@ -132,7 +132,7 @@ configured for that role).
   import of `internal/ai`/`internal/service/ai` exists anywhere under
   `internal/detection`, `internal/correlation`, `internal/investigation`,
   or `internal/intelligence`). A failing AI provider only affects
-  `ai-recon ai ...` commands themselves, which surface the provider's
+  `ai-surface ai ...` commands themselves, which surface the provider's
   error directly (see `docs/ai/safety.md`).
 
 ## Failed migration
@@ -156,7 +156,7 @@ configured for that role).
    added this phase, for the most likely new failure mode after an
    upgrade to a production environment for the first time: `debug`
    logging, `require_authorization: false`, or `ssl_mode: disable` are
-   now all startup-fatal when `AI_RECON_APP_ENV=production`).
+   now all startup-fatal when `AI_SURFACE_APP_ENV=production`).
 2. Roll back per `docs/operations/deployment.md`'s Rollback section if the
    new version cannot be fixed forward quickly.
 

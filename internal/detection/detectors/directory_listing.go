@@ -4,7 +4,7 @@ import (
 	"context"
 	"regexp"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // directoryListingMarkers are patterns produced by common web-server

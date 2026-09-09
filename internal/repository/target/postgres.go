@@ -8,11 +8,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"ai-recon-platform/internal/database"
-	"ai-recon-platform/internal/domain/target"
-	apperrors "ai-recon-platform/internal/errors"
-	"ai-recon-platform/internal/repository/pagination"
-	"ai-recon-platform/internal/repository/sqlerr"
+	"ai-surface-platform/internal/database"
+	"ai-surface-platform/internal/domain/target"
+	apperrors "ai-surface-platform/internal/errors"
+	"ai-surface-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/repository/sqlerr"
 )
 
 // PostgresRepository is the PostgreSQL-backed Repository implementation. It

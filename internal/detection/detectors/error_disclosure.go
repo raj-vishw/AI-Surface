@@ -4,7 +4,7 @@ import (
 	"context"
 	"regexp"
 
-	"ai-recon-platform/internal/detection"
+	"ai-surface-platform/internal/detection"
 )
 
 // errorMarkerPatterns are strong, low-false-positive indicators of a

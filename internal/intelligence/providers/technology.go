@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"ai-recon-platform/internal/intelligence"
+	"ai-surface-platform/internal/intelligence"
 )
 
 const technologyProviderVersion = "1"

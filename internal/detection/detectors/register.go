@@ -1,6 +1,6 @@
 package detectors
 
-import "ai-recon-platform/internal/detection"
+import "ai-surface-platform/internal/detection"
 
 // RegisterAll registers every built-in detector into r. catalog seeds the
 // technology-vulnerability detector (pass nil, or

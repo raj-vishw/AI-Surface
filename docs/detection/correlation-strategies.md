@@ -59,7 +59,7 @@ window 15m → edge `followed_by`, confidence `low`.
 ## identity
 
 **Purpose**: This platform's adaptation of "identity correlation" —
-ai-recon has no user/session/login model, so there is no failed-login →
+ai-surface has no user/session/login model, so there is no failed-login →
 successful-login sequence to correlate by username. Instead, this links
 authentication-**category** findings/detections on the same asset — the
 closest honest analog available.

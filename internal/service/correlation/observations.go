@@ -6,16 +6,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/correlation"
-	domainasset "ai-recon-platform/internal/domain/asset"
-	domainrule "ai-recon-platform/internal/domain/rule"
-	assetrepo "ai-recon-platform/internal/repository/asset"
-	endpointrepo "ai-recon-platform/internal/repository/endpoint"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	fingerprintrepo "ai-recon-platform/internal/repository/fingerprint"
-	intelrepo "ai-recon-platform/internal/repository/intelligence"
-	"ai-recon-platform/internal/repository/pagination"
-	rulerepo "ai-recon-platform/internal/repository/rule"
+	"ai-surface-platform/internal/correlation"
+	domainasset "ai-surface-platform/internal/domain/asset"
+	domainrule "ai-surface-platform/internal/domain/rule"
+	assetrepo "ai-surface-platform/internal/repository/asset"
+	endpointrepo "ai-surface-platform/internal/repository/endpoint"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	fingerprintrepo "ai-surface-platform/internal/repository/fingerprint"
+	intelrepo "ai-surface-platform/internal/repository/intelligence"
+	"ai-surface-platform/internal/repository/pagination"
+	rulerepo "ai-surface-platform/internal/repository/rule"
 )
 
 func inWindow(t, from, to time.Time) bool { return !t.Before(from) && t.Before(to) }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/correlation"
+	"ai-surface-platform/internal/correlation"
 )
 
 // assetStrategy links observations that already carry the SAME AssetID

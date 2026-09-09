@@ -39,14 +39,14 @@ days is rejected (`MaxQueryWindow`). Interval auto-selection:
 
 An explicit `--interval` always overrides the preset's default.
 
-## Overview (`ai-recon analytics overview`)
+## Overview (`ai-surface analytics overview`)
 
 Headline counts: total/monitored assets, open findings, open alerts,
 active investigations, critical/high risk assets (from each asset's most
 recent `risk_scores` row), open correlations, intelligence record count.
 Unfiltered, current-state — not time-ranged.
 
-## Risk (`ai-recon analytics risk`)
+## Risk (`ai-surface analytics risk`)
 
 - **Trend**: per-bucket average/max score and critical/high count from
   `risk_scores`, grouped by `date_trunc(interval, calculated_at)`.
@@ -55,7 +55,7 @@ Unfiltered, current-state — not time-ranged.
   calculated_at DESC` — the same "most recent wins" rule
   `RiskRepository.GetLatestRiskScore` already uses).
 
-## Security Posture (`ai-recon analytics posture`)
+## Security Posture (`ai-surface analytics posture`)
 
 **Calculation**: `Score = 100 - average(latest risk score per scored
 entity)`. Phase 10's `risk_scores.score` is 0-100 where higher means
@@ -75,14 +75,14 @@ misleadingly high score — always read `ScoredEntities` alongside `Score`.
 A target with zero scored entities reports `Score = 0`, not a fabricated
 perfect 100.
 
-## Alerts (`ai-recon analytics alerts`)
+## Alerts (`ai-surface analytics alerts`)
 
 Over time, by severity, by status (`open`/`acknowledged`/
 `investigating`/`resolved`/`suppressed` — this platform's actual
 `rule.AlertStatus` vocabulary), by rule (joined through
 `detection_matches` → `rules`).
 
-## Detections (`ai-recon analytics detections`)
+## Detections (`ai-surface analytics detections`)
 
 - **Matches over time / by rule / by severity**: straightforward
   aggregates over `detection_matches`.
@@ -95,12 +95,12 @@ Over time, by severity, by status (`open`/`acknowledged`/
   this platform has no ground-truth confirmation of which matches were
   genuinely benign (phase14.md §8's own instruction).
 
-## Findings (`ai-recon analytics findings`)
+## Findings (`ai-surface analytics findings`)
 
 By severity, by category, over time, open-vs-resolved counts, and the
 top 10 assets by finding count in range.
 
-## Assets / Attack Surface (`ai-recon analytics assets` /
+## Assets / Attack Surface (`ai-surface analytics assets` /
 `attack-surface`)
 
 Total count, by type, by status, critical/high risk counts. Attack
@@ -109,7 +109,7 @@ new snapshot table (phase14.md §75): "new assets" buckets `first_seen`
 within range; "removed" counts assets with status `inactive`/`retired`
 whose `updated_at` falls within range.
 
-## Correlations / Attack Chains (`ai-recon analytics correlations` /
+## Correlations / Attack Chains (`ai-surface analytics correlations` /
 `attack-chains`)
 
 Over time, by severity, by confidence, by status (correlations only —
@@ -119,7 +119,7 @@ Over time, by severity, by confidence, by status (correlations only —
 chain is never presented as a confirmed attack** — see
 `docs/investigation/attack-chains.md`.
 
-## Investigations (`ai-recon analytics investigations`)
+## Investigations (`ai-surface analytics investigations`)
 
 Serves both "investigation analytics" and "incident analytics"
 (phase14.md §14/§15): this platform consolidates Incident into
@@ -133,7 +133,7 @@ investigations that have actually closed within the range are included;
 an investigation still open contributes nothing (never estimated from a
 still-ticking clock).
 
-## Threat Intelligence (`ai-recon analytics intelligence`)
+## Threat Intelligence (`ai-surface analytics intelligence`)
 
 By indicator type, by provider (`source_type`/`provider_id` already
 distinguishes Phase 10's "local" observations from an external
@@ -141,7 +141,7 @@ provider's — this layer surfaces that existing distinction directly
 rather than inventing a second internal/external label), by confidence,
 and a count of expired records (`expiration < now()`).
 
-## AI Usage (`ai-recon analytics ai`)
+## AI Usage (`ai-surface analytics ai`)
 
 Phase 13 operational metrics only: requests over time, by task type, by
 provider, average latency, token totals, tool calls by tool, and

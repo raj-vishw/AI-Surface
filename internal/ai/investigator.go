@@ -121,9 +121,9 @@ func GenerateInvestigationQuestions(ctx Context) []string {
 // (phase13.md §27) — always phrased as something an analyst does, never
 // something this platform does automatically.
 func nextSteps(ctx Context) []string {
-	steps := []string{"Review each cited item above directly in ai-recon before drawing conclusions."}
+	steps := []string{"Review each cited item above directly in ai-surface before drawing conclusions."}
 	if hasAny(ctx, FactAlert, FactDetection) && !hasAny(ctx, FactCorrelation) {
-		steps = append(steps, "Run ai-recon correlation evaluate for this target to check for related activity.")
+		steps = append(steps, "Run ai-surface correlation evaluate for this target to check for related activity.")
 	}
 	if !hasAny(ctx, FactIntelligence) {
 		steps = append(steps, "Review threat intelligence for any indicators (IP, hostname, domain) involved.")

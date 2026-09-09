@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	analyticsrepo "ai-recon-platform/internal/repository/analytics"
+	analyticsrepo "ai-surface-platform/internal/repository/analytics"
 )
 
 // RiskAnalytics implements phase14.md §6's risk-trend requirements —

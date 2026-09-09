@@ -14,8 +14,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/ai"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/ai"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // SessionListFilter narrows a session listing.

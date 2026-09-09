@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	domaincorrelation "ai-recon-platform/internal/domain/correlation"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	apperrors "ai-recon-platform/internal/errors"
+	domaincorrelation "ai-surface-platform/internal/domain/correlation"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // toInvestigationEntity maps a correlation node's type onto Phase 9's

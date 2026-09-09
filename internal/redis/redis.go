@@ -11,8 +11,8 @@ import (
 
 	goredis "github.com/redis/go-redis/v9"
 
-	"ai-recon-platform/internal/config"
-	apperrors "ai-recon-platform/internal/errors"
+	"ai-surface-platform/internal/config"
+	apperrors "ai-surface-platform/internal/errors"
 )
 
 // Client wraps a *goredis.Client so the rest of the codebase depends on

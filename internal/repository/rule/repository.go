@@ -15,8 +15,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"ai-recon-platform/internal/domain/rule"
-	"ai-recon-platform/internal/repository/pagination"
+	"ai-surface-platform/internal/domain/rule"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // ListFilter narrows a rule listing. Zero-valued fields are not

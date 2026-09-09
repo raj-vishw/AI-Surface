@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	discoveryhttp "ai-recon-platform/internal/discovery/http"
+	discoveryhttp "ai-surface-platform/internal/discovery/http"
 )
 
 // Scanner executes DNS record discovery and subdomain enumeration, using

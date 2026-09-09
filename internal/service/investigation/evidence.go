@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	domainfinding "ai-recon-platform/internal/domain/finding"
-	domaininvestigation "ai-recon-platform/internal/domain/investigation"
-	findingrepo "ai-recon-platform/internal/repository/finding"
-	investigationrepo "ai-recon-platform/internal/repository/investigation"
-	"ai-recon-platform/internal/repository/pagination"
+	domainfinding "ai-surface-platform/internal/domain/finding"
+	domaininvestigation "ai-surface-platform/internal/domain/investigation"
+	findingrepo "ai-surface-platform/internal/repository/finding"
+	investigationrepo "ai-surface-platform/internal/repository/investigation"
+	"ai-surface-platform/internal/repository/pagination"
 )
 
 // AttachFinding attaches an already-persisted Finding (Phase 8) to an
